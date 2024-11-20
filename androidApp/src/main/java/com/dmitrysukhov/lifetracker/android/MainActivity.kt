@@ -31,4 +31,5 @@ class MainActivity : ComponentActivity() {
 fun GreetingView(text: String) {
     Text(text = text)
 }
+//Timofey
 //сава тест 2
