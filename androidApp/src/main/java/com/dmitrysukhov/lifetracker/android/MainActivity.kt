@@ -22,14 +22,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.dmitrysukhov.lifetracker.Greeting
-import org.w3c.dom.Text
-
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -69,27 +67,20 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainScreen(Greeting().greet())
                 }
-                val selectedItemIndex by rememberSaveable {
-                    mutableStateOf(0)
-
-                }
+                var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
                 Scaffold(bottomBar = {
                     NavigationBar {
                         items.forEachIndexed { index, item ->
                             NavigationBarItem(selected = selectedItemIndex == index, onClick = {
-                                selectedItemIndex == index
-                                // navControler.navigate(item.title)
+                                selectedItemIndex = index
+//                                navControler.navigate(item.title)
                             },
-                                label = {
-                                    Text(text = item.title)
-                                },
+                                label = { Text(text = item.title) },
                                 alwaysShowLabel = false,
                                 icon = {
                                 BadgedBox(badge = {
                                     if (item.badgeCount != null) {
-                                        Badge {
-                                            Text(text = item.badgeCount.toString())
-                                        }
+                                        Badge { Text(text = item.badgeCount.toString()) }
                                     } else if (item.hasNews) {
                                         Badge()
                                     }
