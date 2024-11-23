@@ -39,7 +39,7 @@ data class TodoItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TodoList() {
+fun TodoLisScreen() {
     var taskText by remember { mutableStateOf("") }
     var todoList by remember { mutableStateOf(listOf<TodoItem>()) }
 
@@ -152,4 +152,4 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
 }
 //кчау
 
-const val TODO_LIST = "TodoList"
+const val TODOLIST_SCREEN = "TodoList"
