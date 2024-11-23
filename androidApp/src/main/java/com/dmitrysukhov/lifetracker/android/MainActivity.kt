@@ -96,7 +96,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }) {
-
                 }
             }
         }
@@ -105,7 +104,8 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun MainScreen(text: String) {
+fun MainScreen(greet: String) {
+
 }
 
 
