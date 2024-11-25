@@ -19,10 +19,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,74 +30,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
-data class TodoItem(
-    val text: String,
-    var isDone: Boolean
-)
+data class TodoItem(val text: String, var isDone: Boolean)
 
-@OptIn(ExperimentalMaterial3Api::class)
+//это экран Список дел, но он не подключен к базе данных
 @Composable
-fun TodoLisScreen() {
+fun TodoListScreen() {
     var taskText by remember { mutableStateOf("") }
     var todoList by remember { mutableStateOf(listOf<TodoItem>()) }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Список дел") }
-            )
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    TextField(
-                        value = taskText,
-                        onValueChange = { taskText = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text("Введите задачу") },
-                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                if (taskText.isNotBlank()) {
-                                    todoList = todoList + TodoItem(taskText, false)
-                                    taskText = ""
-                                }
-                            }
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            if (taskText.isNotBlank()) {
-                                todoList = todoList + TodoItem(taskText, false)
-                                taskText = ""
-                            }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextField(
+                value = taskText,
+                onValueChange = { taskText = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Введите задачу") },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (taskText.isNotBlank()) {
+                            todoList = todoList + TodoItem(taskText, false)
+                            taskText = ""
                         }
-                    ) {
-                        Text("Добавить")
+                    }
+                )
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    if (taskText.isNotBlank()) {
+                        todoList = todoList + TodoItem(taskText, false)
+                        taskText = ""
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Список задач
-                TodoList(todoList = todoList, onTaskCheckedChange = { index, isChecked ->
-                    val updatedList = todoList.toMutableList()
-                    updatedList[index] = updatedList[index].copy(isDone = isChecked)
-                    todoList = updatedList
-                }, onDeleteTask = { index ->
-                    todoList = todoList.toMutableList().apply { removeAt(index) }
-                })
+            ) {
+                Text("Добавить")
             }
         }
-    )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Список задач
+        TodoList(todoList = todoList, onTaskCheckedChange = { index, isChecked ->
+            val updatedList = todoList.toMutableList()
+            updatedList[index] = updatedList[index].copy(isDone = isChecked)
+            todoList = updatedList
+        }, onDeleteTask = { index ->
+            todoList = todoList.toMutableList().apply { removeAt(index) }
+        })
+    }
 }
 
 @Composable
