@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-//.
+
 //Timofey
 //сава тест 2
 // Kostia
