@@ -29,12 +29,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 
-data class TodoItem(val text: String, var isDone: Boolean)
+data class TodoItem(
+    val text: String,
+    var isDone: Boolean
+)
 
 //это экран Список дел, но он не подключен к базе данных
 @Composable
-fun TodoListScreen() {
+fun TodoListScreen(navController: NavHostController) {
     var taskText by remember { mutableStateOf("") }
     var todoList by remember { mutableStateOf(listOf<TodoItem>()) }
     Column(
@@ -76,7 +80,7 @@ fun TodoListScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Список задач
-        TodoList(todoList = todoList, onTaskCheckedChange = { index, isChecked ->
+        TodoListScreen(todoList = todoList, onTaskCheckedChange = { index, isChecked ->
             val updatedList = todoList.toMutableList()
             updatedList[index] = updatedList[index].copy(isDone = isChecked)
             todoList = updatedList
@@ -87,7 +91,7 @@ fun TodoListScreen() {
 }
 
 @Composable
-fun TodoList(
+fun TodoListScreen(
     todoList: List<TodoItem>,
     onTaskCheckedChange: (Int, Boolean) -> Unit,
     onDeleteTask: (Int) -> Unit
@@ -136,4 +140,4 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
 }
 //кчау
 
-const val TODOLIST_SCREEN = "TodoList"
+const val TODOLIST_SCREEN = "TodoListScreen"
