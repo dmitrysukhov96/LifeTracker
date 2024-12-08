@@ -1,7 +1,6 @@
-package com.dmitrysukhov.lifetracker.android
+package com.dmitrysukhov.lifetracker
 
 import androidx.compose.ui.graphics.vector.ImageVector
-
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -13,9 +12,7 @@ data class BottomNavigationItem(
     val badgeCount: Int? = null
 )
 
-
-
-@Entity(tableName = TodoItem )
+@Entity(tableName = "todo")
 data class TodoItem(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val text: String,

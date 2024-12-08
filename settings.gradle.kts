@@ -1,4 +1,3 @@
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     repositories {
         google()
@@ -15,5 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "LifeTracker"
-include(":androidApp")
-include(":shared")
+include(":app")

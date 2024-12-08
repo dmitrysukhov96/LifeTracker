@@ -1,4 +1,4 @@
-package com.dmitrysukhov.lifetracker.android
+package com.dmitrysukhov.lifetracker
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController

@@ -1,8 +1,9 @@
 import androidx.room.*
+import com.dmitrysukhov.lifetracker.TodoItem
 
 @Dao
 interface TodoDao {
-    @Query("SELECT * FROM TodoItem")
+    @Query("SELECT * FROM todo")
     suspend fun getAllTasks(): List<TodoItem>
 
     @Insert
