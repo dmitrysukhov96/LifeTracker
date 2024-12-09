@@ -7,5 +7,4 @@ import androidx.navigation.NavHostController
 fun TrackerScreen(navController: NavHostController) {
 
 }
-
 const val TRACKER_SCREEN = "Tracker"

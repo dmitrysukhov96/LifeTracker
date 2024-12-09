@@ -1,39 +1,21 @@
 package com.dmitrysukhov.lifetracker
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
-//это экран Список дел, но он не подключен к базе данных
 @Composable
-fun TodoListScreen() {
+fun TodoListScreen(viewModel: TodoViewModel) {
+    val todoList by viewModel.todoList.collectAsState()
     var taskText by remember { mutableStateOf("") }
-    var todoList by remember { mutableStateOf(listOf<TodoItem>()) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,7 +34,7 @@ fun TodoListScreen() {
                 keyboardActions = KeyboardActions(
                     onDone = {
                         if (taskText.isNotBlank()) {
-                            todoList = todoList + TodoItem(text = taskText, isDone = false)
+                            viewModel.addTask(taskText)
                             taskText = ""
                         }
                     }
@@ -62,7 +44,7 @@ fun TodoListScreen() {
             Button(
                 onClick = {
                     if (taskText.isNotBlank()) {
-                        todoList = todoList + TodoItem(text = taskText, isDone = false)
+                        viewModel.addTask(taskText)
                         taskText = ""
                     }
                 }
@@ -72,29 +54,30 @@ fun TodoListScreen() {
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Список задач
-        TodoList(todoList = todoList, onTaskCheckedChange = { index, isChecked ->
-            val updatedList = todoList.toMutableList()
-            updatedList[index] = updatedList[index].copy(isDone = isChecked)
-            todoList = updatedList
-        }, onDeleteTask = { index ->
-            todoList = todoList.toMutableList().apply { removeAt(index) }
-        })
+        TodoList(
+            todoList = todoList,
+            onTaskCheckedChange = { item, isChecked ->
+                viewModel.updateTask(item.copy(isDone = isChecked))
+            },
+            onDeleteTask = { item ->
+                viewModel.deleteTask(item)
+            }
+        )
     }
 }
 
 @Composable
 fun TodoList(
     todoList: List<TodoItem>,
-    onTaskCheckedChange: (Int, Boolean) -> Unit,
-    onDeleteTask: (Int) -> Unit
+    onTaskCheckedChange: (TodoItem, Boolean) -> Unit,
+    onDeleteTask: (TodoItem) -> Unit
 ) {
     Column {
-        todoList.forEachIndexed { index, todoItem ->
+        todoList.forEach { todoItem ->
             TodoListItem(
                 item = todoItem,
-                onCheckedChange = { isChecked -> onTaskCheckedChange(index, isChecked) },
-                onDelete = { onDeleteTask(index) }
+                onCheckedChange = { isChecked -> onTaskCheckedChange(todoItem, isChecked) },
+                onDelete = { onDeleteTask(todoItem) }
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -131,6 +114,4 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
         }
     }
 }
-//кчау
 
-const val TODOLIST_SCREEN = "TodoList"
