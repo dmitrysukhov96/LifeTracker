@@ -1,11 +1,14 @@
-package com.dmitrysukhov.lifetracker.android.data
+package com.dmitrysukhov.lifetracker
 
-import androidx.room.*
-import com.dmitrysukhov.lifetracker.TodoItem
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface TodoDao {
-    @Query("SELECT * FROM TodoItem")
+    @Query("SELECT * FROM todo")
     suspend fun getAllTasks(): List<TodoItem>
 
     @Insert

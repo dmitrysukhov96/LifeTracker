@@ -115,3 +115,4 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
     }
 }
 
+val TODOLIST_SCREEN = "Todo List"

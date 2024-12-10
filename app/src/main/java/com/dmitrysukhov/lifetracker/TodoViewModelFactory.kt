@@ -2,7 +2,6 @@ package com.dmitrysukhov.lifetracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.dmitrysukhov.lifetracker.android.data.TodoDao
 
 class TodoViewModelFactory(private val todoDao: TodoDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
