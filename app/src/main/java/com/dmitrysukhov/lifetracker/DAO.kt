@@ -20,3 +20,22 @@ interface TodoDao {
     @Delete
     suspend fun deleteTask(task: TodoItem)
 }
+
+
+@Dao
+interface EventDao {
+    @Insert
+    suspend fun insertCategory(category: Category)
+
+    @Insert
+    suspend fun insertEvent(event: Event)
+
+    @Update
+    suspend fun updateEvent(event: Event)
+
+    @Query("SELECT * FROM events WHERE id = :id")
+    suspend fun getEventById(id: Long): Event
+
+    @Query("SELECT * FROM categories")
+    suspend fun getAllCategories(): List<Category>
+}

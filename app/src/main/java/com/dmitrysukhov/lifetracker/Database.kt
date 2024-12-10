@@ -5,9 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [TodoItem::class], version = 1, exportSchema = false)
+@Database(entities = [TodoItem::class, Category::class, Event::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun todoDao(): TodoDao
+    abstract fun eventDao(): EventDao
 
     companion object {
         @Volatile
@@ -18,7 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "todo_database"
+                    "lifetracker_database"
                 ).build()
                 INSTANCE = instance
                 instance
@@ -26,4 +27,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-

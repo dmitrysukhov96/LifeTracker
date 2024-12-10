@@ -18,3 +18,20 @@ data class TodoItem(
     val text: String,
     val isDone: Boolean
 )
+
+@Entity(tableName = "categories")
+data class Category(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val color: String,
+    val icon: String
+)
+
+@Entity(tableName = "events")
+data class Event(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val startTime: Long,
+    val categoryId: Long,
+    val name: String,
+    val duration: Long? = null
+)
