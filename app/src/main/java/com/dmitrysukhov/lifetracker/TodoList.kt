@@ -1,68 +1,98 @@
 package com.dmitrysukhov.lifetracker
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 
 @Composable
-fun TodoListScreen(viewModel: TodoViewModel) {
-    val todoList by viewModel.todoList.collectAsState()
-    var taskText by remember { mutableStateOf("") }
+fun TodoListScreen(navController: NavHostController) {
+    MyApplicationTheme {
+        val context = LocalContext.current
+        val todoDao = AppDatabase.getDatabase(context).todoDao()
+        val viewModel: TodoViewModel = viewModel(factory = TodoViewModelFactory(todoDao))
+        val todoList by viewModel.todoList.collectAsState()
+        var taskText by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .background(BgColor)
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            TextField(
-                value = taskText,
-                onValueChange = { taskText = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Введите задачу") },
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextField(
+                    textStyle = PoppinsBold,
+                    value = taskText,
+                    onValueChange = { taskText = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("Введите задачу", style = PoppinsBold) },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            if (taskText.isNotBlank()) {
+                                viewModel.addTask(taskText)
+                                taskText = ""
+                            }
+                        }
+                    )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
                         if (taskText.isNotBlank()) {
                             viewModel.addTask(taskText)
                             taskText = ""
                         }
                     }
-                )
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = {
-                    if (taskText.isNotBlank()) {
-                        viewModel.addTask(taskText)
-                        taskText = ""
-                    }
+                ) {
+                    Text("Добавить")
                 }
-            ) {
-                Text("Добавить")
             }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        TodoList(
-            todoList = todoList,
-            onTaskCheckedChange = { item, isChecked ->
-                viewModel.updateTask(item.copy(isDone = isChecked))
-            },
-            onDeleteTask = { item ->
-                viewModel.deleteTask(item)
-            }
-        )
+            TodoList(
+                todoList = todoList,
+                onTaskCheckedChange = { item, isChecked ->
+                    viewModel.updateTask(item.copy(isDone = isChecked))
+                },
+                onDeleteTask = { item ->
+                    viewModel.deleteTask(item)
+                }
+            )
+        }
     }
 }
 
