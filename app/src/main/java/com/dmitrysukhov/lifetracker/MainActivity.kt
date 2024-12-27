@@ -124,7 +124,11 @@ class MainActivity : ComponentActivity() {
                                         })
                                 }
                             }
-                        }) { padding ->
+                        },
+                        floatingActionButton = {
+                            //todo тут добавить кнопку ГОУ!!
+                        }
+                        ) { padding ->
                         Box(Modifier.fillMaxSize()) {
 
                             NavHost(
