@@ -146,7 +146,7 @@ class MainActivity : ComponentActivity() {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.molni),
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.lightning),
                                     contentDescription = null,
                                     tint = Color.Yellow,
                                     modifier = Modifier.size(20.dp)
