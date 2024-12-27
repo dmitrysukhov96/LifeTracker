@@ -24,10 +24,10 @@ val PoppinsBold = TextStyle(
 val involveFontFamily = FontFamily(
     Font(R.font.involve_regular, FontWeight.Normal),
     Font(R.font.involve_medium, FontWeight.Medium),
+    Font(R.font.involve_medium_oblique, FontWeight.Medium, style = FontStyle.Italic),
     Font(R.font.involve_semibold, FontWeight.SemiBold),
+    Font(R.font.involve_semibold_oblique, FontWeight.SemiBold, style = FontStyle.Italic),
     Font(R.font.involve_bold, FontWeight.Bold),
-    Font(R.font.involve_extrabold, FontWeight.ExtraBold),
-    Font(R.font.involve_black, FontWeight.Black),
     Font(R.font.involve_oblique, FontWeight.Normal, style = FontStyle.Italic),
     Font(R.font.involve_bold_oblique, FontWeight.Bold, style = FontStyle.Italic)
 )

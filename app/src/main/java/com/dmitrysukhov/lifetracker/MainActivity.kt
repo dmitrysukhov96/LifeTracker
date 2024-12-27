@@ -29,8 +29,6 @@ import androidx.compose.material.icons.rounded.Face
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.AlertDialogDefaults.containerColor
-import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -93,24 +91,24 @@ class MainActivity : ComponentActivity() {
                     var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
                     Scaffold(
                         topBar = {
-                            Row(
+                            Box(
                                 Modifier
-                                    .background(PineColor)
                                     .fillMaxWidth()
                                     .padding(
                                         top = WindowInsets.systemBars
                                             .asPaddingValues()
                                             .calculateTopPadding()
                                     )
-                                    .height(56.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
+                                    .height(56.dp)
                             ) {
                                 Text(
                                     "LifeTracker", style = InvolveBold,
-                                    fontSize = 20.sp, color = WhitePine
+                                    fontSize = 20.sp,
+                                    color = WhitePine,
+                                    modifier = Modifier.align(Alignment.Center)
                                 )
                             }
+
                         },
                         bottomBar = {
                             NavigationBar(containerColor = BgColor, contentColor = Color.Red) {
@@ -143,7 +141,7 @@ class MainActivity : ComponentActivity() {
                                     )
 
                                     .clip(RoundedCornerShape(50.dp))
-                                    .clickable {  }
+                                    .clickable { }
                                     .padding(horizontal = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -158,7 +156,7 @@ class MainActivity : ComponentActivity() {
                                     text = "GO!",
                                     fontSize = 18.sp,
                                     color = Color.White,
-                                            fontWeight = FontWeight.W700
+                                    fontWeight = FontWeight.W700
                                 )
                             }
                         }
@@ -206,11 +204,12 @@ class MainActivity : ComponentActivity() {
                                     style = InvolveBold, fontSize = 20.sp
                                 )
                                 Row {
-                                    Button(onClick = {}, modifier = Modifier.width(50.dp)) {
+                                    Box(modifier = Modifier.size(50.dp)) {
                                         Image(
                                             Icons.Rounded.PlayArrow,
                                             contentDescription = "Run",
-                                            contentScale = ContentScale.FillBounds
+                                            contentScale = ContentScale.FillBounds,
+                                            modifier = Modifier.align(Alignment.Center)
                                         )
                                     }
                                     Spacer(Modifier.width(8.dp))

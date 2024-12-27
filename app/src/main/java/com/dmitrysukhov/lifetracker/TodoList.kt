@@ -67,7 +67,7 @@ fun TodoListScreen(navController: NavHostController) {
                         }
                     }
                 ) {
-                    Text("Добавить")
+                    Text("Добавить", fontFamily = involveFontFamily)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -120,7 +120,7 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
                 onCheckedChange = onCheckedChange
             )
             Text(
-                text = item.text,
+                text = item.text, fontFamily = involveFontFamily,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(start = 8.dp)
             )
