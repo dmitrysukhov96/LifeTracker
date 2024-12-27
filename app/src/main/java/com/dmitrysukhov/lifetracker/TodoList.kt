@@ -16,10 +16,19 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -123,7 +132,7 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
             Image(
                 painter = painterResource(if (item.isDone) R.drawable.checked else R.drawable.not_checked),
                 contentDescription = null,
-                modifier = Modifier.clickable { onCheckedChange(item.isDone) }
+                modifier = Modifier.clickable { onCheckedChange(!item.isDone) }
             )
 
 
