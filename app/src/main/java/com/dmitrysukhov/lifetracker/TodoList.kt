@@ -43,11 +43,11 @@ fun TodoListScreen(navController: NavHostController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 TextField(
-                    textStyle = PoppinsBold,
+                    textStyle = InvolveBold,
                     value = taskText,
                     onValueChange = { taskText = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Введите задачу", style = PoppinsBold) },
+                    placeholder = { Text("Введите задачу", style = InvolveBold) },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
                         onDone = {

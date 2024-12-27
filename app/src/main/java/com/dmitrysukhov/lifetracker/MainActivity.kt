@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    "LifeTracker", style = PoppinsBold,
+                                    "LifeTracker", style = InvolveBold,
                                     fontSize = 20.sp, color = WhitePine
                                 )
                             }
@@ -194,16 +194,16 @@ class MainActivity : ComponentActivity() {
                                 Column {
                                     Text(
                                         "Task123", color = BlackPine,
-                                        style = PoppinsBold, fontSize = 18.sp
+                                        style = InvolveBold, fontSize = 18.sp
                                     )
                                     Text(
                                         "Project456", color = BlackPine,
-                                        style = PoppinsBold, fontSize = 14.sp
+                                        style = InvolveBold, fontSize = 14.sp
                                     )
                                 }
                                 Text(
                                     "00:23:57", color = BlackPine,
-                                    style = PoppinsBold, fontSize = 20.sp
+                                    style = InvolveBold, fontSize = 20.sp
                                 )
                                 Row {
                                     Button(onClick = {}, modifier = Modifier.width(50.dp)) {

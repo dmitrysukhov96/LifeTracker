@@ -3,6 +3,7 @@ package com.dmitrysukhov.lifetracker
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W600
 
@@ -18,6 +19,22 @@ val poppinsFontFamily = FontFamily(
 val PoppinsBold = TextStyle(
     fontFamily = poppinsFontFamily,
     fontWeight = W600,
+)
+
+val involveFontFamily = FontFamily(
+    Font(R.font.involve_regular, FontWeight.Normal),
+    Font(R.font.involve_medium, FontWeight.Medium),
+    Font(R.font.involve_semibold, FontWeight.SemiBold),
+    Font(R.font.involve_bold, FontWeight.Bold),
+    Font(R.font.involve_extrabold, FontWeight.ExtraBold),
+    Font(R.font.involve_black, FontWeight.Black),
+    Font(R.font.involve_oblique, FontWeight.Normal, style = FontStyle.Italic),
+    Font(R.font.involve_bold_oblique, FontWeight.Bold, style = FontStyle.Italic)
+)
+
+val InvolveBold = TextStyle(
+    fontFamily = involveFontFamily,
+    fontWeight = FontWeight.Bold,
 )
 
 //todo тут надо сделать то же самое для других шрифтов чтобы поэкспериментировать с ними

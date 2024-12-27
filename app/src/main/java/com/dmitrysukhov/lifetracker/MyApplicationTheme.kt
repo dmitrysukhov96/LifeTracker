@@ -33,7 +33,7 @@ fun MyApplicationTheme(
     }
     val typography = Typography(
         bodyMedium = TextStyle(
-            fontFamily = poppinsFontFamily,
+            fontFamily = involveFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp
         )
