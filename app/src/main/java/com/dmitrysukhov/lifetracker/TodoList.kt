@@ -1,6 +1,8 @@
 package com.dmitrysukhov.lifetracker
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +19,9 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -109,16 +113,20 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
+
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
     ) {
         Row(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            Checkbox(
-                checked = item.isDone,
-                onCheckedChange = onCheckedChange
+            Image(
+                painter = painterResource(if (item.isDone) R.drawable.checked else R.drawable.not_checked),
+                contentDescription = null,
+                modifier = Modifier.clickable { onCheckedChange(item.isDone) }
             )
+
+
             Text(
                 text = item.text, fontFamily = involveFontFamily,
                 style = MaterialTheme.typography.bodyLarge,
