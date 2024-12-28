@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -110,24 +111,59 @@ class MainActivity : ComponentActivity() {
                             }
 
                         },
+
                         bottomBar = {
-                            NavigationBar(containerColor = BgColor, contentColor = Color.Red) {
-                                items.forEachIndexed { index, item ->
-                                    NavigationBarItem(selected = selectedItemIndex == index,
-                                        onClick = {
-                                            selectedItemIndex = index
-                                            navController.navigate(item.title)
-                                        },
-                                        alwaysShowLabel = false,
-                                        icon = {
-                                            Icon(
-                                                imageVector = if (index == selectedItemIndex) {
-                                                    item.selectedIcon
-                                                } else item.unselectedIcon,
-                                                contentDescription = ""
-                                            )
-                                        })
-                                }
+                            var selectedItem by rememberSaveable { mutableStateOf(TRACKER_SCREEN) }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(36.dp))
+                                    .background(Color(0xFF33BA78))
+                                    .height(89.dp)
+                                    .padding(horizontal = 24.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ){
+
+                                Icon(
+                                   imageVector = Icons.Rounded.Home,
+                                    contentDescription = "Home",
+                                    tint = if (selectedItem == TRACKER_SCREEN) Color(0xFFCBF66E) else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = TRACKER_SCREEN
+                                        navController.navigate(TRACKER_SCREEN)
+                                    }
+                                )
+
+                                Icon(
+                                   painter =  painterResource (R.drawable.strekla),
+                                    contentDescription = "Tasks",
+                                    tint = if (selectedItem == TODOLIST_SCREEN) Color(0xFFCBF66E)else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = TODOLIST_SCREEN
+                                        navController.navigate(TODOLIST_SCREEN)
+                                    }
+                                )
+
+                                Icon(
+                                    painter = painterResource (R.drawable.spisok),
+                                    contentDescription = "Profile",
+                                    tint = if (selectedItem == SETTINGS_SCREEN) Color(0xFFCBF66E) else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = SETTINGS_SCREEN
+                                        navController.navigate(SETTINGS_SCREEN)
+                                    }
+                                )
+
+                                Icon(
+                                    imageVector = Icons.Rounded.Settings,
+                                    contentDescription = "Settings",
+                                    tint = if (selectedItem == SETTINGS_SCREEN) Color(0xFFCBF66E) else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = SETTINGS_SCREEN
+                                        navController.navigate(SETTINGS_SCREEN)
+                                    }
+                                )
                             }
                         },
                         floatingActionButton = {
@@ -139,7 +175,6 @@ class MainActivity : ComponentActivity() {
                                         color = Color(0xFF33BA78),
                                         shape = RoundedCornerShape(50.dp)
                                     )
-
                                     .clip(RoundedCornerShape(50.dp))
                                     .clickable { }
                                     .padding(horizontal = 12.dp),
@@ -152,6 +187,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
+
                                 Text(
                                     text = "GO!",
                                     fontSize = 18.sp,
