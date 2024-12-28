@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 @Composable
-fun SettingsScreen(navController: NavHostController) {
+fun HabitScreen(navController: NavHostController) {
     Column(
         Modifier
             .fillMaxSize()
@@ -19,8 +19,9 @@ fun SettingsScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Settings", fontFamily = Montserrat)
+        Text("Habits", fontFamily = Montserrat)
     }
 }
 
-const val SETTINGS_SCREEN = "Settings"
+const val HABIT_SCREEN = "Habits"
+

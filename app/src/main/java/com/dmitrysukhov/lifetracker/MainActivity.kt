@@ -31,15 +31,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.DateRange
-import androidx.compose.material.icons.rounded.Face
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,30 +69,6 @@ class MainActivity : ComponentActivity() {
                         .background(PineColor)
                 ) {
                     val navController = rememberNavController()
-                    val items = listOf(
-                        BottomNavigationItem(
-                            title = TRACKER_SCREEN,
-                            selectedIcon = Icons.Rounded.Home,
-                            unselectedIcon = Icons.Rounded.Home,
-                        ),
-                        BottomNavigationItem(
-                            title = TODOLIST_SCREEN,
-                            selectedIcon = Icons.Rounded.DateRange,
-                            unselectedIcon = Icons.Rounded.DateRange,
-                        ),
-
-                        BottomNavigationItem(
-                            title = SETTINGS_SCREEN,
-                            selectedIcon = Icons.Rounded.Face,
-                            unselectedIcon = Icons.Rounded.Face,
-                        ),
-                        BottomNavigationItem(
-                            title = SETTINGS_SCREEN,
-                            selectedIcon = Icons.Rounded.Settings,
-                            unselectedIcon = Icons.Rounded.Settings,
-                        )
-                    )
-                    var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
                     Scaffold(
                         topBar = {
                             Box(
@@ -121,39 +91,70 @@ class MainActivity : ComponentActivity() {
 
                         },
                         bottomBar = {
-                            NavigationBar(containerColor = BgColor, contentColor = Color.Red) {
-                                items.forEachIndexed { index, item ->
-                                    NavigationBarItem(selected = selectedItemIndex == index,
-                                        onClick = {
-                                            selectedItemIndex = index
-                                            navController.navigate(item.title)
-                                        },
-                                        alwaysShowLabel = false,
-                                        icon = {
-                                            Icon(
-                                                imageVector = if (index == selectedItemIndex) {
-                                                    item.selectedIcon
-                                                } else item.unselectedIcon,
-                                                contentDescription = ""
-                                            )
-                                        })
-                                }
+                            var selectedItem by rememberSaveable { mutableStateOf(MAIN_SCREEN) }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White)
+                                    .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
+                                    .height(89.dp)
+                                    .background(PineColor)
+                                    .padding(horizontal = 50.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ){
+                                Icon(
+                                    painter =  painterResource (R.drawable.home),
+                                    contentDescription = MAIN_SCREEN,
+                                    tint = if (selectedItem == MAIN_SCREEN) AccentColor else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = MAIN_SCREEN
+                                        navController.navigate(MAIN_SCREEN)
+                                    }
+                                )
+                                Icon(
+                                    painter =  painterResource (R.drawable.strekla),
+                                    contentDescription = HABIT_SCREEN,
+                                    tint = if (selectedItem == HABIT_SCREEN) AccentColor else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = HABIT_SCREEN
+                                        navController.navigate(HABIT_SCREEN)
+                                    }
+                                )
+                                Icon(
+                                    painter = painterResource (R.drawable.spisok),
+                                    contentDescription = TODOLIST_SCREEN,
+                                    tint = if (selectedItem == TODOLIST_SCREEN) AccentColor else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = TODOLIST_SCREEN
+                                        navController.navigate(TODOLIST_SCREEN)
+                                    }
+                                )
+                                Icon(
+                                    painter = painterResource (R.drawable.stat),
+                                    contentDescription = TRACKER_SCREEN,
+                                    tint = if (selectedItem == TRACKER_SCREEN) AccentColor else Color.White,
+                                    modifier = Modifier.clickable {
+                                        selectedItem = TRACKER_SCREEN
+                                        navController.navigate(TRACKER_SCREEN)
+                                    }
+                                )
                             }
                         },
                         floatingActionButton = { ActuallyFloatingActionButton({ /*todo click*/ }) }
                     ) { padding ->
                         Box(Modifier.fillMaxSize()) {
-
                             NavHost(
                                 navController = navController,
-                                startDestination = TRACKER_SCREEN,
+                                startDestination = MAIN_SCREEN,
                                 modifier = Modifier
                                     .background(PineColor)
                                     .padding(padding)
                                     .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
                             ) {
+                                composable(MAIN_SCREEN) { MainScreen(navController) }
+                                composable(HABIT_SCREEN) { HabitScreen(navController) }
                                 composable(TODOLIST_SCREEN) { TodoListScreen(navController) }
-                                composable(SETTINGS_SCREEN) { SettingsScreen(navController) }
                                 composable(TRACKER_SCREEN) { TrackerScreen(navController) }
                             }
                             Row(
