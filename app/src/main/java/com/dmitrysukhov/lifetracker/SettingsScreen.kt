@@ -19,7 +19,7 @@ fun SettingsScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Settings", fontFamily = involveFontFamily)
+        Text("Settings", fontFamily = Montserrat)
     }
 }
 

@@ -33,7 +33,7 @@ fun MyApplicationTheme(
     }
     val typography = Typography(
         bodyMedium = TextStyle(
-            fontFamily = involveFontFamily,
+            fontFamily = Montserrat,
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp
         )

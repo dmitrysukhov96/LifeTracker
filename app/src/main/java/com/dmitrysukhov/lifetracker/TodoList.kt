@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,7 +21,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -31,8 +32,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.font.FontWeight.Companion.Medium
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 
@@ -55,12 +60,13 @@ fun TodoListScreen(navController: NavHostController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                val style = TextStyle(fontWeight = Bold, fontFamily = Montserrat)
                 TextField(
-                    textStyle = InvolveBold,
+                    textStyle = style,
                     value = taskText,
                     onValueChange = { taskText = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Введите задачу", style = InvolveBold) },
+                    placeholder = { Text("Введите задачу", style = style) },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
                         onDone = {
@@ -79,39 +85,19 @@ fun TodoListScreen(navController: NavHostController) {
                             taskText = ""
                         }
                     }
-                ) {
-                    Text("Добавить", fontFamily = involveFontFamily)
-                }
+                ) { Text("Добавить", fontFamily = Montserrat) }
             }
             Spacer(modifier = Modifier.height(16.dp))
-
-            TodoList(
-                todoList = todoList,
-                onTaskCheckedChange = { item, isChecked ->
-                    viewModel.updateTask(item.copy(isDone = isChecked))
-                },
-                onDeleteTask = { item ->
-                    viewModel.deleteTask(item)
+            LazyColumn {
+                items(todoList) { todoItem ->
+                    TodoListItem(
+                        item = todoItem,
+                        onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) },
+                        onDelete = { viewModel.deleteTask(todoItem) }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun TodoList(
-    todoList: List<TodoItem>,
-    onTaskCheckedChange: (TodoItem, Boolean) -> Unit,
-    onDeleteTask: (TodoItem) -> Unit
-) {
-    Column {
-        todoList.forEach { todoItem ->
-            TodoListItem(
-                item = todoItem,
-                onCheckedChange = { isChecked -> onTaskCheckedChange(todoItem, isChecked) },
-                onDelete = { onDeleteTask(todoItem) }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
@@ -134,11 +120,9 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: (
                 contentDescription = null,
                 modifier = Modifier.clickable { onCheckedChange(!item.isDone) }
             )
-
-
             Text(
-                text = item.text, fontFamily = involveFontFamily,
-                style = MaterialTheme.typography.bodyLarge,
+                text = item.text, fontFamily = Montserrat,
+                fontSize = 14.sp, fontWeight = Medium,
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
