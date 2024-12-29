@@ -157,52 +157,7 @@ class MainActivity : ComponentActivity() {
                                 composable(TODOLIST_SCREEN) { TodoListScreen(navController) }
                                 composable(TRACKER_SCREEN) { TrackerScreen(navController) }
                             }
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp)
-                                    .padding(bottom = padding.calculateBottomPadding() + 8.dp)
-                                    .height(64.dp)
-                                    .clip(RoundedCornerShape(100.dp))
-                                    .background(AccentColor)
-                                    .align(Alignment.BottomCenter)
-                                    .padding(horizontal = 24.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(
-                                        "Task123", color = BlackPine, fontWeight = Bold,
-                                        fontFamily = Montserrat, fontSize = 18.sp
-                                    )
-                                    Text(
-                                        "Project456", color = BlackPine, fontWeight = Bold,
-                                        fontFamily = Montserrat, fontSize = 14.sp
-                                    )
-                                }
-                                Text(
-                                    "00:23:57", color = BlackPine, fontWeight = Bold,
-                                    fontFamily = Montserrat, fontSize = 20.sp
-                                )
-                                Row {
-                                    Box(modifier = Modifier.size(50.dp)) {
-                                        Image(
-                                            Icons.Rounded.PlayArrow,
-                                            contentDescription = "Run",
-                                            contentScale = ContentScale.FillBounds,
-                                            modifier = Modifier.align(Alignment.Center)
-                                        )
-                                    }
-                                    Spacer(Modifier.width(8.dp))
-                                    Button(onClick = {}, modifier = Modifier.width(50.dp)) {
-                                        Image(
-                                            Icons.Rounded.ArrowDropDown,
-                                            contentDescription = "Change project",
-                                            contentScale = ContentScale.FillBounds
-                                        )
-                                    }
-                                }
-                            }
+
                         }
                     }
                 }
@@ -250,3 +205,52 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
         )
     }
 }
+
+
+@Composable
+fun TimeTracker(){Row(
+    Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 24.dp)
+        .padding(bottom = padding.calculateBottomPadding() + 8.dp)
+        .height(64.dp)
+        .clip(RoundedCornerShape(100.dp))
+        .background(AccentColor)
+        .align(Alignment.BottomCenter)
+        .padding(horizontal = 24.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween
+) {
+    Column {
+        Text(
+            "Task123", color = BlackPine, fontWeight = Bold,
+            fontFamily = Montserrat, fontSize = 18.sp
+        )
+        Text(
+            "Project456", color = BlackPine, fontWeight = Bold,
+            fontFamily = Montserrat, fontSize = 14.sp
+        )
+    }
+    Text(
+        "00:23:57", color = BlackPine, fontWeight = Bold,
+        fontFamily = Montserrat, fontSize = 20.sp
+    )
+    Row {
+        Box(modifier = Modifier.size(50.dp)) {
+            Image(
+                Icons.Rounded.PlayArrow,
+                contentDescription = "Run",
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Button(onClick = {}, modifier = Modifier.width(50.dp)) {
+            Image(
+                Icons.Rounded.ArrowDropDown,
+                contentDescription = "Change project",
+                contentScale = ContentScale.FillBounds
+            )
+        }
+    }
+}}
