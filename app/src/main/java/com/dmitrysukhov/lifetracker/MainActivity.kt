@@ -59,59 +59,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-@Serializable
-data object MainRoute
-@Serializable
-data object AddItemRoute
-const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
-
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-            setContent {
-                FabExplodeTheme {
-                    val navController = rememberNavController()
-                    val fabColor = Color.Green
-                    SharedTransitionLayout {
-                        NavHost(
-                            navController = navController,
-                            startDestination = MainRoute,
-                            modifier = Modifier
-                                .fillMaxSize()
-                        ) {
-                            composable<MainRoute> {
-                                TurboScreen (
-                                    fabColor = fabColor,
-                                    animatedVisibilityScope = this,
-                                    onFabClick = {
-                                        navController.navigate(AddItemRoute)
-                                    }
-                                )
-                            }
-                            composable<AddItemRoute> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(fabColor)
-                                        .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(
-                                                key = FAB_EXPLODE_BOUNDS_KEY
-                                            ),
-                                            animatedVisibilityScope = this
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Add item")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // это код который был у чела в видео ^
+        setContent {
             MyApplicationTheme {
                 Box(
                     Modifier
@@ -119,6 +72,7 @@ class MainActivity : ComponentActivity() {
                         .background(PineColor)
                 ) {
                     val navController = rememberNavController()
+                    SharedTransitionLayout {
                     Scaffold(
                         topBar = {
                             Box(
@@ -152,9 +106,9 @@ class MainActivity : ComponentActivity() {
                                     .padding(horizontal = 50.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
-                            ){
+                            ) {
                                 Icon(
-                                    painter =  painterResource (R.drawable.home),
+                                    painter = painterResource(R.drawable.home),
                                     contentDescription = MAIN_SCREEN,
                                     tint = if (selectedItem == MAIN_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -163,7 +117,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                                 Icon(
-                                    painter =  painterResource (R.drawable.strekla),
+                                    painter = painterResource(R.drawable.strekla),
                                     contentDescription = HABIT_SCREEN,
                                     tint = if (selectedItem == HABIT_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -172,7 +126,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                                 Icon(
-                                    painter = painterResource (R.drawable.spisok),
+                                    painter = painterResource(R.drawable.spisok),
                                     contentDescription = TODOLIST_SCREEN,
                                     tint = if (selectedItem == TODOLIST_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -181,7 +135,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                                 Icon(
-                                    painter = painterResource (R.drawable.stat),
+                                    painter = painterResource(R.drawable.stat),
                                     contentDescription = TRACKER_SCREEN,
                                     tint = if (selectedItem == TRACKER_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -191,7 +145,11 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         },
-                        floatingActionButton = { ActuallyFloatingActionButton({ /*todo click*/ }) }
+                        floatingActionButton = {
+                            ActuallyFloatingActionButton({
+                                navController.navigate(TURBO_SCREEN)
+                            })
+                        }
                     ) { padding ->
                         Box(Modifier.fillMaxSize()) {
                             NavHost(
@@ -206,6 +164,7 @@ class MainActivity : ComponentActivity() {
                                 composable(HABIT_SCREEN) { HabitScreen(navController) }
                                 composable(TODOLIST_SCREEN) { TodoListScreen(navController) }
                                 composable(TRACKER_SCREEN) { TrackerScreen(navController) }
+                                composable(TURBO_SCREEN) { TurboScreen(this) }
                             }
                             Row(
                                 Modifier
@@ -255,6 +214,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+                    }
                 }
             }
         }
@@ -300,3 +260,5 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
         )
     }
 }
+
+const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
