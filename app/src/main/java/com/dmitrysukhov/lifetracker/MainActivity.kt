@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -57,11 +59,59 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
+@Serializable
+data object MainRoute
+@Serializable
+data object AddItemRoute
+const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
+
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContent {
+            enableEdgeToEdge()
+            setContent {
+                FabExplodeTheme {
+                    val navController = rememberNavController()
+                    val fabColor = Color.Green
+                    SharedTransitionLayout {
+                        NavHost(
+                            navController = navController,
+                            startDestination = MainRoute,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            composable<MainRoute> {
+                                TurboScreen (
+                                    fabColor = fabColor,
+                                    animatedVisibilityScope = this,
+                                    onFabClick = {
+                                        navController.navigate(AddItemRoute)
+                                    }
+                                )
+                            }
+                            composable<AddItemRoute> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(fabColor)
+                                        .sharedBounds(
+                                            sharedContentState = rememberSharedContentState(
+                                                key = FAB_EXPLODE_BOUNDS_KEY
+                                            ),
+                                            animatedVisibilityScope = this
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("Add item")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        // это код который был у чела в видео ^
             MyApplicationTheme {
                 Box(
                     Modifier
@@ -75,6 +125,7 @@ class MainActivity : ComponentActivity() {
                                 Modifier
                                     .fillMaxWidth()
                                     .padding(
+
                                         top = WindowInsets.systemBars
                                             .asPaddingValues()
                                             .calculateTopPadding()
@@ -250,3 +301,4 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
         )
     }
 }
+
