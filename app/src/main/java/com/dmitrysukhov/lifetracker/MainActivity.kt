@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,11 +31,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -73,147 +71,102 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     SharedTransitionLayout {
-                    Scaffold(
-                        topBar = {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        top = WindowInsets.systemBars
-                                            .asPaddingValues()
-                                            .calculateTopPadding()
+                        Scaffold(
+                            topBar = {
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            top = WindowInsets.systemBars
+                                                .asPaddingValues()
+                                                .calculateTopPadding()
+                                        )
+                                        .height(56.dp)
+                                ) {
+                                    Text(
+                                        "LifeTracker", fontFamily = Montserrat,
+                                        fontSize = 20.sp, fontWeight = Bold,
+                                        color = WhitePine,
+                                        modifier = Modifier.align(Alignment.Center)
                                     )
-                                    .height(56.dp)
-                            ) {
-                                Text(
-                                    "LifeTracker", fontFamily = Montserrat,
-                                    fontSize = 20.sp, fontWeight = Bold,
-                                    color = WhitePine,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
+                                }
 
-                        },
-                        bottomBar = {
-                            var selectedItem by rememberSaveable { mutableStateOf(MAIN_SCREEN) }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color.White)
-                                    .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
-                                    .height(89.dp)
-                                    .background(PineColor)
-                                    .padding(horizontal = 50.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.home),
-                                    contentDescription = MAIN_SCREEN,
-                                    tint = if (selectedItem == MAIN_SCREEN) AccentColor else Color.White,
-                                    modifier = Modifier.clickable {
-                                        selectedItem = MAIN_SCREEN
-                                        navController.navigate(MAIN_SCREEN)
-                                    }
-                                )
-                                Icon(
-                                    painter = painterResource(R.drawable.strekla),
-                                    contentDescription = HABIT_SCREEN,
-                                    tint = if (selectedItem == HABIT_SCREEN) AccentColor else Color.White,
-                                    modifier = Modifier.clickable {
-                                        selectedItem = HABIT_SCREEN
-                                        navController.navigate(HABIT_SCREEN)
-                                    }
-                                )
-                                Icon(
-                                    painter = painterResource(R.drawable.spisok),
-                                    contentDescription = TODOLIST_SCREEN,
-                                    tint = if (selectedItem == TODOLIST_SCREEN) AccentColor else Color.White,
-                                    modifier = Modifier.clickable {
-                                        selectedItem = TODOLIST_SCREEN
-                                        navController.navigate(TODOLIST_SCREEN)
-                                    }
-                                )
-                                Icon(
-                                    painter = painterResource(R.drawable.stat),
-                                    contentDescription = TRACKER_SCREEN,
-                                    tint = if (selectedItem == TRACKER_SCREEN) AccentColor else Color.White,
-                                    modifier = Modifier.clickable {
-                                        selectedItem = TRACKER_SCREEN
-                                        navController.navigate(TRACKER_SCREEN)
-                                    }
-                                )
-                            }
-                        },
-                        floatingActionButton = {
-                            ActuallyFloatingActionButton({
-                                navController.navigate(TURBO_SCREEN)
-                            })
-                        }
-                    ) { padding ->
-                        Box(Modifier.fillMaxSize()) {
-                            NavHost(
-                                navController = navController,
-                                startDestination = MAIN_SCREEN,
-                                modifier = Modifier
-                                    .background(PineColor)
-                                    .padding(padding)
-                                    .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
-                            ) {
-                                composable(MAIN_SCREEN) { MainScreen(navController) }
-                                composable(HABIT_SCREEN) { HabitScreen(navController) }
-                                composable(TODOLIST_SCREEN) { TodoListScreen(navController) }
-                                composable(TRACKER_SCREEN) { TrackerScreen(navController) }
-                                composable(TURBO_SCREEN) { TurboScreen(this) }
-                            }
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp)
-                                    .padding(bottom = padding.calculateBottomPadding() + 8.dp)
-                                    .height(64.dp)
-                                    .clip(RoundedCornerShape(100.dp))
-                                    .background(AccentColor)
-                                    .align(Alignment.BottomCenter)
-                                    .padding(horizontal = 24.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(
-                                        "Task123", color = BlackPine, fontWeight = Bold,
-                                        fontFamily = Montserrat, fontSize = 18.sp
+                            },
+                            bottomBar = {
+                                var selectedItem by rememberSaveable { mutableStateOf(MAIN_SCREEN) }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White)
+                                        .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
+                                        .height(89.dp)
+                                        .background(PineColor)
+                                        .padding(horizontal = 50.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.home),
+                                        contentDescription = MAIN_SCREEN,
+                                        tint = if (selectedItem == MAIN_SCREEN) AccentColor else Color.White,
+                                        modifier = Modifier.clickable {
+                                            selectedItem = MAIN_SCREEN
+                                            navController.navigate(MAIN_SCREEN)
+                                        }
                                     )
-                                    Text(
-                                        "Project456", color = BlackPine, fontWeight = Bold,
-                                        fontFamily = Montserrat, fontSize = 14.sp
+                                    Icon(
+                                        painter = painterResource(R.drawable.strekla),
+                                        contentDescription = HABIT_SCREEN,
+                                        tint = if (selectedItem == HABIT_SCREEN) AccentColor else Color.White,
+                                        modifier = Modifier.clickable {
+                                            selectedItem = HABIT_SCREEN
+                                            navController.navigate(HABIT_SCREEN)
+                                        }
+                                    )
+                                    Icon(
+                                        painter = painterResource(R.drawable.spisok),
+                                        contentDescription = TODOLIST_SCREEN,
+                                        tint = if (selectedItem == TODOLIST_SCREEN) AccentColor else Color.White,
+                                        modifier = Modifier.clickable {
+                                            selectedItem = TODOLIST_SCREEN
+                                            navController.navigate(TODOLIST_SCREEN)
+                                        }
+                                    )
+                                    Icon(
+                                        painter = painterResource(R.drawable.stat),
+                                        contentDescription = TRACKER_SCREEN,
+                                        tint = if (selectedItem == TRACKER_SCREEN) AccentColor else Color.White,
+                                        modifier = Modifier.clickable {
+                                            selectedItem = TRACKER_SCREEN
+                                            navController.navigate(TRACKER_SCREEN)
+                                        }
                                     )
                                 }
-                                Text(
-                                    "00:23:57", color = BlackPine, fontWeight = Bold,
-                                    fontFamily = Montserrat, fontSize = 20.sp
-                                )
-                                Row {
-                                    Box(modifier = Modifier.size(50.dp)) {
-                                        Image(
-                                            Icons.Rounded.PlayArrow,
-                                            contentDescription = "Run",
-                                            contentScale = ContentScale.FillBounds,
-                                            modifier = Modifier.align(Alignment.Center)
-                                        )
-                                    }
-                                    Spacer(Modifier.width(8.dp))
-                                    Button(onClick = {}, modifier = Modifier.width(50.dp)) {
-                                        Image(
-                                            Icons.Rounded.ArrowDropDown,
-                                            contentDescription = "Change project",
-                                            contentScale = ContentScale.FillBounds
-                                        )
-                                    }
+                            },
+                            floatingActionButton = {
+                                ActuallyFloatingActionButton({
+                                    navController.navigate(TURBO_SCREEN)
+                                })
+                            }
+                        ) { padding ->
+                            Box(Modifier.fillMaxSize()) {
+                                NavHost(
+                                    navController = navController,
+                                    startDestination = MAIN_SCREEN,
+                                    modifier = Modifier
+                                        .background(PineColor)
+                                        .padding(padding)
+                                        .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
+                                ) {
+                                    composable(MAIN_SCREEN) { MainScreen(navController) }
+                                    composable(HABIT_SCREEN) { HabitScreen(navController) }
+                                    composable(TODOLIST_SCREEN) { TodoListScreen(navController) }
+                                    composable(TRACKER_SCREEN) { TrackerScreen(navController) }
+                                    composable(TURBO_SCREEN) { TurboScreen(this) }
                                 }
+                                TimeTracker(padding)
                             }
                         }
-                    }
                     }
                 }
             }
@@ -262,3 +215,51 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
 }
 
 const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
+
+@Composable
+fun TimeTracker(padding: PaddingValues) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = padding.calculateTopPadding() + 12.dp)
+            .padding(horizontal = 24.dp)
+            .height(64.dp)
+            .clip(RoundedCornerShape(100.dp))
+            .background(AccentColor)
+            .padding(horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                "Task123", color = BlackPine, fontWeight = Bold,
+                fontFamily = Montserrat, fontSize = 18.sp
+            )
+            Text(
+                "Project456", color = BlackPine, fontWeight = Bold,
+                fontFamily = Montserrat, fontSize = 14.sp
+            )
+        }
+        Text(
+            "00:23:57", color = BlackPine, fontWeight = Bold,
+            fontFamily = Montserrat, fontSize = 20.sp
+        )
+        val type = "Play"
+        Row {
+            Box(modifier = Modifier
+                .clickable {
+
+                }
+                .clip(CircleShape)
+                .background(PineColor)
+                .size(50.dp)) {
+                Image(
+                    painter = painterResource(R.drawable.play),
+                    contentDescription = "Run",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+    }
+}
