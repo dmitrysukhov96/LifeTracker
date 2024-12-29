@@ -16,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -157,7 +158,7 @@ class MainActivity : ComponentActivity() {
                                 composable(TODOLIST_SCREEN) { TodoListScreen(navController) }
                                 composable(TRACKER_SCREEN) { TrackerScreen(navController) }
                             }
-
+                            TimeTracker(padding)
                         }
                     }
                 }
@@ -208,15 +209,15 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
 
 
 @Composable
-fun TimeTracker(){Row(
+fun TimeTracker(padding: PaddingValues) {
+    Row(
     Modifier
         .fillMaxWidth()
+        .padding(top = padding.calculateTopPadding()+12.dp)
         .padding(horizontal = 24.dp)
-        .padding(bottom = padding.calculateBottomPadding() + 8.dp)
         .height(64.dp)
         .clip(RoundedCornerShape(100.dp))
         .background(AccentColor)
-        .align(Alignment.BottomCenter)
         .padding(horizontal = 24.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.SpaceBetween
