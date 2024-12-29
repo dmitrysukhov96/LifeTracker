@@ -29,11 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -103,9 +100,9 @@ class MainActivity : ComponentActivity() {
                                     .padding(horizontal = 50.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
-                            ){
+                            ) {
                                 Icon(
-                                    painter =  painterResource (R.drawable.home),
+                                    painter = painterResource(R.drawable.home),
                                     contentDescription = MAIN_SCREEN,
                                     tint = if (selectedItem == MAIN_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -114,7 +111,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                                 Icon(
-                                    painter =  painterResource (R.drawable.strekla),
+                                    painter = painterResource(R.drawable.strekla),
                                     contentDescription = HABIT_SCREEN,
                                     tint = if (selectedItem == HABIT_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -123,7 +120,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                                 Icon(
-                                    painter = painterResource (R.drawable.spisok),
+                                    painter = painterResource(R.drawable.spisok),
                                     contentDescription = TODOLIST_SCREEN,
                                     tint = if (selectedItem == TODOLIST_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -132,7 +129,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                                 Icon(
-                                    painter = painterResource (R.drawable.stat),
+                                    painter = painterResource(R.drawable.stat),
                                     contentDescription = TRACKER_SCREEN,
                                     tint = if (selectedItem == TRACKER_SCREEN) AccentColor else Color.White,
                                     modifier = Modifier.clickable {
@@ -211,47 +208,47 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
 @Composable
 fun TimeTracker(padding: PaddingValues) {
     Row(
-    Modifier
-        .fillMaxWidth()
-        .padding(top = padding.calculateTopPadding()+12.dp)
-        .padding(horizontal = 24.dp)
-        .height(64.dp)
-        .clip(RoundedCornerShape(100.dp))
-        .background(AccentColor)
-        .padding(horizontal = 24.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceBetween
-) {
-    Column {
-        Text(
-            "Task123", color = BlackPine, fontWeight = Bold,
-            fontFamily = Montserrat, fontSize = 18.sp
-        )
-        Text(
-            "Project456", color = BlackPine, fontWeight = Bold,
-            fontFamily = Montserrat, fontSize = 14.sp
-        )
-    }
-    Text(
-        "00:23:57", color = BlackPine, fontWeight = Bold,
-        fontFamily = Montserrat, fontSize = 20.sp
-    )
-    Row {
-        Box(modifier = Modifier.size(50.dp)) {
-            Image(
-                Icons.Rounded.PlayArrow,
-                contentDescription = "Run",
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier.align(Alignment.Center)
+        Modifier
+            .fillMaxWidth()
+            .padding(top = padding.calculateTopPadding() + 12.dp)
+            .padding(horizontal = 24.dp)
+            .height(64.dp)
+            .clip(RoundedCornerShape(100.dp))
+            .background(AccentColor)
+            .padding(horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                "Task123", color = BlackPine, fontWeight = Bold,
+                fontFamily = Montserrat, fontSize = 18.sp
+            )
+            Text(
+                "Project456", color = BlackPine, fontWeight = Bold,
+                fontFamily = Montserrat, fontSize = 14.sp
             )
         }
-        Spacer(Modifier.width(8.dp))
-        Button(onClick = {}, modifier = Modifier.width(50.dp)) {
-            Image(
-                Icons.Rounded.ArrowDropDown,
-                contentDescription = "Change project",
-                contentScale = ContentScale.FillBounds
-            )
+        Text(
+            "00:23:57", color = BlackPine, fontWeight = Bold,
+            fontFamily = Montserrat, fontSize = 20.sp
+        )
+        val type = "Play"
+        Row {
+            Box(modifier = Modifier
+                .clickable {
+
+                }
+                .clip(CircleShape)
+                .background(PineColor)
+                .size(50.dp)) {
+                Image(
+                    painter = painterResource(R.drawable.play),
+                    contentDescription = "Run",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
     }
-}}
+}
