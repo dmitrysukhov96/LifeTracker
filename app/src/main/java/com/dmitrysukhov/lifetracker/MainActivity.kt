@@ -244,18 +244,23 @@ fun TimeTracker(padding: PaddingValues) {
             "00:23:57", color = BlackPine, fontWeight = Bold,
             fontFamily = Montserrat, fontSize = 20.sp
         )
-        val type = "Play"
-        Row {
-            Box(modifier = Modifier
-                .clickable {
+        var type by rememberSaveable { mutableStateOf("Play") }
 
-                }
-                .clip(CircleShape)
-                .background(PineColor)
-                .size(50.dp)) {
+        Row {
+            Box(
+                modifier = Modifier
+                    .clickable {
+                        type = if (type == "Play") "Stop" else "Play"
+                    }
+                    .clip(CircleShape)
+                    .background(PineColor)
+                    .size(50.dp)
+            ) {
                 Image(
-                    painter = painterResource(R.drawable.play),
-                    contentDescription = "Run",
+                    painter = painterResource(
+                        id = if (type == "Play") R.drawable.play else R.drawable.stop
+                    ),
+                    contentDescription = if (type == "Play") "Run" else "Stop",
                     contentScale = ContentScale.FillBounds,
                     modifier = Modifier.align(Alignment.Center)
                 )
