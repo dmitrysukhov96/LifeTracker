@@ -98,6 +98,9 @@ fun TodoListScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
+
+            Button({navController.navigate(Screen.Turbo.route)}) {  Text("Turbo") }
+            Button({navController.navigate(Screen.DailyPlanning.route)}) {  Text("DP") }
         }
     }
 }

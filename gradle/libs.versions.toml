@@ -11,8 +11,11 @@ roomCommon = "2.6.1"
 roomCompiler = "2.6.1"
 roomKtx = "2.6.1"
 compose = "2.0.21"
+jodaTime = "2.13.0"
+composeMaterial = "1.4.0"
 
 [libraries]
+joda-time = { module = "joda-time:joda-time", version.ref = "jodaTime" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
