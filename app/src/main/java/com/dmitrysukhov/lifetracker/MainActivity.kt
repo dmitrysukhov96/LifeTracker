@@ -164,7 +164,7 @@ class MainActivity : ComponentActivity() {
                                     composable(TRACKER_SCREEN) { TrackerScreen(navController) }
                                     composable(TURBO_SCREEN) { TurboScreen(this) }
                                 }
-                                TimeTracker(padding)
+//                                TimeTracker(padding)
                             }
                         }
                     }
