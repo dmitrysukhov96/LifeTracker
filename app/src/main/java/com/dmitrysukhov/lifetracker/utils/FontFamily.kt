@@ -1,9 +1,10 @@
-package com.dmitrysukhov.lifetracker
+package com.dmitrysukhov.lifetracker.utils
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import com.dmitrysukhov.lifetracker.R
 
 val Montserrat = FontFamily(
     Font(R.font.montserrat_light, FontWeight.Light),

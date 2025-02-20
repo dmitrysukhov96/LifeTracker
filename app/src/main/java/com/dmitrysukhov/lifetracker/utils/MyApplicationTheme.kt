@@ -1,4 +1,4 @@
-package com.dmitrysukhov.lifetracker
+package com.dmitrysukhov.lifetracker.utils
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape

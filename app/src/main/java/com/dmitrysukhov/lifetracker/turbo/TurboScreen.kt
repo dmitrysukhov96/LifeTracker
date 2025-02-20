@@ -1,4 +1,4 @@
-package com.dmitrysukhov.lifetracker
+package com.dmitrysukhov.lifetracker.turbo
 
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.dmitrysukhov.lifetracker.FAB_EXPLODE_BOUNDS_KEY
+import com.dmitrysukhov.lifetracker.utils.PineColor
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable

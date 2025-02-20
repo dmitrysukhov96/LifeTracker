@@ -51,11 +51,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
+import androidx.compose.ui.text.font.FontWeight.Companion.SemiBold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
+import com.dmitrysukhov.lifetracker.habits.HabitScreen
+import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
+import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
+import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
+import com.dmitrysukhov.lifetracker.todo.TodoListScreen
+import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
+import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
+import com.dmitrysukhov.lifetracker.turbo.TURBO_SCREEN
+import com.dmitrysukhov.lifetracker.turbo.TurboScreen
+import com.dmitrysukhov.lifetracker.utils.AccentColor
+import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.BlackPine
+import com.dmitrysukhov.lifetracker.utils.DarkerPine
+import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
+import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.WhitePine
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalSharedTransitionApi::class)
@@ -93,54 +112,51 @@ class MainActivity : ComponentActivity() {
 
                             },
                             bottomBar = {
-                                var selectedItem by rememberSaveable { mutableStateOf(MAIN_SCREEN) }
+                                var selectedItem by rememberSaveable {
+                                    mutableStateOf(
+                                        TODOLIST_SCREEN
+                                    )
+                                }
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color.White)
+                                        .background(BgColor)
                                         .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
-                                        .height(89.dp)
+                                        .height(90.dp)
                                         .background(PineColor)
-                                        .padding(horizontal = 50.dp),
+                                        .padding(horizontal = 40.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.home),
-                                        contentDescription = MAIN_SCREEN,
-                                        tint = if (selectedItem == MAIN_SCREEN) AccentColor else Color.White,
-                                        modifier = Modifier.clickable {
-                                            selectedItem = MAIN_SCREEN
-                                            navController.navigate(MAIN_SCREEN)
-                                        }
-                                    )
-                                    Icon(
-                                        painter = painterResource(R.drawable.strekla),
-                                        contentDescription = HABIT_SCREEN,
-                                        tint = if (selectedItem == HABIT_SCREEN) AccentColor else Color.White,
-                                        modifier = Modifier.clickable {
-                                            selectedItem = HABIT_SCREEN
-                                            navController.navigate(HABIT_SCREEN)
-                                        }
-                                    )
-                                    Icon(
-                                        painter = painterResource(R.drawable.spisok),
-                                        contentDescription = TODOLIST_SCREEN,
-                                        tint = if (selectedItem == TODOLIST_SCREEN) AccentColor else Color.White,
-                                        modifier = Modifier.clickable {
+                                    BottomBarItem(
+                                        R.drawable.tick_list, "TODO",
+                                        selectedItem == TODOLIST_SCREEN,
+                                        {
                                             selectedItem = TODOLIST_SCREEN
                                             navController.navigate(TODOLIST_SCREEN)
-                                        }
-                                    )
-                                    Icon(
-                                        painter = painterResource(R.drawable.stat),
-                                        contentDescription = TRACKER_SCREEN,
-                                        tint = if (selectedItem == TRACKER_SCREEN) AccentColor else Color.White,
-                                        modifier = Modifier.clickable {
+                                        })
+                                    BottomBarItem(R.drawable.tracker,
+                                        "Tracker",
+                                        selectedItem == TRACKER_SCREEN,
+                                        {
                                             selectedItem = TRACKER_SCREEN
                                             navController.navigate(TRACKER_SCREEN)
-                                        }
-                                    )
+                                        })
+                                    BottomBarItem(R.drawable.habits,
+                                        "Habits",
+                                        selectedItem == HABIT_SCREEN,
+                                        {
+                                            selectedItem = HABIT_SCREEN
+                                            navController.navigate(HABIT_SCREEN)
+                                        })
+                                    BottomBarItem(R.drawable.projects, "Projects",
+                                        selectedItem == PROJECTS_SCREEN,
+                                        {
+                                            selectedItem = PROJECTS_SCREEN
+                                            navController.navigate(PROJECTS_SCREEN)
+                                        })
+//                                    BottomBarItem(R.drawable.stat, "Statistics", selectedItem == STAT_SCREEN,
+//                                        { selectedItem = STAT_SCREEN })
                                 }
                             },
                             floatingActionButton = {
@@ -152,16 +168,16 @@ class MainActivity : ComponentActivity() {
                             Box(Modifier.fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
-                                    startDestination = MAIN_SCREEN,
+                                    startDestination = TODOLIST_SCREEN,
                                     modifier = Modifier
                                         .background(PineColor)
                                         .padding(padding)
                                         .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
                                 ) {
-                                    composable(MAIN_SCREEN) { MainScreen(navController) }
-                                    composable(HABIT_SCREEN) { HabitScreen(navController) }
-                                    composable(TODOLIST_SCREEN) { TodoListScreen(navController) }
-                                    composable(TRACKER_SCREEN) { TrackerScreen(navController) }
+                                    composable(TODOLIST_SCREEN) { TodoListScreen() }
+                                    composable(TRACKER_SCREEN) { TrackerScreen() }
+                                    composable(HABIT_SCREEN) { HabitScreen() }
+                                    composable(PROJECTS_SCREEN) { ProjectsScreen() }
                                     composable(TURBO_SCREEN) { TurboScreen(this) }
                                 }
 //                                TimeTracker(padding)
@@ -171,6 +187,19 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun BottomBarItem(iconRes: Int, text: String, isSelected: Boolean, onSelect: () -> Unit) {
+    val color = if (isSelected) WhitePine else DarkerPine
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier.clickable { onSelect() }
+    ) {
+        Icon(painterResource(iconRes), contentDescription = null, tint = color)
+        Text(text, fontSize = 12.sp, fontWeight = SemiBold, fontFamily = Montserrat, color = color)
     }
 }
 

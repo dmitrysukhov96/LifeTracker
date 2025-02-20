@@ -1,7 +1,9 @@
-package com.dmitrysukhov.lifetracker
+package com.dmitrysukhov.lifetracker.todo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dmitrysukhov.lifetracker.TodoDao
+import com.dmitrysukhov.lifetracker.utils.TodoItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

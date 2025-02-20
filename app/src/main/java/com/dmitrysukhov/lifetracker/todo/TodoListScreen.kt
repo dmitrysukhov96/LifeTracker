@@ -1,4 +1,4 @@
-package com.dmitrysukhov.lifetracker
+package com.dmitrysukhov.lifetracker.todo
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -40,10 +40,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
+import com.dmitrysukhov.lifetracker.AppDatabase
+import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
+import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.utils.TodoItem
+import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.PineColor
 
 @Composable
-fun TodoListScreen(navController: NavHostController) {
+fun TodoListScreen() {
     MyApplicationTheme {
         val context = LocalContext.current
         val todoDao = AppDatabase.getDatabase(context).todoDao()
@@ -96,8 +102,7 @@ fun TodoListScreen(navController: NavHostController) {
                 items(todoList) { todoItem ->
                     TodoListItem(
                         item = todoItem,
-                        onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) },
-                        onDelete = { viewModel.deleteTask(todoItem) }
+                        onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -107,7 +112,7 @@ fun TodoListScreen(navController: NavHostController) {
 }
 
 @Composable
-fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, onDelete: () -> Unit) {
+fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
