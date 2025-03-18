@@ -128,7 +128,7 @@ class MainActivity : ComponentActivity() {
                             Box(Modifier.fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
-                                    startDestination = TODOLIST_SCREEN,
+                                    startDestination = NEW_TASK_SCREEN,
                                     modifier = Modifier
                                         .background(PineColor)
                                         .padding(padding)
@@ -139,6 +139,7 @@ class MainActivity : ComponentActivity() {
                                     composable(ADD_TASK_SCREEN) { AddTaskScreen() }
                                     composable(HABIT_SCREEN) { HabitScreen() }
                                     composable(PROJECTS_SCREEN) { ProjectsScreen() }
+                                    composable(NEW_TASK_SCREEN) { NewTaskScreen() }
                                     composable(TURBO_SCREEN) { TurboScreen(this) }
                                 }
 //                                TimeTracker(padding)
