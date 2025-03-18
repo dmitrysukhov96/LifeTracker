@@ -71,7 +71,6 @@ import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
 import com.dmitrysukhov.lifetracker.turbo.TURBO_SCREEN
 import com.dmitrysukhov.lifetracker.turbo.TurboScreen
 import com.dmitrysukhov.lifetracker.utils.AccentColor
-import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.BlackPine
 import com.dmitrysukhov.lifetracker.utils.DarkerPine
 import com.dmitrysukhov.lifetracker.utils.Montserrat
@@ -85,6 +84,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        //todo переехать на ксп
         setContent {
             MyApplicationTheme {
                 var topBarState by remember { mutableStateOf(TopBarState()) }
@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     SharedTransitionLayout {
-                        Scaffold(
+                        Scaffold( //todo таки создать шторку
                             topBar = {
                                 Box(
                                     Modifier
@@ -109,64 +109,17 @@ class MainActivity : ComponentActivity() {
                                         .height(56.dp)
                                 ) {
                                     Text(
-                                        "LifeTracker", fontFamily = Montserrat,
+                                        topBarState.title, fontFamily = Montserrat,
                                         fontSize = 20.sp, fontWeight = Bold,
                                         color = WhitePine,
                                         modifier = Modifier.align(Alignment.Center)
                                     )
+                                    topBarState.topBarActions
                                 }
 
                             },
                             bottomBar = {
-                                var selectedItem by rememberSaveable {
-                                    mutableStateOf(
-                                        TODOLIST_SCREEN
-                                    )
-                                }
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(BgColor)
-                                        .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
-                                        .height(90.dp)
-                                        .background(PineColor)
-                                        .padding(horizontal = 40.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    BottomBarItem(
-                                        R.drawable.tick_list, "TODO",
-                                        selectedItem == TODOLIST_SCREEN,
-                                        {
-                                            selectedItem = TODOLIST_SCREEN
-                                            navController.navigate(TODOLIST_SCREEN)
-                                        })
-                                    BottomBarItem(
-                                        R.drawable.tracker,
-                                        "Tracker",
-                                        selectedItem == TRACKER_SCREEN,
-                                        {
-                                            selectedItem = TRACKER_SCREEN
-                                            navController.navigate(TRACKER_SCREEN)
-                                        })
-                                    BottomBarItem(
-                                        R.drawable.habits,
-                                        "Habits",
-                                        selectedItem == HABIT_SCREEN,
-                                        {
-                                            selectedItem = HABIT_SCREEN
-                                            navController.navigate(HABIT_SCREEN)
-                                        })
-                                    BottomBarItem(
-                                        R.drawable.projects, "Projects",
-                                        selectedItem == PROJECTS_SCREEN,
-                                        {
-                                            selectedItem = PROJECTS_SCREEN
-                                            navController.navigate(PROJECTS_SCREEN)
-                                        })
-//                                    BottomBarItem(R.drawable.stat, "Statistics", selectedItem == STAT_SCREEN,
-//                                        { selectedItem = STAT_SCREEN })
-                                }
+                                //todo реклама???
                             },
                             floatingActionButton = {
                                 ActuallyFloatingActionButton({ navController.navigate(TURBO_SCREEN) })
