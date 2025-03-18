@@ -59,11 +59,15 @@ fun TodoListScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHost
     val todoList by viewModel.todoList.collectAsState()
     var taskText by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
-        setTopBarState(TopBarState("LifeTracker",{
+        setTopBarState(TopBarState("LifeTracker", {
             IconButton({ navController.navigate(NEW_TASK_SCREEN) }) {
                 Icon(painterResource(R.drawable.plus), contentDescription = null)
             }
-        }))
+        }, {
+            Icon(painterResource(R.drawable.strelka), contentDescription = null) // Вторая иконка
+        }) {
+            Icon(painterResource(R.drawable.delete), contentDescription = null)
+        })
     }
     Column(
         modifier = Modifier

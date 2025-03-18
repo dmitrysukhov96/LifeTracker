@@ -80,16 +80,34 @@ import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
 
+
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        //todo переехать на ксп
+
         setContent {
             MyApplicationTheme {
-                var topBarState by remember { mutableStateOf(TopBarState()) }
+                var topBarState by remember {
+                    mutableStateOf(
+                        TopBarState(
+                            title = "New Task",
+                            leftIcon = {
+                                IconButton(onClick = {  }) {
+                                    Icon(painterResource(R.drawable.strelka), contentDescription = "Далее")
+                                }
+                            },
+                            rightIcon = {
+                                IconButton(onClick = {  }) {
+                                    Icon(painterResource(R.drawable.delete), contentDescription = "Удалить")
+                                }
+                            }
+                        )
+                    )
+                }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
+
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -97,7 +115,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     SharedTransitionLayout {
-                        Scaffold( //todo таки создать шторку
+                        Scaffold(
                             topBar = {
                                 val canNavigateBack = navController.previousBackStackEntry != null
                                 Box(
@@ -113,17 +131,21 @@ class MainActivity : ComponentActivity() {
                                     if (canNavigateBack) {
                                         IconButton(
                                             onClick = { navController.popBackStack() },
-                                            modifier = Modifier.align(Alignment.CenterStart).padding(start = 10.dp)
+                                            modifier = Modifier
+                                                .align(Alignment.CenterStart)
+                                                .padding(start = 10.dp)
                                         ) {
                                             Icon(
                                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                contentDescription = "Назад", tint = WhitePine
+                                                contentDescription = "Назад",
+                                                tint = WhitePine
                                             )
                                         }
                                     }
                                     Text(
-                                        topBarState.title, fontFamily = Montserrat,
-                                        fontSize = 20.sp, fontWeight = Bold,
+                                        topBarState.title,
+                                        fontSize = 20.sp,
+                                        fontWeight = Bold,
                                         color = WhitePine,
                                         modifier = Modifier.align(Alignment.Center)
                                     )
@@ -132,24 +154,21 @@ class MainActivity : ComponentActivity() {
                                             .fillMaxSize()
                                             .padding(horizontal = 28.dp),
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.End
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        topBarState.topBarActions.invoke(this)
+                                        topBarState.leftIcon?.invoke()
+                                        topBarState.rightIcon?.invoke()
                                     }
                                 }
-
-                            },
-                            bottomBar = {
-                                //todo
                             },
                             floatingActionButton = {
-                                ActuallyFloatingActionButton({ navController.navigate(TURBO_SCREEN) })
+                                ActuallyFloatingActionButton { navController.navigate(TURBO_SCREEN) }
                             }
                         ) { padding ->
                             Box(Modifier.fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
-                                    startDestination = TODOLIST_SCREEN,
+                                    startDestination = NEW_TASK_SCREEN,
                                     modifier = Modifier
                                         .background(PineColor)
                                         .padding(padding)
@@ -162,7 +181,6 @@ class MainActivity : ComponentActivity() {
                                     composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
                                     composable(TURBO_SCREEN) { TurboScreen(this) }
                                 }
-//                                TimeTracker(padding)
                             }
                         }
                     }
@@ -190,10 +208,7 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
             .width(86.dp)
             .clip(RoundedCornerShape(50.dp))
             .shadow(2.dp)
-            .background(
-                color = Color(0xFF33BA78),
-                shape = RoundedCornerShape(50.dp)
-            )
+            .background(Color(0xFF33BA78))
             .clickable { onClick() }
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -205,12 +220,13 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "GO!",
-            fontSize = 18.sp, fontStyle = Italic,
-            color = Color.White, fontFamily = Montserrat,
-            fontWeight = ExtraBold
+            fontSize = 18.sp,
+            fontWeight = ExtraBold,
+            color = Color.White
         )
     }
 }
+
 
 const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
 
