@@ -20,9 +20,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,73 +43,72 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.AppDatabase
-import com.dmitrysukhov.lifetracker.utils.Montserrat
-import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
 import com.dmitrysukhov.lifetracker.R
-import com.dmitrysukhov.lifetracker.utils.TodoItem
 import com.dmitrysukhov.lifetracker.utils.BgColor
-import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.utils.TodoItem
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 
 @Composable
-fun TodoListScreen(setTopBarState: (TopBarState) -> Unit, ) {
-    MyApplicationTheme {
-        val context = LocalContext.current
-        val todoDao = AppDatabase.getDatabase(context).todoDao()
-        val viewModel: TodoViewModel = viewModel(factory = TodoViewModelFactory(todoDao))
-        val todoList by viewModel.todoList.collectAsState()
-        var taskText by remember { mutableStateOf("") }
-
-        Column(
-            modifier = Modifier
-                .background(BgColor)
-                .fillMaxSize()
+fun TodoListScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHostController) {
+    val context = LocalContext.current
+    val todoDao = AppDatabase.getDatabase(context).todoDao()
+    val viewModel: TodoViewModel = viewModel(factory = TodoViewModelFactory(todoDao))
+    val todoList by viewModel.todoList.collectAsState()
+    var taskText by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        setTopBarState(TopBarState("LifeTracker",{
+            IconButton({ navController.navigate(ADD_TASK_SCREEN) }) {
+                Icon(painterResource(R.drawable.plus), contentDescription = null)
+            }
+        }))
+    }
+    Column(
+        modifier = Modifier
+            .background(BgColor)
+            .fillMaxSize()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                val style = TextStyle(fontWeight = Bold, fontFamily = Montserrat)
-                TextField(
-                    textStyle = style,
-                    value = taskText,
-                    onValueChange = { taskText = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Введите задачу", style = style) },
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            if (taskText.isNotBlank()) {
-                                viewModel.addTask(taskText)
-                                taskText = ""
-                            }
-                        }
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = {
+            val style = TextStyle(fontWeight = Bold, fontFamily = Montserrat)
+            TextField(
+                textStyle = style,
+                value = taskText,
+                onValueChange = { taskText = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Введите задачу", style = style) },
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = {
                         if (taskText.isNotBlank()) {
                             viewModel.addTask(taskText)
                             taskText = ""
                         }
                     }
-                ) { Text("Добавить", fontFamily = Montserrat) }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            LazyColumn(
-                Modifier
-                    .padding(horizontal = 24.dp)
-
-            ) {
-                items(todoList) { todoItem ->
-                    TodoListItem(
-                        item = todoItem,
-                        onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                )
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    if (taskText.isNotBlank()) {
+                        viewModel.addTask(taskText)
+                        taskText = ""
+                    }
                 }
+            ) { Text("Добавить", fontFamily = Montserrat) }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyColumn(Modifier.padding(horizontal = 24.dp)) {
+            items(todoList) { todoItem ->
+                TodoListItem(
+                    item = todoItem,
+                    onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -129,16 +131,16 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit) {
                     .clickable { onCheckedChange(!item.isDone) }
                     .size(20.dp)
             )
-            Spacer(
-                Modifier
-                    .size(2.dp, 34.dp)
-                    .padding(top = 4.dp)
-                    .background(color = PineColor)
-            )
+//            Spacer(
+//                Modifier
+//                    .size(2.dp, 34.dp)
+//                    .padding(top = 4.dp)
+//                    .background(color = PineColor)
+//            )
 
         }
         Column {
-            Row (
+            Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -163,9 +165,11 @@ val TODOLIST_SCREEN = "Todo List"
 
 @Composable
 fun ProjectTag(text: String) {
-    Box(Modifier
-        .background(Color.Gray, shape = RoundedCornerShape(52))
-        .padding(horizontal = 8.dp, vertical = 1.dp)) {
+    Box(
+        Modifier
+            .background(Color.Gray, shape = RoundedCornerShape(52))
+            .padding(horizontal = 8.dp, vertical = 1.dp)
+    ) {
         Text(
             fontFamily = Montserrat,
             text = text,

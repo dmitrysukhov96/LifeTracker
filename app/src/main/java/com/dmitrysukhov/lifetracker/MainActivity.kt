@@ -62,6 +62,8 @@ import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
+import com.dmitrysukhov.lifetracker.todo.ADD_TASK_SCREEN
+import com.dmitrysukhov.lifetracker.todo.AddTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
 import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
@@ -139,21 +141,24 @@ class MainActivity : ComponentActivity() {
                                             selectedItem = TODOLIST_SCREEN
                                             navController.navigate(TODOLIST_SCREEN)
                                         })
-                                    BottomBarItem(R.drawable.tracker,
+                                    BottomBarItem(
+                                        R.drawable.tracker,
                                         "Tracker",
                                         selectedItem == TRACKER_SCREEN,
                                         {
                                             selectedItem = TRACKER_SCREEN
                                             navController.navigate(TRACKER_SCREEN)
                                         })
-                                    BottomBarItem(R.drawable.habits,
+                                    BottomBarItem(
+                                        R.drawable.habits,
                                         "Habits",
                                         selectedItem == HABIT_SCREEN,
                                         {
                                             selectedItem = HABIT_SCREEN
                                             navController.navigate(HABIT_SCREEN)
                                         })
-                                    BottomBarItem(R.drawable.projects, "Projects",
+                                    BottomBarItem(
+                                        R.drawable.projects, "Projects",
                                         selectedItem == PROJECTS_SCREEN,
                                         {
                                             selectedItem = PROJECTS_SCREEN
@@ -164,9 +169,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             floatingActionButton = {
-                                ActuallyFloatingActionButton({
-                                    navController.navigate(TURBO_SCREEN)
-                                })
+                                ActuallyFloatingActionButton({ navController.navigate(TURBO_SCREEN) })
                             }
                         ) { padding ->
                             Box(Modifier.fillMaxSize()) {
@@ -178,8 +181,9 @@ class MainActivity : ComponentActivity() {
                                         .padding(padding)
                                         .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
                                 ) {
-                                    composable(TODOLIST_SCREEN) { TodoListScreen(setTopBarState) }
+                                    composable(TODOLIST_SCREEN) { TodoListScreen(setTopBarState, navController) }
                                     composable(TRACKER_SCREEN) { TrackerScreen() }
+                                    composable(ADD_TASK_SCREEN) { AddTaskScreen() }
                                     composable(HABIT_SCREEN) { HabitScreen() }
                                     composable(PROJECTS_SCREEN) { ProjectsScreen() }
                                     composable(TURBO_SCREEN) { TurboScreen(this) }
