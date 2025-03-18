@@ -47,9 +47,10 @@ import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.TodoItem
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.TopBarState
 
 @Composable
-fun TodoListScreen() {
+fun TodoListScreen(setTopBarState: (TopBarState) -> Unit, ) {
     MyApplicationTheme {
         val context = LocalContext.current
         val todoDao = AppDatabase.getDatabase(context).todoDao()

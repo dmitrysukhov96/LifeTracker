@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -74,6 +75,7 @@ import com.dmitrysukhov.lifetracker.utils.DarkerPine
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
 import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
 
 class MainActivity : ComponentActivity() {
@@ -83,6 +85,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
+                var topBarState by remember { mutableStateOf(TopBarState()) }
+                val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -174,7 +178,7 @@ class MainActivity : ComponentActivity() {
                                         .padding(padding)
                                         .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
                                 ) {
-                                    composable(TODOLIST_SCREEN) { TodoListScreen() }
+                                    composable(TODOLIST_SCREEN) { TodoListScreen(setTopBarState) }
                                     composable(TRACKER_SCREEN) { TrackerScreen() }
                                     composable(HABIT_SCREEN) { HabitScreen() }
                                     composable(PROJECTS_SCREEN) { ProjectsScreen() }
