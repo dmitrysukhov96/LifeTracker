@@ -60,7 +60,7 @@ fun TodoListScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHost
     var taskText by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState("LifeTracker",{
-            IconButton({ navController.navigate(ADD_TASK_SCREEN) }) {
+            IconButton({ navController.navigate(NEW_TASK_SCREEN) }) {
                 Icon(painterResource(R.drawable.plus), contentDescription = null)
             }
         }))

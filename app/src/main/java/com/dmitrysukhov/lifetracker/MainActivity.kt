@@ -62,8 +62,8 @@ import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
-import com.dmitrysukhov.lifetracker.todo.ADD_TASK_SCREEN
-import com.dmitrysukhov.lifetracker.todo.AddTaskScreen
+import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
+import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
 import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
@@ -114,7 +114,15 @@ class MainActivity : ComponentActivity() {
                                         color = WhitePine,
                                         modifier = Modifier.align(Alignment.Center)
                                     )
-                                    topBarState.topBarActions
+                                    Row(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 28.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        topBarState.topBarActions.invoke(this)
+                                    }
                                 }
 
                             },
@@ -128,7 +136,7 @@ class MainActivity : ComponentActivity() {
                             Box(Modifier.fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
-                                    startDestination = NEW_TASK_SCREEN,
+                                    startDestination = TODOLIST_SCREEN,
                                     modifier = Modifier
                                         .background(PineColor)
                                         .padding(padding)
@@ -136,10 +144,9 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     composable(TODOLIST_SCREEN) { TodoListScreen(setTopBarState, navController) }
                                     composable(TRACKER_SCREEN) { TrackerScreen() }
-                                    composable(ADD_TASK_SCREEN) { AddTaskScreen() }
                                     composable(HABIT_SCREEN) { HabitScreen() }
                                     composable(PROJECTS_SCREEN) { ProjectsScreen() }
-                                    composable(NEW_TASK_SCREEN) { NewTaskScreen() }
+                                    composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
                                     composable(TURBO_SCREEN) { TurboScreen(this) }
                                 }
 //                                TimeTracker(padding)
