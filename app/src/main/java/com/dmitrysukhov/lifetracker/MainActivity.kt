@@ -33,7 +33,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +55,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
-import androidx.compose.ui.text.font.FontWeight.Companion.SemiBold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
@@ -72,7 +74,6 @@ import com.dmitrysukhov.lifetracker.turbo.TURBO_SCREEN
 import com.dmitrysukhov.lifetracker.turbo.TurboScreen
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BlackPine
-import com.dmitrysukhov.lifetracker.utils.DarkerPine
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
 import com.dmitrysukhov.lifetracker.utils.PineColor
@@ -98,6 +99,7 @@ class MainActivity : ComponentActivity() {
                     SharedTransitionLayout {
                         Scaffold( //todo таки создать шторку
                             topBar = {
+                                val canNavigateBack = navController.previousBackStackEntry != null
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
@@ -108,6 +110,17 @@ class MainActivity : ComponentActivity() {
                                         )
                                         .height(56.dp)
                                 ) {
+                                    if (canNavigateBack) {
+                                        IconButton(
+                                            onClick = { navController.popBackStack() },
+                                            modifier = Modifier.align(Alignment.CenterStart).padding(start = 10.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = "Назад", tint = WhitePine
+                                            )
+                                        }
+                                    }
                                     Text(
                                         topBarState.title, fontFamily = Montserrat,
                                         fontSize = 20.sp, fontWeight = Bold,
@@ -127,7 +140,7 @@ class MainActivity : ComponentActivity() {
 
                             },
                             bottomBar = {
-                                //todo реклама???
+                                //todo
                             },
                             floatingActionButton = {
                                 ActuallyFloatingActionButton({ navController.navigate(TURBO_SCREEN) })
@@ -156,19 +169,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun BottomBarItem(iconRes: Int, text: String, isSelected: Boolean, onSelect: () -> Unit) {
-    val color = if (isSelected) WhitePine else DarkerPine
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier.clickable { onSelect() }
-    ) {
-        Icon(painterResource(iconRes), contentDescription = null, tint = color)
-        Text(text, fontSize = 12.sp, fontWeight = SemiBold, fontFamily = Montserrat, color = color)
     }
 }
 

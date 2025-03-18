@@ -92,4 +92,4 @@ fun PreviewNewTaskScreen() {
     NewTaskScreen {}
 }
 
-val NEW_TASK_SCREEN = "NewTaskScreen"
+const val NEW_TASK_SCREEN = "NewTaskScreen"
