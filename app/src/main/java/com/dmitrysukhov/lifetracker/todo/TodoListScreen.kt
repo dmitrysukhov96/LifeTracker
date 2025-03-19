@@ -44,9 +44,27 @@ fun TodoListScreen(
 ) {
     val todoList by viewModel.todoList.collectAsState()
     LaunchedEffect(Unit) {
-        setTopBarState(TopBarState("LifeTracker") {
+        setTopBarState(TopBarState("LifeTracker", {
             IconButton({ navController.navigate(NEW_TASK_SCREEN) }) {
                 Icon(painterResource(R.drawable.plus), contentDescription = null, tint = Color.White)
+            }
+        }, {
+            IconButton(onClick = { }) {
+                Icon(
+                    modifier = Modifier,
+                    painter = painterResource(R.drawable.delete),
+                    contentDescription = "Удалить",
+                    tint = Color.White
+                )
+            }
+        }) {
+            IconButton(onClick = { }) {
+                Icon(
+                    modifier = Modifier,
+                    painter = painterResource(R.drawable.strelka),
+                    contentDescription = "Далее",
+                    tint = Color.White // Задаем цвет иконки
+                )
             }
         })
     }

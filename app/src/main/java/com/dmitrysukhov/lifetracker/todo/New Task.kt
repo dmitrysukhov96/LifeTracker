@@ -21,23 +21,36 @@ import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 
+
 @Composable
 fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
-    var title by remember { mutableStateOf(TextFieldValue("")) }
+    var title by remember { mutableStateOf(TextFieldValue("LifeTracker")) }
     var description by remember { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState(title = "New Task") {
-                IconButton(onClick = { }) {
-                    Icon(
-                        modifier = Modifier,
-                        painter = painterResource(R.drawable.delete),
-                        contentDescription = "Удалить",
-                        tint = Color.White
-                    )
+            TopBarState(
+                title = "LifeTracker",
+                leftIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            modifier = Modifier,
+                            painter = painterResource(R.drawable.strelka),
+                            contentDescription = "Далее",
+                            tint = Color.White
+                        )
+                    }
+                },
+                rightIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            modifier = Modifier,
+                            painter = painterResource(R.drawable.delete),
+                            contentDescription = "Удалить",
+                            tint = Color.White )
+                    }
                 }
-            }
+            )
         )
     }
 
@@ -45,57 +58,31 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(BgColor)
-            .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.Start
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        BasicTextField(
+        OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            textStyle = TextStyle(fontSize = 20.sp, color = Color.Gray),
-            decorationBox = { innerTextField ->
-                if (title.text.isEmpty()) {
-                    Text("Заголовок", fontSize = 20.sp, color = PineColor, fontWeight = W700)
-                }
-                innerTextField()
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp)
+            label = { Text("Заголовок") },
+            modifier = Modifier.fillMaxWidth()
         )
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-        BasicTextField(
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            textStyle = TextStyle(fontSize = 16.sp, color = Color.Gray),
-            decorationBox = { innerTextField ->
-                if (description.text.isEmpty()) {
-                    Text("Описание", fontSize = 16.sp, color = PineColor, fontWeight = W500)
-                }
-                innerTextField()
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+            label = { Text("Описание") },
+            modifier = Modifier.fillMaxWidth()
         )
-
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+        Spacer(modifier = Modifier.height(16.dp))
 
         TaskOption("Дата/время", R.drawable.data)
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-
         TaskOption("Проект", R.drawable.proekt, showIcon = true)
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-
         TaskOption("Добавить напоминание", R.drawable.kolokol)
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-
         TaskOption("Добавить повторение", R.drawable.strelki)
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-
         TaskOption("Добавить время на задачу", R.drawable.vremya)
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
     }
 }
 
@@ -104,7 +91,7 @@ fun TaskOption(text: String, iconRes: Int, showIcon: Boolean = false) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -115,7 +102,7 @@ fun TaskOption(text: String, iconRes: Int, showIcon: Boolean = false) {
                 tint = PineColor
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text, fontSize = 16.sp, color = Color.Black)
+            Text(text, fontSize = 16.sp)
         }
         if (showIcon) {
             Icon(
@@ -134,4 +121,3 @@ fun PreviewNewTaskScreen() {
 }
 
 const val NEW_TASK_SCREEN = "NewTaskScreen"
-
