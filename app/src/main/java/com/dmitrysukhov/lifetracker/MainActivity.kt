@@ -33,8 +33,12 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -50,13 +54,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -68,62 +76,49 @@ import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
 import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
 import com.dmitrysukhov.lifetracker.todo.TodoListScreen
+import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
 import com.dmitrysukhov.lifetracker.turbo.TURBO_SCREEN
 import com.dmitrysukhov.lifetracker.turbo.TurboScreen
 import com.dmitrysukhov.lifetracker.utils.AccentColor
+import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.BlackPine
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
         setContent {
             MyApplicationTheme {
-                var topBarState by remember {
-                    mutableStateOf(
-                        TopBarState(
-                            title = "New Task",
-                            leftIcon = {
-                                IconButton(onClick = {  }) {
-                                    Icon(painterResource(R.drawable.strelka), contentDescription = "Далее")
-                                }
-                            },
-                            rightIcon = {
-                                IconButton(onClick = {  }) {
-                                    Icon(painterResource(R.drawable.delete), contentDescription = "Удалить")
-                                }
-                            }
-                        )
-                    )
-                }
+                var topBarState by remember { mutableStateOf(TopBarState("LifeTracker")) }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
-
+                var isTodo by rememberSaveable { mutableStateOf(false) }
+                val todoViewModel: TodoViewModel = hiltViewModel()
+                val navController = rememberNavController()
                 Box(
                     Modifier
                         .fillMaxSize()
                         .background(PineColor)
                 ) {
-                    val navController = rememberNavController()
                     SharedTransitionLayout {
-                        Scaffold(
+                        Scaffold( //todo таки создать шторку
                             topBar = {
+                                isTodo = navController.currentDestination?.route == TODOLIST_SCREEN
                                 val canNavigateBack = navController.previousBackStackEntry != null
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
                                         .padding(
-                                            top = WindowInsets.systemBars
-                                                .asPaddingValues()
+                                            top = WindowInsets.systemBars.asPaddingValues()
                                                 .calculateTopPadding()
                                         )
                                         .height(56.dp)
@@ -137,15 +132,13 @@ class MainActivity : ComponentActivity() {
                                         ) {
                                             Icon(
                                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                contentDescription = "Назад",
-                                                tint = WhitePine
+                                                contentDescription = "Назад", tint = WhitePine
                                             )
                                         }
                                     }
                                     Text(
-                                        topBarState.title,
-                                        fontSize = 20.sp,
-                                        fontWeight = Bold,
+                                        topBarState.title, fontFamily = Montserrat,
+                                        fontSize = 20.sp, fontWeight = Bold,
                                         color = WhitePine,
                                         modifier = Modifier.align(Alignment.Center)
                                     )
@@ -154,33 +147,79 @@ class MainActivity : ComponentActivity() {
                                             .fillMaxSize()
                                             .padding(horizontal = 28.dp),
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
+                                        horizontalArrangement = Arrangement.End
                                     ) {
-                                        topBarState.leftIcon?.invoke()
-                                        topBarState.rightIcon?.invoke()
+                                        topBarState.topBarActions.invoke(this)
                                     }
                                 }
+
                             },
-                            floatingActionButton = {
+                            bottomBar = {
+                                if (isTodo) Row(
+                                    Modifier
+                                        .background(BgColor)
+                                        .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
+                                        .background(PineColor)
+                                        .fillMaxWidth()
+                                        .height(72.dp)
+                                        .align(Alignment.BottomCenter)
+                                ) {
+                                    var taskText by rememberSaveable { mutableStateOf("") }
+                                    val style =
+                                        TextStyle(fontWeight = Bold, fontFamily = Montserrat, color = Color.White)
+                                    BasicTextField(
+                                        textStyle = style,
+                                        value = taskText, singleLine = true, cursorBrush = SolidColor(Color.White),
+                                        onValueChange = { taskText = it },
+                                        modifier = Modifier.padding(top = 16.dp, start = 24.dp).weight(1f),
+                                        decorationBox = {
+                                            it()
+                                            if (taskText.isEmpty()) Text("Введите задачу...", color = Color.White)
+                                        },
+                                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                                        keyboardActions = KeyboardActions(
+                                            onDone = {
+                                                if (taskText.isNotBlank()) {
+//                                                    todoViewModel.addTask(taskText)
+                                                    taskText = ""
+                                                }
+                                            }
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Button(
+                                        onClick = {
+                                            if (taskText.isNotBlank()) {
+                                                todoViewModel.addTask(taskText)
+                                                taskText = ""
+                                            }
+                                        }
+                                    ) { Text("Добавить", fontFamily = Montserrat) }
+
+                                }
+                            }, floatingActionButton = {
                                 ActuallyFloatingActionButton { navController.navigate(TURBO_SCREEN) }
                             }
                         ) { padding ->
                             Box(Modifier.fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
-                                    startDestination = NEW_TASK_SCREEN,
+                                    startDestination = TODOLIST_SCREEN,
                                     modifier = Modifier
                                         .background(PineColor)
                                         .padding(padding)
                                         .clip(RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp))
                                 ) {
-                                    composable(TODOLIST_SCREEN) { TodoListScreen(setTopBarState, navController) }
+                                    composable(TODOLIST_SCREEN) {
+                                        TodoListScreen(setTopBarState, navController, todoViewModel)
+                                    }
                                     composable(TRACKER_SCREEN) { TrackerScreen() }
                                     composable(HABIT_SCREEN) { HabitScreen() }
                                     composable(PROJECTS_SCREEN) { ProjectsScreen() }
                                     composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
                                     composable(TURBO_SCREEN) { TurboScreen(this) }
                                 }
+//                                TimeTracker(padding)
                             }
                         }
                     }
@@ -208,7 +247,10 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
             .width(86.dp)
             .clip(RoundedCornerShape(50.dp))
             .shadow(2.dp)
-            .background(Color(0xFF33BA78))
+            .background(
+                color = Color(0xFF33BA78),
+                shape = RoundedCornerShape(50.dp)
+            )
             .clickable { onClick() }
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -220,13 +262,12 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "GO!",
-            fontSize = 18.sp,
-            fontWeight = ExtraBold,
-            color = Color.White
+            fontSize = 18.sp, fontStyle = Italic,
+            color = Color.White, fontFamily = Montserrat,
+            fontWeight = ExtraBold
         )
     }
 }
-
 
 const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
 

@@ -28,29 +28,16 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
 
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState(
-                title = "New Task",
-                leftIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            modifier = Modifier,
-                            painter = painterResource(R.drawable.strelka),
-                            contentDescription = "Далее",
-                            tint = Color.White
-                        )
-                    }
-                },
-                rightIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            modifier = Modifier,
-                            painter = painterResource(R.drawable.delete),
-                            contentDescription = "Удалить",
-                            tint = Color.White
-                        )
-                    }
+            TopBarState(title = "New Task") {
+                IconButton(onClick = { }) {
+                    Icon(
+                        modifier = Modifier,
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = "Удалить",
+                        tint = Color.White
+                    )
                 }
-            )
+            }
         )
     }
 
@@ -73,9 +60,11 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 }
                 innerTextField()
             },
-            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
         )
-        Divider(color = Color.LightGray, thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
         BasicTextField(
             value = description,
             onValueChange = { description = it },
@@ -86,25 +75,27 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 }
                 innerTextField()
             },
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         )
 
-        Divider(color = Color.LightGray, thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
 
         TaskOption("Дата/время", R.drawable.data)
-        Divider(color = Color.LightGray, thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
 
         TaskOption("Проект", R.drawable.proekt, showIcon = true)
-        Divider(color = Color.LightGray, thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
 
         TaskOption("Добавить напоминание", R.drawable.kolokol)
-        Divider(color = Color.LightGray, thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
 
         TaskOption("Добавить повторение", R.drawable.strelki)
-        Divider(color = Color.LightGray, thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
 
         TaskOption("Добавить время на задачу", R.drawable.vremya)
-        Divider(color = Color.LightGray, thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
     }
 }
 

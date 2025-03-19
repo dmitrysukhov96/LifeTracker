@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
+        android:name="com.dmitrysukhov.lifetracker.LifeTrackerApp"
         android:allowBackup="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -8,7 +9,7 @@
 <!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
 <!--            android:value="${ADMOB_APP_ID}" />-->
         <activity
-            android:name=".MainActivity"
+            android:name="com.dmitrysukhov.lifetracker.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
