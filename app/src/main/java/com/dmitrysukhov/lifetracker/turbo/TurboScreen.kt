@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dmitrysukhov.lifetracker.FAB_EXPLODE_BOUNDS_KEY
+//import com.dmitrysukhov.lifetracker.FAB_EXPLODE_BOUNDS_KEY
 import com.dmitrysukhov.lifetracker.utils.PineColor
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -21,12 +21,12 @@ fun SharedTransitionScope.TurboScreen(
         modifier = Modifier
             .background(PineColor)
             .fillMaxSize()
-            .sharedBounds(
-                sharedContentState = rememberSharedContentState(
-                    key = FAB_EXPLODE_BOUNDS_KEY
-                ),
-                animatedVisibilityScope = animatedVisibilityScope
-            )
+//            .sharedBounds(
+//                sharedContentState = rememberSharedContentState(
+//                    key = FAB_EXPLODE_BOUNDS_KEY
+//                ),
+//                animatedVisibilityScope = animatedVisibilityScope
+//            )
     ) {
         Text("Main content")
     }
