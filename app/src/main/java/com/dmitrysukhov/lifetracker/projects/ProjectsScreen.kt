@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.Montserrat
 
 
 @Composable
@@ -26,7 +28,7 @@ fun ProjectsScreen() {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(BgColor)
             .padding(24.dp)
     ) {
         items(projects) { project ->
@@ -49,14 +51,14 @@ fun Item(title: String, progress: String, deadline: String, color: Color) {
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(color)
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
-        Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = title, fontSize = 14.sp, fontFamily = Montserrat, fontWeight = FontWeight.Medium, color = Color.White)
+        Spacer(modifier = Modifier.weight(1f))
         Row {
-            Text(text = progress, fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
+            Text(text = progress, fontSize = 12.sp, fontFamily = Montserrat, fontWeight = FontWeight.Medium,color = Color.White.copy(alpha = 0.8f))
             Spacer(modifier = Modifier.weight(1f))
-            Text(text = deadline, fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
+            Text(text = deadline, fontSize = 12.sp, fontFamily = Montserrat, fontWeight = FontWeight.Medium, color = Color.White.copy(alpha = 0.8f))
         }
     }
 }
@@ -68,7 +70,7 @@ val projects = listOf(
     Project("Работа", 0, 100, "23.02.2025", Color(0xFF757575)),
     Project("Спорт", 10, 10, "12.03.2025", Color(0xFF009688)),
     Project("Дизайн LifeTracker", 6, 13, "15.01.2025", Color(0xFF4CAF50)),
-    Project("Подготовиться к молодёжи", 2, 3, "10.01.2025", Color(0xFF795548)),
+    Project("Подготовиться к молодёжке", 2, 3, "10.01.2025", Color(0xFF795548)),
     Project("Лайф", 5, 23, "04.01.2025", Color(0xFF673AB7))
 )
 
