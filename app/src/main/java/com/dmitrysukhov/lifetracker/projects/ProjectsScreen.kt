@@ -1,6 +1,7 @@
 package com.dmitrysukhov.lifetracker.projects
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,15 +12,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.Blue
 import com.dmitrysukhov.lifetracker.utils.BlueViolet
@@ -40,33 +47,44 @@ import com.dmitrysukhov.lifetracker.utils.Red
 import com.dmitrysukhov.lifetracker.utils.RedViolet
 import com.dmitrysukhov.lifetracker.utils.SkyBlue
 import com.dmitrysukhov.lifetracker.utils.Teal
+import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.Turquoise
 import com.dmitrysukhov.lifetracker.utils.Yellow
 
 @Composable
-fun ProjectsScreen() {
+fun ProjectsScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHostController) {
+    LaunchedEffect(Unit) {
+        setTopBarState(TopBarState("Projects", {
+            IconButton({ navController.navigate(NEW_PROJECT_SCREEN) }) {
+                Icon(painterResource(R.drawable.plus), contentDescription = null, tint = Color.White)
+            }
+        }))
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(BgColor)
-            .padding(24.dp)
+            .padding(horizontal = 24.dp)
     ) {
+        item { Spacer(Modifier.height(24.dp)) }
         items(projects) { project ->
             Item(
                 title = project.title,
                 progress = "${project.completed}/${project.total} выполнено",
                 deadline = "до ${project.deadline}",
                 gradient = generateGradient(project.color)
-            )
+            ) {/*navController.navigate(PROJECTS_SCREEN)*/ }
             Spacer(modifier = Modifier.height(16.dp))
         }
+        item { Spacer(Modifier.height(64.dp)) }
     }
 }
 
 @Composable
-fun Item(title: String, progress: String, deadline: String, gradient: Brush) {
+fun Item(title: String, progress: String, deadline: String, gradient: Brush, onClick: () -> Unit) {
     Column(
         modifier = Modifier
+            .clickable { onClick() }
             .fillMaxWidth()
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))

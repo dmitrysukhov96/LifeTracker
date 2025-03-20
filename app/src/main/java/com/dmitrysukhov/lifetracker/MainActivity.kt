@@ -1,13 +1,20 @@
 package com.dmitrysukhov.lifetracker
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -17,7 +24,9 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +46,7 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,13 +56,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,6 +76,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
+import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
+import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
 import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
@@ -95,7 +110,6 @@ class MainActivity : ComponentActivity() {
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val navController = rememberNavController()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-                //todo сделать так чтоб отображало текущий элемент
                 val scope = rememberCoroutineScope()
                 val drawerMenuDestinations = listOf(
                     Destination("Список дел", TODOLIST_SCREEN, painterResource(R.drawable.spisok)),
@@ -105,9 +119,7 @@ class MainActivity : ComponentActivity() {
                 )
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination?.route ?: ""
-
-                val canNavigateBack = navController.previousBackStackEntry != null
-                val isTodo = currentDestination == TODOLIST_SCREEN
+                val isTodo = currentDestination == TODOLIST_SCREEN  //todo nav back
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
@@ -135,7 +147,6 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(destination.route)
                                     }
                                 )
-                                Log.e("dimaaaa", navController.currentDestination?.route.toString())
                             }
                         }
                     },
@@ -147,6 +158,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             SharedTransitionLayout {
                                 Scaffold(
+                                    floatingActionButton = { ActuallyFloatingActionButton {  } },
                                     topBar = {
                                         Box(
                                             Modifier
@@ -198,8 +210,7 @@ class MainActivity : ComponentActivity() {
                                                 .background(BgColor)
                                                 .clip(
                                                     RoundedCornerShape(
-                                                        topStart = 36.dp,
-                                                        topEnd = 36.dp
+                                                        topStart = 36.dp, topEnd = 36.dp
                                                     )
                                                 )
                                                 .background(PineColor)
@@ -208,22 +219,18 @@ class MainActivity : ComponentActivity() {
                                                 .align(Alignment.BottomCenter)
                                         ) {
                                             var taskText by rememberSaveable { mutableStateOf("") }
-                                            val style =
-                                                TextStyle(
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontFamily = Montserrat,
-                                                    color = Color.White
-                                                )
+                                            val style = TextStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                fontFamily = Montserrat, color = Color.White
+                                            )
                                             BasicTextField(
-                                                textStyle = style,
-                                                value = taskText,
+                                                textStyle = style, value = taskText,
                                                 singleLine = true,
                                                 cursorBrush = SolidColor(Color.White),
                                                 onValueChange = { taskText = it },
                                                 modifier = Modifier
                                                     .padding(top = 16.dp, start = 24.dp)
-                                                    .weight(1f),
-                                                decorationBox = {
+                                                    .weight(1f), decorationBox = {
                                                     it()
                                                     if (taskText.isEmpty())
                                                         Text(
@@ -233,13 +240,9 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 keyboardOptions = KeyboardOptions.Default.copy(
                                                     imeAction = ImeAction.Done
-                                                ),
-                                                keyboardActions = KeyboardActions(
-                                                    onDone = {
-                                                        if (taskText.isNotBlank()) {
-                                                            taskText = ""
-                                                        }
-                                                    }
+                                                ), keyboardActions = KeyboardActions(onDone = {
+                                                    if (taskText.isNotBlank()) taskText = ""
+                                                }
                                                 )
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
@@ -257,14 +260,12 @@ class MainActivity : ComponentActivity() {
                                     Box(Modifier.fillMaxSize()) {
                                         NavHost(
                                             navController = navController,
-                                            startDestination = TODOLIST_SCREEN,
-                                            modifier = Modifier
+                                            startDestination = TODOLIST_SCREEN, modifier = Modifier
                                                 .background(PineColor)
                                                 .padding(padding)
                                                 .clip(
                                                     RoundedCornerShape(
-                                                        topStart = 36.dp,
-                                                        topEnd = 36.dp
+                                                        topStart = 36.dp, topEnd = 36.dp
                                                     )
                                                 )
                                         ) {
@@ -273,11 +274,18 @@ class MainActivity : ComponentActivity() {
                                                     setTopBarState, navController, todoViewModel
                                                 )
                                             }
-                                            composable(TRACKER_SCREEN) { TrackerScreen() }
-                                            composable(HABIT_SCREEN) { HabitScreen() }
-                                            composable(PROJECTS_SCREEN) { ProjectsScreen() }
+                                            composable(TRACKER_SCREEN) {
+                                                TrackerScreen(setTopBarState)
+                                            }
+                                            composable(HABIT_SCREEN) { HabitScreen(setTopBarState) }
+                                            composable(PROJECTS_SCREEN) {
+                                                ProjectsScreen(setTopBarState, navController)
+                                            }
                                             composable(NEW_TASK_SCREEN) {
                                                 NewTaskScreen(setTopBarState)
+                                            }
+                                            composable(NEW_PROJECT_SCREEN) {
+                                                NewProjectScreen(setTopBarState)
                                             }
                                         }
                                     }
@@ -293,47 +301,40 @@ class MainActivity : ComponentActivity() {
 
 data class Destination(val title: String, val route: String, val icon: Painter)
 
+@Composable
+fun ActuallyFloatingActionButton(onClick: () -> Unit) {
+    val transition = rememberInfiniteTransition(label = "")
+    val offsetY by transition.animateFloat(
+        initialValue = 0f, targetValue = 5f, animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1300, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+    Row(
+        modifier = Modifier
+            .offset(y = offsetY.dp)
+            .height(56.dp)
+            .width(86.dp)
+            .clip(RoundedCornerShape(50.dp))
+            .shadow(2.dp)
+            .background(color = Color(0xFF33BA78), shape = RoundedCornerShape(50.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(R.drawable.lightning),
+            contentDescription = null, modifier = Modifier.size(16.dp, 22.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "GO!",
+            fontSize = 18.sp, fontStyle = Italic,
+            color = Color.White, fontFamily = Montserrat,
+            fontWeight = ExtraBold
+        )
+    }
+}
 
-//@Composable
-//fun ActuallyFloatingActionButton(onClick: () -> Unit) {
-//    val transition = rememberInfiniteTransition(label = "")
-//    val offsetY by transition.animateFloat(
-//        initialValue = 0f, targetValue = 5f,
-//        animationSpec = infiniteRepeatable(
-//            animation = tween(durationMillis = 1300, easing = LinearEasing),
-//            repeatMode = RepeatMode.Reverse
-//        ), label = ""
-//    )
-//
-//    Row(
-//        modifier = Modifier
-//            .offset(y = offsetY.dp)
-//            .height(56.dp)
-//            .width(86.dp)
-//            .clip(RoundedCornerShape(50.dp))
-//            .shadow(2.dp)
-//            .background(
-//                color = Color(0xFF33BA78),
-//                shape = RoundedCornerShape(50.dp)
-//            )
-//            .clickable { onClick() }
-//            .padding(horizontal = 12.dp),
-//        verticalAlignment = Alignment.CenterVertically
-//    ) {
-//        Image(
-//            painter = painterResource(R.drawable.lightning),
-//            contentDescription = null, modifier = Modifier.size(16.dp, 22.dp)
-//        )
-//        Spacer(modifier = Modifier.width(8.dp))
-//        Text(
-//            text = "GO!",
-//            fontSize = 18.sp, fontStyle = Italic,
-//            color = Color.White, fontFamily = Montserrat,
-//            fontWeight = ExtraBold
-//        )
-//    }
-//}
-//
 //const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
 
 //@Composable
