@@ -31,7 +31,6 @@ import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 
-
 @Composable
 fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
     var title by remember { mutableStateOf(TextFieldValue("")) }
@@ -46,6 +45,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     //todo при нажатии на галочку - сохраняется в базу задача, и выходим из этого экрана в предыдущий
                     //как сохранить задачу можешь посмотреть на Туду скрине где "Введите задачу" и кнопка добавить
                     //как выйти назад ты можешь увидеть в кофеШопе при добавлении в корзину
+
 //                    IconButton(onClick = { }) {
 //                        Icon(
 //                            modifier = Modifier,
@@ -70,6 +70,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
         OutlinedTextField( //todo тут надо сделать через BasicTextField и в decorationBox написать типа
             //todo it()
             // if (title == null || title == "") Text( "Заголовок" )
+            // todo это можно увидеть в МейнАктивити, поищи decorationBox
             //todo также добавить шрифт Монсератт и его цвет, размер, толщину
             value = title,
             onValueChange = { title = it },
