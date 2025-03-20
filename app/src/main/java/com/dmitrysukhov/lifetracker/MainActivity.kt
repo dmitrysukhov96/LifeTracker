@@ -204,7 +204,7 @@ class MainActivity : ComponentActivity() {
                             Box(Modifier.fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
-                                    startDestination = NEW_TASK_SCREEN,
+                                    startDestination = TODOLIST_SCREEN,
                                     modifier = Modifier
                                         .background(PineColor)
                                         .padding(padding)

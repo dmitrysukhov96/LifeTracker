@@ -1,21 +1,31 @@
 package com.dmitrysukhov.lifetracker.todo
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight.Companion.W500
-import androidx.compose.ui.text.font.FontWeight.Companion.W700
-import androidx.compose.ui.tooling.preview.Preview
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
@@ -24,31 +34,25 @@ import com.dmitrysukhov.lifetracker.utils.TopBarState
 
 @Composable
 fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
-    var title by remember { mutableStateOf(TextFieldValue("LifeTracker")) }
+    var title by remember { mutableStateOf(TextFieldValue("")) }
     var description by remember { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState(
                 title = "LifeTracker",
-                leftIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            modifier = Modifier,
-                            painter = painterResource(R.drawable.strelka),
-                            contentDescription = "Далее",
-                            tint = Color.White
-                        )
-                    }
-                },
-                rightIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            modifier = Modifier,
-                            painter = painterResource(R.drawable.delete),
-                            contentDescription = "Удалить",
-                            tint = Color.White )
-                    }
+                topBarActions = {
+                    //todo мусорку пока я спрятал, добавь лучше галочку если !title.isNullOrEmpty()
+                    //todo при нажатии на галочку - сохраняется в базу задача, и выходим из этого экрана в предыдущий
+                    //как сохранить задачу можешь посмотреть на Туду скрине где "Введите задачу" и кнопка добавить
+                    //как выйти назад ты можешь увидеть в кофеШопе при добавлении в корзину
+//                    IconButton(onClick = { }) {
+//                        Icon(
+//                            modifier = Modifier,
+//                            painter = painterResource(R.drawable.delete),
+//                            contentDescription = "Удалить",
+//                            tint = Color.White )
+//                    }
                 }
             )
         )
@@ -63,14 +67,17 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
+        OutlinedTextField( //todo тут надо сделать через BasicTextField и в decorationBox написать типа
+            //todo it()
+            // if (title == null || title == "") Text( "Заголовок" )
+            //todo также добавить шрифт Монсератт и его цвет, размер, толщину
             value = title,
             onValueChange = { title = it },
             label = { Text("Заголовок") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
+        OutlinedTextField( //todo тут то же самое
             value = description,
             onValueChange = { description = it },
             label = { Text("Описание") },
@@ -78,8 +85,8 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        TaskOption("Дата/время", R.drawable.data)
-        TaskOption("Проект", R.drawable.proekt, showIcon = true)
+        TaskOption("Дата/время", R.drawable.data) //todo при клике должен появляться пикер. сделаем потом
+        TaskOption("Проект", R.drawable.proekt, showIcon = true) //todo тоже пока что рано
         TaskOption("Добавить напоминание", R.drawable.kolokol)
         TaskOption("Добавить повторение", R.drawable.strelki)
         TaskOption("Добавить время на задачу", R.drawable.vremya)
