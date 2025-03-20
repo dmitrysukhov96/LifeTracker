@@ -135,7 +135,7 @@ class MainActivity : ComponentActivity() {
                             drawerMenuDestinations.forEach { destination ->
                                 NavigationDrawerItem(
                                     label = { Text(destination.title, fontFamily = Montserrat, fontWeight = FontWeight.Medium,) },
-                                    icon = { Icon(destination.icon, destination.title) },
+                                    icon = { Icon(destination.icon, destination.title, modifier = Modifier.size(20.dp)) },
                                     colors = NavigationDrawerItemDefaults.colors(
                                         selectedTextColor = PineColor,
                                         selectedContainerColor = PineColor.copy(0.1f),
@@ -147,6 +147,7 @@ class MainActivity : ComponentActivity() {
                                     onClick = {
                                         scope.launch { drawerState.close() }
                                         navController.navigate(destination.route)
+                                    //todo убрать возможность навигироваться назад
                                     }
                                 )
                             }
