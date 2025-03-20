@@ -34,6 +34,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
@@ -109,23 +110,23 @@ class MainActivity : ComponentActivity() {
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val navController = rememberNavController()
-                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 val scope = rememberCoroutineScope()
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination?.route ?: ""
                 val drawerMenuDestinations = listOf(
                     Destination("Список дел", TODOLIST_SCREEN, painterResource(R.drawable.spisok)),
                     Destination("Трекер", TRACKER_SCREEN, painterResource(R.drawable.tracker)),
                     Destination("Привычки", HABIT_SCREEN, painterResource(R.drawable.habits)),
                     Destination("Проекты", PROJECTS_SCREEN, painterResource(R.drawable.projects))
                 )
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination?.route ?: ""
-                val isTodo = currentDestination == TODOLIST_SCREEN  //todo nav back
+                val isRootScreen = drawerMenuDestinations.any { it.route == currentDestination }
+                val isTodo = currentDestination == TODOLIST_SCREEN
                 ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
+                    drawerState = drawerState, gesturesEnabled = isRootScreen, drawerContent = {
                         ModalDrawerSheet(drawerContainerColor = BgColor) {
                             Text(
-                                text = "LifeTracker",
+                                text = "LifeTracker", fontFamily = Montserrat,
                                 fontSize = 20.sp, color = InverseColor,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(16.dp)
@@ -133,14 +134,15 @@ class MainActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.height(16.dp))
                             drawerMenuDestinations.forEach { destination ->
                                 NavigationDrawerItem(
-                                    label = { Text(destination.title) },
+                                    label = { Text(destination.title, fontFamily = Montserrat, fontWeight = FontWeight.Medium,) },
+                                    icon = { Icon(destination.icon, destination.title) },
                                     colors = NavigationDrawerItemDefaults.colors(
                                         selectedTextColor = PineColor,
                                         selectedContainerColor = PineColor.copy(0.1f),
                                         unselectedTextColor = InverseColor,
-                                        selectedIconColor = Color.Red,
-                                        selectedBadgeColor = Color.Red
-                                    ), shape = RectangleShape,
+                                        selectedIconColor = PineColor
+                                    ),
+                                    shape = RectangleShape,
                                     selected = currentDestination == destination.route,
                                     onClick = {
                                         scope.launch { drawerState.close() }
@@ -158,7 +160,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             SharedTransitionLayout {
                                 Scaffold(
-                                    floatingActionButton = { ActuallyFloatingActionButton {  } },
+                                    floatingActionButton = { ActuallyFloatingActionButton { } },
                                     topBar = {
                                         Box(
                                             Modifier
@@ -169,22 +171,29 @@ class MainActivity : ComponentActivity() {
                                                 )
                                                 .height(56.dp)
                                         ) {
-                                            IconButton(
-                                                onClick = {
-                                                    scope.launch {
-                                                        if (drawerState.isClosed) drawerState.open() else drawerState.close()
-                                                    }
-                                                },
-                                                modifier = Modifier.padding(start = 10.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Menu,
-                                                    contentDescription = "Меню",
-                                                    tint = WhitePine
-                                                )
+                                            if (isRootScreen) {
+                                                IconButton(
+                                                    onClick = { scope.launch { drawerState.open() } },
+                                                    modifier = Modifier.padding(start = 10.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Menu,
+                                                        contentDescription = "Меню",
+                                                        tint = WhitePine
+                                                    )
+                                                }
+                                            } else {
+                                                IconButton(
+                                                    onClick = { navController.popBackStack() },
+                                                    modifier = Modifier.padding(start = 10.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                        contentDescription = "Назад",
+                                                        tint = WhitePine
+                                                    )
+                                                }
                                             }
-
-
                                             Text(
                                                 topBarState.title,
                                                 fontFamily = Montserrat,
@@ -242,8 +251,7 @@ class MainActivity : ComponentActivity() {
                                                     imeAction = ImeAction.Done
                                                 ), keyboardActions = KeyboardActions(onDone = {
                                                     if (taskText.isNotBlank()) taskText = ""
-                                                }
-                                                )
+                                                })
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Button(
@@ -260,7 +268,8 @@ class MainActivity : ComponentActivity() {
                                     Box(Modifier.fillMaxSize()) {
                                         NavHost(
                                             navController = navController,
-                                            startDestination = TODOLIST_SCREEN, modifier = Modifier
+                                            startDestination = TODOLIST_SCREEN,
+                                            modifier = Modifier
                                                 .background(PineColor)
                                                 .padding(padding)
                                                 .clip(
@@ -271,7 +280,9 @@ class MainActivity : ComponentActivity() {
                                         ) {
                                             composable(TODOLIST_SCREEN) {
                                                 TodoListScreen(
-                                                    setTopBarState, navController, todoViewModel
+                                                    setTopBarState,
+                                                    navController,
+                                                    todoViewModel
                                                 )
                                             }
                                             composable(TRACKER_SCREEN) {
