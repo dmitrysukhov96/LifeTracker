@@ -3,6 +3,7 @@ package com.dmitrysukhov.lifetracker
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
+import com.dmitrysukhov.lifetracker.todo.TodoDao
 import com.dmitrysukhov.lifetracker.utils.Event
 import com.dmitrysukhov.lifetracker.utils.Project
 import com.dmitrysukhov.lifetracker.utils.TodoItem

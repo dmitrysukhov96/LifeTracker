@@ -2,7 +2,6 @@ package com.dmitrysukhov.lifetracker.todo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitrysukhov.lifetracker.TodoDao
 import com.dmitrysukhov.lifetracker.utils.TodoItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +28,23 @@ class TodoViewModel @Inject constructor(
     }
 
     fun addTask(text: String) {
-        val newTask = TodoItem(text = text, isDone = false)
+        val newTask = TodoItem(
+            text = text,
+            description = listOf(
+                "Проверить почту",
+                "Позвонить клиенту",
+                "Прочитать статью",
+                "Почистить входящие",
+                "Повторить материал"
+            ).random(),
+            projectId = listOf(1L, 2L, 3L, null).random(), // пример: случайный проект или без проекта
+            dateTime = System.currentTimeMillis() + (1..7).random() * 24 * 60 * 60 * 1000L, // через 1–7 дней
+            reminderTime = System.currentTimeMillis() + (1..6).random() * 60 * 60 * 1000L, // через 1–6 часов
+            repeatInterval = listOf("daily", "weekly", null).random(),
+            durationMinutes = listOf(15, 30, 60, 90, 120).random(),
+            isDone = false
+        )
+
         viewModelScope.launch {
             todoDao.insertTask(newTask)
             loadTasks()

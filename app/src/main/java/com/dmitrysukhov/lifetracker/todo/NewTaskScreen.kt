@@ -88,8 +88,8 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
 
         TaskOption("Дата/время", R.drawable.data) //todo при клике должен появляться пикер. сделаем потом
         TaskOption("Проект", R.drawable.proekt, showIcon = true) //todo тоже пока что рано
-        TaskOption("Добавить напоминание", R.drawable.kolokol)
-        TaskOption("Добавить повторение", R.drawable.strelki)
+        TaskOption("Добавить напоминание", R.drawable.bell)
+        TaskOption("Добавить повторение", R.drawable.repeat)
         TaskOption("Добавить время на задачу", R.drawable.vremya)
     }
 }

@@ -151,8 +151,10 @@ class MainActivity : ComponentActivity() {
                                     selected = currentDestination == destination.route,
                                     onClick = {
                                         scope.launch { drawerState.close() }
-                                        navController.navigate(destination.route)
-                                        //todo убрать возможность навигироваться назад
+                                        navController.navigate(destination.route) {
+                                            popUpTo(0) { inclusive = true }
+                                            launchSingleTop = true
+                                        }
                                     }
                                 )
                             }

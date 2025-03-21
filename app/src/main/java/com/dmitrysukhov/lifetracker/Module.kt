@@ -3,6 +3,7 @@ package com.dmitrysukhov.lifetracker
 import android.content.Context
 import androidx.room.Room
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
+import com.dmitrysukhov.lifetracker.todo.TodoDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

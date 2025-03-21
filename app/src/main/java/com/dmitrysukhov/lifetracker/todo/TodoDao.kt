@@ -1,4 +1,4 @@
-package com.dmitrysukhov.lifetracker
+package com.dmitrysukhov.lifetracker.todo
 
 import androidx.room.Dao
 import androidx.room.Delete
