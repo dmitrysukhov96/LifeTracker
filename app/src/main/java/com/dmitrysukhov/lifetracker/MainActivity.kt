@@ -4,8 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -100,7 +98,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -108,7 +105,7 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
                 var topBarState by remember { mutableStateOf(TopBarState("LifeTracker")) }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
-                val todoViewModel: TodoViewModel = hiltViewModel()
+                val viewModel: TodoViewModel = hiltViewModel()
                 val navController = rememberNavController()
                 val scope = rememberCoroutineScope()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -134,20 +131,28 @@ class MainActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.height(16.dp))
                             drawerMenuDestinations.forEach { destination ->
                                 NavigationDrawerItem(
-                                    label = { Text(destination.title, fontFamily = Montserrat, fontWeight = FontWeight.Medium,) },
-                                    icon = { Icon(destination.icon, destination.title, modifier = Modifier.size(20.dp)) },
-                                    colors = NavigationDrawerItemDefaults.colors(
+                                    label = {
+                                        Text(
+                                            destination.title, fontFamily = Montserrat,
+                                            fontWeight = FontWeight.Medium,
+                                        )
+                                    },
+                                    icon = {
+                                        Icon(
+                                            destination.icon, destination.title,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }, colors = NavigationDrawerItemDefaults.colors(
                                         selectedTextColor = PineColor,
                                         selectedContainerColor = PineColor.copy(0.1f),
                                         unselectedTextColor = InverseColor,
                                         selectedIconColor = PineColor
-                                    ),
-                                    shape = RectangleShape,
+                                    ), shape = RectangleShape,
                                     selected = currentDestination == destination.route,
                                     onClick = {
                                         scope.launch { drawerState.close() }
                                         navController.navigate(destination.route)
-                                    //todo убрать возможность навигироваться назад
+                                        //todo убрать возможность навигироваться назад
                                     }
                                 )
                             }
@@ -159,151 +164,129 @@ class MainActivity : ComponentActivity() {
                                 .fillMaxSize()
                                 .background(PineColor)
                         ) {
-                            SharedTransitionLayout {
-                                Scaffold(
-                                    floatingActionButton = { ActuallyFloatingActionButton { } },
-                                    topBar = {
-                                        Box(
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(
-                                                    top = WindowInsets.systemBars.asPaddingValues()
-                                                        .calculateTopPadding()
-                                                )
-                                                .height(56.dp)
-                                        ) {
-                                            if (isRootScreen) {
-                                                IconButton(
-                                                    onClick = { scope.launch { drawerState.open() } },
-                                                    modifier = Modifier.padding(start = 10.dp)
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Menu,
-                                                        contentDescription = "Меню",
-                                                        tint = WhitePine
-                                                    )
-                                                }
-                                            } else {
-                                                IconButton(
-                                                    onClick = { navController.popBackStack() },
-                                                    modifier = Modifier.padding(start = 10.dp)
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                        contentDescription = "Назад",
-                                                        tint = WhitePine
-                                                    )
-                                                }
-                                            }
-                                            Text(
-                                                topBarState.title,
-                                                fontFamily = Montserrat,
-                                                fontSize = 20.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = WhitePine,
-                                                modifier = Modifier.align(Alignment.Center)
+//                            SharedTransitionLayout {
+                            Scaffold(
+                                floatingActionButton = { ActuallyFloatingActionButton { } },
+                                topBar = {
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                top = WindowInsets.systemBars.asPaddingValues()
+                                                    .calculateTopPadding()
                                             )
-                                            Row(
-                                                Modifier
-                                                    .fillMaxSize()
-                                                    .padding(horizontal = 28.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.End
+                                            .height(56.dp)
+                                    ) {
+                                        if (isRootScreen) {
+                                            IconButton(
+                                                onClick = { scope.launch { drawerState.open() } },
+                                                modifier = Modifier.padding(start = 10.dp)
                                             ) {
-                                                topBarState.topBarActions.invoke(this)
+                                                Icon(
+                                                    imageVector = Icons.Default.Menu,
+                                                    contentDescription = "Меню", tint = WhitePine
+                                                )
+                                            }
+                                        } else {
+                                            IconButton(
+                                                onClick = { navController.popBackStack() },
+                                                modifier = Modifier.padding(start = 10.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                    contentDescription = "Назад", tint = WhitePine
+                                                )
                                             }
                                         }
-                                    },
-                                    bottomBar = {
-                                        if (isTodo) Row(
+                                        Text(
+                                            topBarState.title, fontFamily = Montserrat,
+                                            fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                                            color = WhitePine,
+                                            modifier = Modifier.align(Alignment.Center)
+                                        )
+                                        Row(
                                             Modifier
-                                                .background(BgColor)
-                                                .clip(
-                                                    RoundedCornerShape(
-                                                        topStart = 36.dp, topEnd = 36.dp
-                                                    )
-                                                )
-                                                .background(PineColor)
-                                                .fillMaxWidth()
-                                                .height(72.dp)
-                                                .align(Alignment.BottomCenter)
-                                        ) {
-                                            var taskText by rememberSaveable { mutableStateOf("") }
-                                            val style = TextStyle(
-                                                fontWeight = FontWeight.Bold,
-                                                fontFamily = Montserrat, color = Color.White
-                                            )
-                                            BasicTextField(
-                                                textStyle = style, value = taskText,
-                                                singleLine = true,
-                                                cursorBrush = SolidColor(Color.White),
-                                                onValueChange = { taskText = it },
-                                                modifier = Modifier
-                                                    .padding(top = 16.dp, start = 24.dp)
-                                                    .weight(1f), decorationBox = {
-                                                    it()
-                                                    if (taskText.isEmpty())
-                                                        Text(
-                                                            "Введите задачу...",
-                                                            color = Color.White
-                                                        )
-                                                },
-                                                keyboardOptions = KeyboardOptions.Default.copy(
-                                                    imeAction = ImeAction.Done
-                                                ), keyboardActions = KeyboardActions(onDone = {
-                                                    if (taskText.isNotBlank()) taskText = ""
-                                                })
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Button(
-                                                onClick = {
-                                                    if (taskText.isNotBlank()) {
-                                                        todoViewModel.addTask(taskText)
-                                                        taskText = ""
-                                                    }
-                                                }
-                                            ) { Text("Добавить", fontFamily = Montserrat) }
-                                        }
+                                                .fillMaxSize()
+                                                .padding(horizontal = 28.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.End
+                                        ) { topBarState.topBarActions.invoke(this) }
                                     }
-                                ) { padding ->
-                                    Box(Modifier.fillMaxSize()) {
-                                        NavHost(
-                                            navController = navController,
-                                            startDestination = TODOLIST_SCREEN,
+                                }, bottomBar = {
+                                    if (isTodo) Row(
+                                        Modifier
+                                            .background(BgColor)
+                                            .clip(
+                                                RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)
+                                            )
+                                            .background(PineColor)
+                                            .fillMaxWidth()
+                                            .height(72.dp)
+                                            .align(Alignment.BottomCenter)
+                                    ) {
+                                        var taskText by rememberSaveable { mutableStateOf("") }
+                                        val style = TextStyle(
+                                            fontWeight = FontWeight.Bold,
+                                            fontFamily = Montserrat, color = Color.White
+                                        )
+                                        BasicTextField(
+                                            textStyle = style, value = taskText, singleLine = true,
+                                            cursorBrush = SolidColor(Color.White),
+                                            onValueChange = { taskText = it },
                                             modifier = Modifier
-                                                .background(PineColor)
-                                                .padding(padding)
-                                                .clip(
-                                                    RoundedCornerShape(
-                                                        topStart = 36.dp, topEnd = 36.dp
-                                                    )
+                                                .padding(top = 16.dp, start = 24.dp)
+                                                .weight(1f), decorationBox = {
+                                                it()
+                                                if (taskText.isEmpty()) Text(
+                                                    "Введите задачу...", color = Color.White
                                                 )
-                                        ) {
-                                            composable(TODOLIST_SCREEN) {
-                                                TodoListScreen(
-                                                    setTopBarState,
-                                                    navController,
-                                                    todoViewModel
-                                                )
+                                            }, keyboardOptions = KeyboardOptions.Default.copy(
+                                                imeAction = ImeAction.Done
+                                            ), keyboardActions = KeyboardActions(onDone = {
+                                                if (taskText.isNotBlank()) taskText = ""
+                                            })
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Button(
+                                            onClick = {
+                                                if (taskText.isNotBlank()) {
+                                                    viewModel.addTask(taskText)
+                                                    taskText = ""
+                                                }
                                             }
-                                            composable(TRACKER_SCREEN) {
-                                                TrackerScreen(setTopBarState)
-                                            }
-                                            composable(HABIT_SCREEN) { HabitScreen(setTopBarState) }
-                                            composable(PROJECTS_SCREEN) {
-                                                ProjectsScreen(setTopBarState, navController)
-                                            }
-                                            composable(NEW_TASK_SCREEN) {
-                                                NewTaskScreen(setTopBarState)
-                                            }
-                                            composable(NEW_PROJECT_SCREEN) {
-                                                NewProjectScreen(setTopBarState)
-                                            }
+                                        ) { Text("Добавить", fontFamily = Montserrat) }
+                                    }
+                                }
+                            ) { padding ->
+                                Box(Modifier.fillMaxSize()) {
+                                    NavHost(
+                                        navController = navController,
+                                        startDestination = TODOLIST_SCREEN, modifier = Modifier
+                                            .background(PineColor)
+                                            .padding(padding)
+                                            .clip(
+                                                RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)
+                                            )
+                                    ) {
+                                        composable(TODOLIST_SCREEN) {
+                                            TodoListScreen(
+                                                setTopBarState, navController, viewModel
+                                            )
+                                        }
+                                        composable(TRACKER_SCREEN) { TrackerScreen(setTopBarState) }
+                                        composable(HABIT_SCREEN) { HabitScreen(setTopBarState) }
+                                        composable(PROJECTS_SCREEN) {
+                                            ProjectsScreen(setTopBarState, navController)
+                                        }
+                                        composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
+                                        composable(NEW_PROJECT_SCREEN) {
+                                            NewProjectScreen(setTopBarState)
                                         }
                                     }
                                 }
                             }
                         }
+//                        }
                     }
                 )
             }

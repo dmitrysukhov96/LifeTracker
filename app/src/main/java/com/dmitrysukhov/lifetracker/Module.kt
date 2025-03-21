@@ -2,6 +2,7 @@ package com.dmitrysukhov.lifetracker
 
 import android.content.Context
 import androidx.room.Room
+import com.dmitrysukhov.lifetracker.projects.ProjectDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,5 +27,10 @@ object AppModule {
     @Provides
     fun provideTodoDao(database: AppDatabase): TodoDao {
         return database.todoDao()
+    }
+
+    @Provides
+    fun provideProjectDao(database: AppDatabase): ProjectDao {
+        return database.projectsDao()
     }
 }
