@@ -1,5 +1,7 @@
 package com.dmitrysukhov.lifetracker
 
+import NEW_TASK_SCREEN
+import NewTaskScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -79,8 +81,6 @@ import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
-import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
-import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
 import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
