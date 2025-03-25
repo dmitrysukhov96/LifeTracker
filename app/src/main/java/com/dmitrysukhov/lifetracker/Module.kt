@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
 import com.dmitrysukhov.lifetracker.todo.TodoDao
+import com.dmitrysukhov.lifetracker.tracker.EventDao
+import com.dmitrysukhov.lifetracker.tracker.EventRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,5 +35,17 @@ object AppModule {
     @Provides
     fun provideProjectDao(database: AppDatabase): ProjectDao {
         return database.projectsDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEventDao(database: AppDatabase): EventDao {
+        return database.eventDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEventRepository(eventDao: EventDao): EventRepository {
+        return EventRepository(eventDao)
     }
 }

@@ -3,7 +3,7 @@ package com.dmitrysukhov.lifetracker.projects
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitrysukhov.lifetracker.utils.Project
+import com.dmitrysukhov.lifetracker.Project
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch

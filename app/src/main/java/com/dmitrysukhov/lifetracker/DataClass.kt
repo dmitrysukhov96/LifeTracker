@@ -1,4 +1,4 @@
-package com.dmitrysukhov.lifetracker.utils
+package com.dmitrysukhov.lifetracker
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -18,8 +18,7 @@ data class TodoItem(
 
 @Entity(tableName = "projects")
 data class Project(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) val projectId: Long = 0L,
     val title: String,
     val description: String,
     val color: Int,
@@ -32,9 +31,8 @@ data class Project(
 
 @Entity(tableName = "events")
 data class Event(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val eventId: Long = 0,
+    val projectId: Long,
     val startTime: Long,
-    val categoryId: Long,
-    val name: String,
-    val duration: Long? = null
+    val endTime: Long?
 )

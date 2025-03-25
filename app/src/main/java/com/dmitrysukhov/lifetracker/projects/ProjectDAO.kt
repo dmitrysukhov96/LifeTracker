@@ -3,7 +3,7 @@ package com.dmitrysukhov.lifetracker.projects
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.dmitrysukhov.lifetracker.utils.Project
+import com.dmitrysukhov.lifetracker.Project
 import kotlinx.coroutines.flow.Flow
 
 @Dao

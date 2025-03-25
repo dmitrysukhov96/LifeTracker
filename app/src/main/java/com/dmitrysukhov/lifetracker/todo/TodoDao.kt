@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.dmitrysukhov.lifetracker.utils.TodoItem
+import com.dmitrysukhov.lifetracker.TodoItem
 
 @Dao
 interface TodoDao {

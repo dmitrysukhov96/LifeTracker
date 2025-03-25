@@ -33,10 +33,12 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.random.Random
 
 @Composable
 fun ProjectsScreen(
@@ -49,11 +51,16 @@ fun ProjectsScreen(
     LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState("Projects", {
-                IconButton(onClick = { navController.navigate(NEW_PROJECT_SCREEN) }) {
+                IconButton(onClick = { viewModel.addProject(getRandomProject()) }) {
                     Icon(
                         painter = painterResource(R.drawable.plus),
-                        contentDescription = null,
-                        tint = Color.White
+                        contentDescription = null, tint = Color.White
+                    )
+                }
+                IconButton(onClick = { navController.navigate(NEW_PROJECT_SCREEN) }) {
+                    Icon(
+                        painter = painterResource(R.drawable.lightning),
+                        contentDescription = null
                     )
                 }
             })
@@ -90,13 +97,31 @@ fun ProjectsScreen(
     }
 }
 
+fun getRandomProject(): Project {
+    val random = Random(System.currentTimeMillis())
+    val title = "Проект ${('A'..'Z').random()}"
+    val color = generateRandomColor()
+    val newProject = Project(
+        title = title, color = color,
+        deadlineMillis = System.currentTimeMillis() + random.nextLong(1_000_000_000L),
+        completedTasks = random.nextInt(0, 5),
+        totalTasks = random.nextInt(5, 10),
+        description = "lalali lalala"
+    )
+    return newProject
+}
+
+fun generateRandomColor(): Int {
+    val hue = Random.nextFloat() * 360f
+    val saturation = 0.7f + Random.nextFloat() * 0.3f
+    val value = 0.7f + Random.nextFloat() * 0.3f
+    val hsv = floatArrayOf(hue, saturation, value)
+    return android.graphics.Color.HSVToColor(hsv)
+}
+
 @Composable
 fun Item(
-    title: String,
-    progress: String,
-    deadline: String,
-    gradient: Brush,
-    onClick: () -> Unit
+    title: String, progress: String, deadline: String, gradient: Brush, onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
