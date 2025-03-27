@@ -1,13 +1,14 @@
 [versions]
 agp = "8.5.2"
-hilt = "2.49"
+hilt = "2.50"
 hiltNavigationCompose = "1.2.0"
 coreKtx = "1.15.0"
+jodaTime = "2.13.1"
 navigationCompose = "2.8.9"
 navigationRuntimeKtx = "2.8.9"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.03.00"
+composeBom = "2025.03.01"
 #playServicesAds = "24.1.0"
 roomCommon = "2.6.1"
 roomCompiler = "2.6.1"
@@ -33,6 +34,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"}
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+joda-time = { module = "joda-time:joda-time", version.ref = "jodaTime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
