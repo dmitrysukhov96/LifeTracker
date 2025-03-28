@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight.Companion.W700
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.sp
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.DarkerPine
 import com.dmitrysukhov.lifetracker.utils.Green
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
@@ -84,7 +85,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             BasicTextField(
                 value = title,
                 onValueChange = { title = it },
-                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp,),
+                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (title.text.isEmpty()) Text(
@@ -106,8 +107,10 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             BasicTextField(
                 value = description,
                 onValueChange = { description = it },
-                textStyle = LocalTextStyle.current.copy(fontSize = 16.sp, fontWeight = W500,
-                    fontFamily = Montserrat,),
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = 16.sp, fontWeight = W500,
+                    fontFamily = Montserrat,
+                ),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (description.text.isEmpty()) Text(
@@ -144,17 +147,19 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             TaskOption("Напоминания", R.drawable.bell) {}
 
 
-
-                //Сделать функцию добовления
+            //Сделать функцию добовления
+            //заменить крестик как на дизайне,тонкий и серый
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)) {
+                    .padding(16.dp)
+                    .width(120.dp)
+            ) {
                 reminders.forEach { reminder ->
                     Text(
                         text = "$reminder ❌",
                         fontSize = 14.sp,
-                        color = Green,
+                        color = DarkerPine,
                         fontWeight = W500,
                         fontFamily = Montserrat,
                         modifier = Modifier.clickable { reminders = reminders - reminder }
@@ -162,17 +167,16 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     Spacer(modifier = Modifier.width(8.dp))
                 }
             }
+
+            //На до каждой букве добавить Фон белый с салатовой обвоткой а принажатие полностью становится салатовым
             Divider(Modifier.width(352.dp))
             TaskOption("Повторение", R.drawable.repeat) {}
-
-
-                //добавить каждому фон,сделать по ниже
             Row(
                 Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                listOf("П", "В", "С", "Ч", "П", "С", "В").forEach { day ->
+                listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { day ->
                     Text(
                         text = day,
                         fontSize = 16.sp,
@@ -188,7 +192,10 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     )
                 }
             }
-            Divider(Modifier.width(352.dp).padding(16.dp))
+            Divider(
+                Modifier
+                    .width(352.dp)
+                    .padding(16.dp))
             TaskOption("Время на задачу", R.drawable.vremya) {
                 val calendar = Calendar.getInstance()
                 TimePickerDialog(
@@ -200,8 +207,10 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 ).show()
             }
             //переместить в лево
-            Text(text = taskDuration, fontSize = 16.sp, fontWeight = W500,
-                fontFamily = Montserrat, color = PineColor)
+            Text(
+                text = taskDuration, fontSize = 16.sp, fontWeight = W500,
+                fontFamily = Montserrat, color = PineColor
+            )
             Divider(Modifier.width(352.dp))
         }
     }
