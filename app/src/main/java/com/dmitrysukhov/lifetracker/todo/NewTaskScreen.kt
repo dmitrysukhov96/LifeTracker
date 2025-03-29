@@ -175,13 +175,13 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 }
             }
 
-            //На до каждой букве добавить Фон белый с салатовой обвоткой а принажатие полностью становится салатовым
+
             Divider(Modifier.width(352.dp))
             TaskOption("Повторение", R.drawable.repeat) {}
             Row(
                 Modifier
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp) // Уменьшаем расстояние между элементами
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
 
@@ -189,7 +189,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     val isSelected = repeatDays.contains(day)
                     Box(
                         modifier = Modifier
-                            .size(32.dp) // Можно уменьшить размер кружков, если нужно
+                            .size(32.dp)
                             .clip(CircleShape)
                             .background(if (isSelected) OliveGreen else Color.White)
                             .border(2.dp, OliveGreen, CircleShape)
@@ -200,7 +200,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     ) {
                         Text(
                             text = day,
-                            fontSize = 14.sp, // Можно уменьшить текст, если он не помещается
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.W500,
                             fontFamily = FontFamily.SansSerif,
                             color = if (isSelected) Color.Black else Color.Black
