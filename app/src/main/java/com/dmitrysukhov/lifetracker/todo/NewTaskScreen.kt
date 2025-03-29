@@ -33,9 +33,7 @@ import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.DarkerPine
 import com.dmitrysukhov.lifetracker.utils.Green
-import com.dmitrysukhov.lifetracker.utils.LightGreen
 import com.dmitrysukhov.lifetracker.utils.Montserrat
-import com.dmitrysukhov.lifetracker.utils.OliveGreen
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.util.*
@@ -78,8 +76,6 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             )
         )
     }
-
-
     CompositionLocalProvider(LocalTextStyle provides globalTextStyle) {
         Column(
             modifier = Modifier
@@ -93,7 +89,12 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             BasicTextField(
                 value = title,
                 onValueChange = { title = it },
-                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
+                textStyle = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = W700,
+                    fontFamily = Montserrat,
+                    color = DarkerPine
+                ),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (title.text.isEmpty()) Text(
@@ -115,9 +116,11 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             BasicTextField(
                 value = description,
                 onValueChange = { description = it },
-                textStyle = LocalTextStyle.current.copy(
-                    fontSize = 16.sp, fontWeight = W500,
+                textStyle = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = W700,
                     fontFamily = Montserrat,
+                    color = DarkerPine
                 ),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
@@ -173,7 +176,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                             text = reminder,
                             fontSize = 14.sp,
                             color = DarkerPine,
-                            fontWeight = FontWeight.W500,
+                            fontWeight = W500,
                             fontFamily = Montserrat
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -189,8 +192,6 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     Spacer(modifier = Modifier.width(8.dp))
                 }
             }
-
-
 
             Divider(Modifier.width(352.dp))
             TaskOption("Повторение", R.drawable.repeat) {}
@@ -219,7 +220,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                         Text(
                             text = day,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.W500,
+                            fontWeight = W500,
                             fontFamily = FontFamily.SansSerif,
                             color = if (isSelected) Color.Black else Color.Black
                         )
@@ -251,16 +252,14 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 Text(
                     text = taskDuration,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.W500,
+                    fontWeight = W500,
                     fontFamily = FontFamily.SansSerif,
                     color = Color.Black
                 )
             }
             Divider(Modifier.width(352.dp))
         }
-    }
-}
-
+}}
 @Composable
 fun TaskOption(text: String, iconRes: Int, showIcon: Boolean = false, onClick: () -> Unit) {
     Row(
