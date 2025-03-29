@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.text.font.FontWeight.Companion.W700
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.sp
+import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.DarkerPine
 import com.dmitrysukhov.lifetracker.utils.Green
@@ -160,20 +161,35 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .width(120.dp)
             ) {
                 reminders.forEach { reminder ->
-                    Text(
-                        text = "$reminder ❌",
-                        fontSize = 14.sp,
-                        color = DarkerPine,
-                        fontWeight = W500,
-                        fontFamily = Montserrat,
-                        modifier = Modifier.clickable { reminders = reminders - reminder }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .background(AccentColor, shape = RoundedCornerShape(20.dp)) // Овальный фон
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = reminder,
+                            fontSize = 14.sp,
+                            color = DarkerPine,
+                            fontWeight = FontWeight.W500,
+                            fontFamily = Montserrat
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.krest), // Замените на ваш ресурс
+                            contentDescription = "Удалить",
+                            tint = DarkerPine,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clickable { reminders = reminders - reminder }
+                        )
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
                 }
             }
+
 
 
             Divider(Modifier.width(352.dp))
@@ -192,8 +208,8 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(if (isSelected) OliveGreen else Color.White)
-                            .border(2.dp, OliveGreen, CircleShape)
+                            .background(if (isSelected) AccentColor else Color.White)
+                            .border(2.dp, AccentColor, CircleShape)
                             .clickable {
                                 repeatDays = if (isSelected) repeatDays - day else repeatDays + day
                             }
@@ -213,7 +229,6 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             Divider(Modifier.width(352.dp))
 
             (Modifier
-                .padding(160.dp)
                 .width(352.dp))
             TaskOption("Время на задачу", R.drawable.vremya) {
                 val calendar = Calendar.getInstance()
@@ -228,14 +243,14 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
 
             Row(
                 modifier = Modifier
-                    .background(OliveGreen, shape = RoundedCornerShape(20.dp))
-                    .padding(8.dp)   ,
+                    .background(AccentColor, shape = RoundedCornerShape(15.dp))
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = taskDuration,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.W500,
                     fontFamily = FontFamily.SansSerif,
                     color = Color.Black
