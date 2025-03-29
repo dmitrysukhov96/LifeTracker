@@ -8,18 +8,23 @@ import com.dmitrysukhov.lifetracker.R
 import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.text.font.FontWeight.Companion.W700
 import androidx.compose.ui.text.input.TextFieldValue
@@ -27,7 +32,9 @@ import androidx.compose.ui.unit.sp
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.DarkerPine
 import com.dmitrysukhov.lifetracker.utils.Green
+import com.dmitrysukhov.lifetracker.utils.LightGreen
 import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.utils.OliveGreen
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.util.*
@@ -173,29 +180,39 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             TaskOption("Повторение", R.drawable.repeat) {}
             Row(
                 Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp) // Уменьшаем расстояние между элементами
             ) {
-                listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { day ->
-                    Text(
-                        text = day,
-                        fontSize = 16.sp,
-                        fontWeight = W500,
-                        fontFamily = Montserrat,
-                        color = if (repeatDays.contains(day)) PineColor else Color.Gray,
+                val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+
+                days.forEach { day ->
+                    val isSelected = repeatDays.contains(day)
+                    Box(
                         modifier = Modifier
+                            .size(32.dp) // Можно уменьшить размер кружков, если нужно
+                            .clip(CircleShape)
+                            .background(if (isSelected) OliveGreen else Color.White)
+                            .border(2.dp, OliveGreen, CircleShape)
                             .clickable {
-                                repeatDays =
-                                    if (repeatDays.contains(day)) repeatDays - day else repeatDays + day
-                            }
-                            .padding(4.dp)
-                    )
+                                repeatDays = if (isSelected) repeatDays - day else repeatDays + day
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = day,
+                            fontSize = 14.sp, // Можно уменьшить текст, если он не помещается
+                            fontWeight = FontWeight.W500,
+                            fontFamily = FontFamily.SansSerif,
+                            color = if (isSelected) Color.Black else Color.Black
+                        )
+                    }
                 }
             }
             Divider(
                 Modifier
                     .width(352.dp)
-                    .padding(16.dp))
+                    .padding(16.dp)
+            )
             TaskOption("Время на задачу", R.drawable.vremya) {
                 val calendar = Calendar.getInstance()
                 TimePickerDialog(
@@ -206,11 +223,22 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     0, 45, true
                 ).show()
             }
-            //переместить в лево
-            Text(
-                text = taskDuration, fontSize = 16.sp, fontWeight = W500,
-                fontFamily = Montserrat, color = PineColor
-            )
+
+            Row(
+                modifier = Modifier
+                    .background(OliveGreen, shape = RoundedCornerShape(20.dp)) // Овальный фон
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = taskDuration,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.W500,
+                    fontFamily = FontFamily.SansSerif,
+                    color = Color.Black
+                )
+            }
             Divider(Modifier.width(352.dp))
         }
     }
