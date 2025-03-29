@@ -159,7 +159,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .width(120.dp)
             ) {
                 reminders.forEach { reminder ->
@@ -180,7 +180,8 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             TaskOption("Повторение", R.drawable.repeat) {}
             Row(
                 Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
@@ -195,7 +196,8 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                             .border(2.dp, OliveGreen, CircleShape)
                             .clickable {
                                 repeatDays = if (isSelected) repeatDays - day else repeatDays + day
-                            },
+                            }
+                               ,
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -208,11 +210,11 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     }
                 }
             }
-            Divider(
-                Modifier
-                    .width(352.dp)
-                    .padding(16.dp)
-            )
+            Divider(Modifier.width(352.dp))
+
+            (Modifier
+                .padding(160.dp)
+                .width(352.dp))
             TaskOption("Время на задачу", R.drawable.vremya) {
                 val calendar = Calendar.getInstance()
                 TimePickerDialog(
@@ -226,8 +228,8 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
 
             Row(
                 modifier = Modifier
-                    .background(OliveGreen, shape = RoundedCornerShape(20.dp)) // Овальный фон
-                    .padding(8.dp),
+                    .background(OliveGreen, shape = RoundedCornerShape(20.dp))
+                    .padding(8.dp)   ,
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
