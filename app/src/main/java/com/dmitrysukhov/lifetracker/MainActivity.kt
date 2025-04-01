@@ -5,7 +5,6 @@ import NewTaskScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -17,6 +16,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,10 +66,13 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -99,7 +104,7 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
@@ -232,23 +237,56 @@ class MainActivity : ComponentActivity() {
                                             fontFamily = Montserrat, color = Color.White
                                         )
                                         BasicTextField(
-                                            textStyle = style, value = taskText, singleLine = true,
+                                            textStyle = style,
+                                            value = taskText,
+                                            singleLine = true,
                                             cursorBrush = SolidColor(Color.White),
                                             onValueChange = { taskText = it },
                                             modifier = Modifier
-                                                .padding(top = 16.dp, start = 24.dp)
-                                                .weight(1f), decorationBox = {
-                                                it()
-                                                if (taskText.isEmpty()) Text(
-                                                    "Введите задачу...", color = Color.White
-                                                )
-                                            }, keyboardOptions = KeyboardOptions.Default.copy(
+                                                .weight(1f)
+                                                .background(Color(0xFF33BA78), shape = RoundedCornerShape(8.dp)) // Закругленные углы
+                                                .padding(12.dp)
+                                                .clip(RoundedCornerShape(8.dp)), // Добавляем clip, чтобы закругление работало
+                                            decorationBox = { innerTextField ->
+                                                Box(
+                                                    modifier = Modifier.fillMaxWidth()
+                                                        .padding(top = 10.dp), // Добавляем отступ сверху для текста
+                                                    contentAlignment = Alignment.CenterStart
+                                                ) {
+                                                    innerTextField()
+                                                    if (taskText.isEmpty()) {
+                                                        Text(
+                                                            "Введите задачу...",
+                                                            color = Color.White,
+                                                            fontSize = 16.sp
+
+
+                                                        )
+                                                    }
+                                                }
+                                            },
+                                            keyboardOptions = KeyboardOptions.Default.copy(
                                                 imeAction = ImeAction.Done
-                                            ), keyboardActions = KeyboardActions(onDone = {
-                                                if (taskText.isNotBlank()) taskText = ""
+                                            ),
+                                            keyboardActions = KeyboardActions(onDone = {
+                                                if (taskText.isNotBlank()) {
+                                                    viewModel.addTask(taskText)
+                                                    taskText = ""
+                                                }
                                             })
                                         )
+
                                         Spacer(modifier = Modifier.width(8.dp))
+
+                                        Image(
+                                            painter = painterResource(id = R.drawable.baseline_send_24),
+                                            contentDescription = "Arrow",
+                                            modifier = Modifier.size(50.dp)
+                                                .padding(top = 20.dp)
+                                        )
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
                                         Button(
                                             onClick = {
                                                 if (taskText.isNotBlank()) {
@@ -256,7 +294,9 @@ class MainActivity : ComponentActivity() {
                                                     taskText = ""
                                                 }
                                             }
-                                        ) { Text("Добавить", fontFamily = Montserrat) }
+                                        ) {
+                                            Text("")
+                                        }
                                     }
                                 }
                             ) { padding ->
@@ -332,6 +372,7 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
     }
 }
 
+
 //const val FAB_EXPLODE_BOUNDS_KEY = "FAB_EXPLODE_BOUNDS_KEY"
 
 //@Composable
@@ -386,3 +427,5 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
 //        }
 //    }
 //}
+
+
