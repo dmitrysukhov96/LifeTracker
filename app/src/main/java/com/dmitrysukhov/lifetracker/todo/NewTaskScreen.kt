@@ -1,74 +1,94 @@
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.dmitrysukhov.lifetracker.R
+package com.dmitrysukhov.lifetracker.todo
+
 import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.text.font.FontWeight.Companion.W700
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.DarkerPine
-import com.dmitrysukhov.lifetracker.utils.Green
+import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
-fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
-    var title by remember { mutableStateOf(TextFieldValue("")) }
-    var description by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedTime by remember { mutableStateOf("Завтра 15:00") }
-    var reminders by remember { mutableStateOf(listOf("Сегодня 22:30", "Завтра 11:00")) }
-    var repeatDays by remember { mutableStateOf(setOf<String>()) }
-    var taskDuration by remember { mutableStateOf("00:45:00") }
+fun NewTaskScreen(
+    setTopBarState: (TopBarState) -> Unit,
+    viewModel: TodoViewModel,
+    navController: NavHostController
+) {
+    var title by rememberSaveable { mutableStateOf("") }
+    var description by rememberSaveable { mutableStateOf("") }
+    var selectedTime by rememberSaveable { mutableStateOf("Завтра 15:00") } //todo до этого дойдем
+    var reminders by rememberSaveable { mutableStateOf(listOf("Сегодня 22:30", "Завтра 11:00")) } //
+    var repeatDays by rememberSaveable { mutableStateOf(setOf<String>()) }//
+    var taskDuration by rememberSaveable { mutableStateOf("00:45:00") }//
     val context = LocalContext.current
-
-//По добовлять всем текстам вес и шрифт
+    //Подобавлять всем текстам вес и шрифт
     val globalTextStyle = TextStyle(
-        fontFamily = FontFamily(Font(R.font.montserrat_regular)),
-        fontSize = 16.sp,
+        fontFamily = FontFamily(Font(R.font.montserrat_regular)), fontSize = 16.sp,
         color = Color.Black
     )
 
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState(
-                title = "New Task",
-                topBarActions = {
-                    if (title.text.isNotEmpty()) {
+            TopBarState(//todo локализация
+                title = "New Task", topBarActions = {
+                    if (title.isNotEmpty()) {
                         Icon(
-                            painter = painterResource(R.drawable.plus),
-                            contentDescription = "Сохранить",
+                            painter = painterResource(R.drawable.plus), //todo тут надо галочку
+                            contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.clickable {
-                                saveTask(title.text, description.text)
+                                viewModel.addTask(title)
                                 Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT)
                                     .show()
+                                navController.navigateUp()
                             }
                         )
                     }
@@ -81,37 +101,25 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(BgColor)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
+            Spacer(modifier = Modifier.height(24.dp))
             BasicTextField(
-                value = title,
-                onValueChange = { title = it },
-                textStyle = TextStyle(
-                    fontSize = 18.sp,
-                    fontWeight = W700,
-                    fontFamily = Montserrat,
-                    color = DarkerPine
-                ),
-                decorationBox = { innerTextField ->
+                value = title, onValueChange = { title = it }, textStyle = TextStyle(
+                    fontSize = 18.sp, fontWeight = W700, fontFamily = Montserrat,
+                    color = InverseColor,
+                ), decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        if (title.text.isEmpty()) Text(
-                            "Заголовок",
-                            fontSize = 18.sp,
-                            fontWeight = W700,
-                            fontFamily = Montserrat,
-                            color = Green
+                        if (title.isEmpty()) Text(
+                            "Заголовок", fontSize = 18.sp, fontWeight = W700,
+                            fontFamily = Montserrat, color = PineColor.copy(0.5f)
                         )
                         innerTextField()
                     }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
+                }, modifier = Modifier.fillMaxWidth()
+            ) //todo диме посмотреть как ограничить высоту компонента или кол-во символов
             Spacer(modifier = Modifier.height(8.dp))
-            Divider(Modifier.width(352.dp))
+            HorizontalDivider()
 
             BasicTextField(
                 value = description,
@@ -120,16 +128,16 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     fontSize = 16.sp,
                     fontWeight = W700,
                     fontFamily = Montserrat,
-                    color = DarkerPine
+                    color = InverseColor
                 ),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        if (description.text.isEmpty()) Text(
-                            "Описание",
+                        if (description.isEmpty()) Text(
+                            stringResource(R.string.description),
                             fontSize = 16.sp,
                             fontWeight = W500,
                             fontFamily = Montserrat,
-                            color = Green
+                            color = PineColor.copy(0.5f)
                         )
                         innerTextField()
                     }
@@ -138,9 +146,9 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Divider(Modifier.width(352.dp))
+            HorizontalDivider()
 
-            TaskOption("$selectedTime", R.drawable.data) {
+            TaskOption(selectedTime, R.drawable.data) {
                 val calendar = Calendar.getInstance()
                 TimePickerDialog(
                     context,
@@ -152,9 +160,9 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     true
                 ).show()
             }
-            Divider(Modifier.width(352.dp))
+            HorizontalDivider()
             TaskOption("Покупки", R.drawable.proekt, showIcon = true) {}
-            Divider(Modifier.width(352.dp))
+            HorizontalDivider()
             TaskOption("Напоминания", R.drawable.bell) {}
 
 
@@ -168,7 +176,10 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 reminders.forEach { reminder ->
                     Row(
                         modifier = Modifier
-                            .background(AccentColor, shape = RoundedCornerShape(20.dp)) // Овальный фон
+                            .background(
+                                AccentColor,
+                                shape = RoundedCornerShape(20.dp)
+                            ) // Овальный фон
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -182,7 +193,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.krest), // Замените на ваш ресурс
-                            contentDescription = "Удалить",
+                            contentDescription = null,
                             tint = DarkerPine,
                             modifier = Modifier
                                 .size(16.dp)
@@ -193,7 +204,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                 }
             }
 
-            Divider(Modifier.width(352.dp))
+            HorizontalDivider()
             TaskOption("Повторение", R.drawable.repeat) {}
             Row(
                 Modifier
@@ -213,8 +224,7 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                             .border(2.dp, AccentColor, CircleShape)
                             .clickable {
                                 repeatDays = if (isSelected) repeatDays - day else repeatDays + day
-                            }
-                               ,
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -227,18 +237,17 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     }
                 }
             }
-            Divider(Modifier.width(352.dp))
+            HorizontalDivider()
 
             (Modifier
                 .width(352.dp))
             TaskOption("Время на задачу", R.drawable.vremya) {
-                val calendar = Calendar.getInstance()
                 TimePickerDialog(
                     context,
                     { _, hour, minute ->
-                        taskDuration = String.format("%02d:%02d:00", hour, minute)
-                    },
-                    0, 45, true
+                        taskDuration =
+                            String.format(Locale.getDefault(), "%02d:%02d:00", hour, minute)
+                    }, 0, 45, true
                 ).show()
             }
 
@@ -257,9 +266,11 @@ fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
                     color = Color.Black
                 )
             }
-            Divider(Modifier.width(352.dp))
+            HorizontalDivider()
         }
-}}
+    }
+}
+
 @Composable
 fun TaskOption(text: String, iconRes: Int, showIcon: Boolean = false, onClick: () -> Unit) {
     Row(
@@ -277,27 +288,15 @@ fun TaskOption(text: String, iconRes: Int, showIcon: Boolean = false, onClick: (
                 tint = PineColor
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text, fontSize = 16.sp)
+            Text(text, fontSize = 16.sp, color = InverseColor)
         }
         if (showIcon) {
             Icon(
                 painter = painterResource(id = R.drawable.ministrelka),
-                contentDescription = "Expand",
-                tint = PineColor
+                contentDescription = null, tint = PineColor
             )
         }
     }
-}
-
-fun saveTask(title: String, description: String) {
-    // Реальная логика сохранения в БД или SharedPreferences
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewNewTaskScreen() {
-    NewTaskScreen {}
 }
 
 const val NEW_TASK_SCREEN = "NewTaskScreen"

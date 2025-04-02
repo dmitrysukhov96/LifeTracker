@@ -1,7 +1,7 @@
 package com.dmitrysukhov.lifetracker
 
-import NEW_TASK_SCREEN
-import NewTaskScreen
+import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
+import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,8 +16,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -38,7 +36,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,13 +63,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -320,7 +314,7 @@ class MainActivity : ComponentActivity() {
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(setTopBarState, navController)
                                         }
-                                        composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
+                                        composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState, viewModel, navController) }
                                         composable(NEW_PROJECT_SCREEN) {
                                             NewProjectScreen(setTopBarState)
                                         }

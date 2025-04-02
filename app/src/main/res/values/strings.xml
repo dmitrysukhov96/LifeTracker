@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name" translatable="false">LifeTracker</string>
     <string name="main_screen">Main Screen</string>
+    <string name="description">Description</string>
 </resources>
