@@ -1,6 +1,5 @@
 package com.dmitrysukhov.lifetracker.todo
 
-import NEW_TASK_SCREEN
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,7 +54,7 @@ fun TodoListScreen(
 ) {
     val todoList by viewModel.todoList.collectAsState()
     LaunchedEffect(Unit) {
-        setTopBarState(TopBarState("LifeTracker", {
+        setTopBarState(TopBarState("LifeTracker") {
             IconButton({ navController.navigate(NEW_TASK_SCREEN) }) {
                 Icon(
                     painterResource(R.drawable.plus),
@@ -63,7 +62,7 @@ fun TodoListScreen(
                     tint = Color.White
                 )
             }
-        }))
+        })
     }
     Column(
         modifier = Modifier
@@ -177,7 +176,7 @@ fun formatDuration(seconds: Int): String {
     val hrs = seconds / 3600
     val mins = (seconds % 3600) / 60
     val secs = seconds % 60
-    return String.format("%02d:%02d:%02d", hrs, mins, secs)
+    return String.format(Locale.getDefault(), "%02d:%02d:%02d", hrs, mins, secs)
 }
 
 fun formatTime(timestamp: Long): String {
