@@ -2,6 +2,7 @@ package com.dmitrysukhov.lifetracker
 
 import NEW_TASK_SCREEN
 import NewTaskScreen
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -103,6 +104,7 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @SuppressLint("Range")
     override fun onCreate(savedInstanceState: Bundle?) {
 //        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -244,13 +246,27 @@ class MainActivity : ComponentActivity() {
                                             onValueChange = { taskText = it },
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .background(Color(0xFF33BA78), shape = RoundedCornerShape(8.dp)) // Закругленные углы
+                                                .background(Color(0xFF33BA78), shape = RoundedCornerShape(8.dp))
                                                 .padding(12.dp)
-                                                .clip(RoundedCornerShape(8.dp)), // Добавляем clip, чтобы закругление работало
+                                                .clip(RoundedCornerShape(8.dp)),
                                             decorationBox = { innerTextField ->
+
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxSize(),
+                                                    contentAlignment = Alignment.BottomStart
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth(1f)
+                                                            .height(1.dp)
+                                                            .background(Color.White)
+                                                            .offset(x = 50.dp, y = (-10).dp)
+                                                    )
+                                                }
                                                 Box(
                                                     modifier = Modifier.fillMaxWidth()
-                                                        .padding(top = 10.dp), // Добавляем отступ сверху для текста
+                                                        .padding(top = 10.dp),
                                                     contentAlignment = Alignment.CenterStart
                                                 ) {
                                                     innerTextField()
@@ -259,12 +275,12 @@ class MainActivity : ComponentActivity() {
                                                             "Введите задачу...",
                                                             color = Color.White,
                                                             fontSize = 16.sp
-
-
                                                         )
+
                                                     }
                                                 }
                                             },
+
                                             keyboardOptions = KeyboardOptions.Default.copy(
                                                 imeAction = ImeAction.Done
                                             ),
@@ -283,7 +299,9 @@ class MainActivity : ComponentActivity() {
                                             contentDescription = "Arrow",
                                             modifier = Modifier.size(50.dp)
                                                 .padding(top = 20.dp)
+                                                .offset(x = 25.dp)
                                         )
+
 
                                         Spacer(modifier = Modifier.width(8.dp))
 
@@ -294,7 +312,9 @@ class MainActivity : ComponentActivity() {
                                                     taskText = ""
                                                 }
                                             }
-                                        ) {
+                                        )
+
+                                        {
                                             Text("")
                                         }
                                     }
