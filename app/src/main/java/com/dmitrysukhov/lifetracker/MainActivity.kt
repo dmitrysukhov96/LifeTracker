@@ -1,7 +1,5 @@
 package com.dmitrysukhov.lifetracker
 
-import NEW_TASK_SCREEN
-import NewTaskScreen
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -18,7 +16,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -38,9 +35,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
@@ -67,13 +63,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -87,6 +80,8 @@ import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
+import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
+import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
 import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
@@ -221,7 +216,8 @@ class MainActivity : ComponentActivity() {
                                             horizontalArrangement = Arrangement.End
                                         ) { topBarState.topBarActions.invoke(this) }
                                     }
-                                }, bottomBar = {
+                                },
+                                bottomBar = {
                                     if (isTodo) Row(
                                         Modifier
                                             .background(BgColor)
@@ -231,92 +227,75 @@ class MainActivity : ComponentActivity() {
                                             .background(PineColor)
                                             .fillMaxWidth()
                                             .height(72.dp)
-                                            .align(Alignment.BottomCenter)
+                                            .padding(horizontal = 24.dp)
+                                            .align(Alignment.BottomCenter),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
                                     ) {
                                         var taskText by rememberSaveable { mutableStateOf("") }
                                         val style = TextStyle(
                                             fontWeight = FontWeight.Bold,
                                             fontFamily = Montserrat, color = Color.White
                                         )
-                                        BasicTextField(
-                                            textStyle = style,
-                                            value = taskText,
-                                            singleLine = true,
-                                            cursorBrush = SolidColor(Color.White),
-                                            onValueChange = { taskText = it },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .background(Color(0xFF33BA78), shape = RoundedCornerShape(8.dp))
-                                                .padding(12.dp)
-                                                .clip(RoundedCornerShape(8.dp)),
-                                            decorationBox = { innerTextField ->
-
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxSize(),
-                                                    contentAlignment = Alignment.BottomStart
-                                                ) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth(1f)
-                                                            .height(1.dp)
-                                                            .background(Color.White)
-                                                            .offset(x = 50.dp, y = (-10).dp)
-                                                    )
-                                                }
-                                                Box(
-                                                    modifier = Modifier.fillMaxWidth()
-                                                          .padding(top = 10.dp),
-                                                    contentAlignment = Alignment.CenterStart
-                                                ) {
-                                                    innerTextField()
-                                                    if (taskText.isEmpty()) {
-                                                        Text(
-                                                            "Введите задачу...",
-                                                            color = Color.White,
-                                                            fontSize = 16.sp
-                                                        )
-
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            BasicTextField(
+                                                modifier = Modifier.fillMaxWidth().height(24.dp),
+                                                textStyle = style,
+                                                value = taskText,
+                                                singleLine = true,
+                                                cursorBrush = SolidColor(Color.White),
+                                                onValueChange = { taskText = it },
+                                                decorationBox = { innerTextField ->
+                                                    Box(contentAlignment = Alignment.CenterStart) {
+                                                        innerTextField()
+                                                        if (taskText.isEmpty()) {
+                                                            Text(
+                                                                "Введите задачу...",
+                                                                color = Color.White,
+                                                                fontSize = 14.sp
+                                                            )
+                                                        }
                                                     }
-                                                }
-                                            },
-
-                                            keyboardOptions = KeyboardOptions.Default.copy(
-                                                imeAction = ImeAction.Done
-                                            ),
-                                            keyboardActions = KeyboardActions(onDone = {
-                                                if (taskText.isNotBlank()) {
-                                                    viewModel.addTask(taskText)
-                                                    taskText = ""
-                                                }
-                                            })
-                                        )
-
-                                        Spacer(modifier = Modifier.width(8.dp))
-
-                                        Image(
-                                            painter = painterResource(id = R.drawable.baseline_send_24),
-                                            contentDescription = "Arrow",
-                                            modifier = Modifier.size(50.dp)
-                                                .padding(top = 20.dp)
-                                                .offset(x = 25.dp)
-                                        )
-
-
-                                        Spacer(modifier = Modifier.width(8.dp))
-
-                                        Button(
-                                            onClick = {
-                                                if (taskText.isNotBlank()) {
-                                                    viewModel.addTask(taskText)
-                                                    taskText = ""
-                                                }
-                                            }
-                                        )
-
-                                        {
-                                            Text("")
+                                                },
+                                                keyboardOptions = KeyboardOptions.Default.copy(
+                                                    imeAction = ImeAction.Done
+                                                ),
+                                                keyboardActions = KeyboardActions(onDone = {
+                                                    if (taskText.isNotBlank()) {
+                                                        viewModel.addTask(taskText)
+                                                        taskText = ""
+                                                    }
+                                                })
+                                            )
+                                            Spacer(Modifier.height(4.dp))
+                                            HorizontalDivider(color = Color.White)
                                         }
+                                        Spacer(Modifier.width(16.dp))
+                                        IconButton({
+                                            if (taskText.isNotBlank()) {
+                                                    viewModel.addTask(taskText)
+                                                    taskText = ""
+                                                }
+                                        }, modifier = Modifier.size(22.dp)) {
+                                            Image(
+                                                painter = painterResource(R.drawable.send),
+                                                contentDescription = null,
+                                            )
+                                        }
+//                                        Button(
+//                                            onClick = {
+//                                                if (taskText.isNotBlank()) {
+//                                                    viewModel.addTask(taskText)
+//                                                    taskText = ""
+//                                                }
+//                                            }
+//                                        ) {
+//                                            Image(
+//                                                painter = painterResource(R.drawable.send),
+//                                                contentDescription = null,
+//                                                modifier = Modifier.size(22.dp)
+//                                            )
+//                                        }
                                     }
                                 }
                             ) { padding ->
@@ -340,7 +319,9 @@ class MainActivity : ComponentActivity() {
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(setTopBarState, navController)
                                         }
-                                        composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
+                                        composable(NEW_TASK_SCREEN) {
+                                            NewTaskScreen(setTopBarState, viewModel, navController)
+                                        }
                                         composable(NEW_PROJECT_SCREEN) {
                                             NewProjectScreen(setTopBarState)
                                         }
