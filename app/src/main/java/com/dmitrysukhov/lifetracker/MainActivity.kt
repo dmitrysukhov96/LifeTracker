@@ -1,5 +1,6 @@
 package com.dmitrysukhov.lifetracker
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,9 +34,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
@@ -44,9 +49,9 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,12 +66,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -81,7 +88,6 @@ import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
 import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
-import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
 import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
@@ -94,21 +100,16 @@ import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @SuppressLint("Range")
     override fun onCreate(savedInstanceState: Bundle?) {
+//        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
-            val systemUiController = rememberSystemUiController()
-            val useDarkIcons = false
-            LaunchedEffect(Unit) {
-                systemUiController.setStatusBarColor(PineColor, darkIcons = useDarkIcons)
-                systemUiController.setNavigationBarColor(PineColor, darkIcons = useDarkIcons)
-            }
             MyApplicationTheme {
                 var topBarState by remember { mutableStateOf(TopBarState("LifeTracker")) }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
@@ -181,7 +182,8 @@ class MainActivity : ComponentActivity() {
                                         Modifier
                                             .fillMaxWidth()
                                             .padding(
-                                                top = WindowInsets.systemBars.asPaddingValues()
+                                                top = WindowInsets.systemBars
+                                                    .asPaddingValues()
                                                     .calculateTopPadding()
                                             )
                                             .height(56.dp)
@@ -221,8 +223,7 @@ class MainActivity : ComponentActivity() {
                                             horizontalArrangement = Arrangement.End
                                         ) { topBarState.topBarActions.invoke(this) }
                                     }
-                                },
-                                bottomBar = {
+                                }, bottomBar = {
                                     if (isTodo) Row(
                                         Modifier
                                             .background(BgColor)
@@ -232,60 +233,96 @@ class MainActivity : ComponentActivity() {
                                             .background(PineColor)
                                             .fillMaxWidth()
                                             .height(72.dp)
-                                            .padding(horizontal = 24.dp)
-                                            .align(Alignment.BottomCenter),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
+                                            .align(Alignment.BottomCenter)
                                     ) {
                                         var taskText by rememberSaveable { mutableStateOf("") }
                                         val style = TextStyle(
                                             fontWeight = FontWeight.Bold,
                                             fontFamily = Montserrat, color = Color.White
                                         )
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            BasicTextField(
-                                                modifier = Modifier.fillMaxWidth().height(24.dp),
-                                                textStyle = style,
-                                                value = taskText,
-                                                singleLine = true,
-                                                cursorBrush = SolidColor(Color.White),
-                                                onValueChange = { taskText = it },
-                                                decorationBox = { innerTextField ->
-                                                    Box(contentAlignment = Alignment.CenterStart) {
-                                                        innerTextField()
-                                                        if (taskText.isEmpty()) {
-                                                            Text(
-                                                                "Введите задачу...",
-                                                                color = Color.White,
-                                                                fontSize = 14.sp
-                                                            )
-                                                        }
+                                        BasicTextField(
+                                            textStyle = style,
+                                            value = taskText,
+                                            singleLine = true,
+                                            cursorBrush = SolidColor(Color.White),
+                                            onValueChange = { taskText = it },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .background(
+                                                    Color(0xFF33BA78),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                )
+                                                .padding(12.dp)
+                                                .clip(RoundedCornerShape(8.dp)),
+                                            decorationBox = { innerTextField ->
+
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxSize(),
+                                                    contentAlignment = Alignment.BottomStart
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth(1f)
+                                                            .height(1.dp)
+                                                            .background(Color.White)
+                                                            .offset(x = 50.dp, y = (-10).dp)
+                                                    )
+                                                }
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(top = 10.dp),
+                                                    contentAlignment = Alignment.CenterStart
+                                                ) {
+                                                    innerTextField()
+                                                    if (taskText.isEmpty()) {
+                                                        Text(
+                                                            "Введите задачу...",
+                                                            color = Color.White,
+                                                            fontSize = 16.sp
+                                                        )
+
                                                     }
-                                                },
-                                                keyboardOptions = KeyboardOptions.Default.copy(
-                                                    imeAction = ImeAction.Done
-                                                ),
-                                                keyboardActions = KeyboardActions(onDone = {
-                                                    if (taskText.isNotBlank()) {
-                                                        viewModel.addTask(taskText)
-                                                        taskText = ""
-                                                    }
-                                                })
-                                            )
-                                            Spacer(Modifier.height(4.dp))
-                                            HorizontalDivider(color = Color.White)
-                                        }
-                                        Spacer(Modifier.width(16.dp))
-                                        IconButton({
-                                            if (taskText.isNotBlank()) {
+                                                }
+                                            },
+
+                                            keyboardOptions = KeyboardOptions.Default.copy(
+                                                imeAction = ImeAction.Done
+                                            ),
+                                            keyboardActions = KeyboardActions(onDone = {
+                                                if (taskText.isNotBlank()) {
                                                     viewModel.addTask(taskText)
                                                     taskText = ""
                                                 }
-                                        }, modifier = Modifier.size(22.dp)) {
-                                            Image(
-                                                painter = painterResource(R.drawable.send),
-                                                contentDescription = null,
-                                            )
+                                            })
+                                        )
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        Image(
+                                            painter = painterResource(id = R.drawable.send),
+                                            contentDescription = "Arrow",
+                                            modifier = Modifier
+                                                .size(50.dp)
+                                                .padding(top = 20.dp)
+                                                .offset(x = 25.dp)
+                                        )
+
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        Button(
+                                            onClick = {
+                                                if (taskText.isNotBlank()) {
+                                                    viewModel.addTask(taskText)
+                                                    taskText = ""
+                                                }
+                                            }
+                                        )
+
+                                        {
+                                            Text("")
                                         }
                                     }
                                 }
@@ -293,7 +330,7 @@ class MainActivity : ComponentActivity() {
                                 Box(Modifier.fillMaxSize()) {
                                     NavHost(
                                         navController = navController,
-                                        startDestination = TODOLIST_SCREEN, modifier = Modifier
+                                        startDestination = DIPLOMA_SCREEN, modifier = Modifier
                                             .background(PineColor)
                                             .padding(padding)
                                             .clip(
@@ -305,14 +342,14 @@ class MainActivity : ComponentActivity() {
                                                 setTopBarState, navController, viewModel
                                             )
                                         }
+
+                                        composable(DIPLOMA_SCREEN) { DiplomaScreen(setTopBarState) }
                                         composable(TRACKER_SCREEN) { TrackerScreen(setTopBarState) }
                                         composable(HABIT_SCREEN) { HabitScreen(setTopBarState) }
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(setTopBarState, navController)
                                         }
-                                        composable(NEW_TASK_SCREEN) {
-                                            NewTaskScreen(setTopBarState, viewModel, navController)
-                                        }
+                                        composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
                                         composable(NEW_PROJECT_SCREEN) {
                                             NewProjectScreen(setTopBarState)
                                         }
@@ -325,6 +362,76 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun DiplomaScreen(setTopBarState: (TopBarState) -> Unit) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Text("Диплом", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {}) {
+                            Icon(Icons.Filled.ArrowBack, contentDescription = "Назад")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {}) {
+                            Icon(Icons.Filled.Edit, contentDescription = "Редактировать")
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+            ) {
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Описание:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Blue)
+                Text("написать диплом Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum", fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Цель:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Blue)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("закончить универ", fontSize = 14.sp)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Color.Blue)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Задачи:", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(290.dp))
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Add, contentDescription = "Добавить задачу", tint = Color.Blue, modifier = Modifier.size(32.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp)) // Added some space before the line
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Color.Blue)
+                )
+            }
+        }
+    }
+    private fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
+        TODO("Not yet implemented")
     }
 }
 
@@ -421,3 +528,4 @@ fun ActuallyFloatingActionButton(onClick: () -> Unit) {
 //}
 
 
+val DIPLOMA_SCREEN = "diplomascreen"
