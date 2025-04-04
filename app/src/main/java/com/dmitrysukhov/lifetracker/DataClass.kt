@@ -20,7 +20,7 @@ data class TodoItem(
 data class Project(
     @PrimaryKey(autoGenerate = true) val projectId: Long = 0L,
     val title: String,
-    val description: String,
+    val description: String = "",
     val color: Int,
     val photoUri: String? = null,
     val goal: String? = null,

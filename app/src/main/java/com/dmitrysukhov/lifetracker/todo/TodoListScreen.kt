@@ -88,11 +88,9 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-//            .height(46.dp)
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.Top
     ) {
-//        Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
             painter = painterResource(if (item.isDone) R.drawable.checked else R.drawable.not_checked),
             contentDescription = null,
@@ -100,10 +98,7 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
                 .clickable { onCheckedChange(!item.isDone) }
                 .size(20.dp)
         )
-//        }
-
         Spacer(modifier = Modifier.width(8.dp))
-
         Column(modifier = Modifier.weight(1f)) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -188,7 +183,6 @@ fun formatTime(timestamp: Long): String {
 fun DurationBadge(duration: Int, isRunning: Boolean) {
     val backgroundColor = if (isRunning) PineColor else BgColor
     val contentColor = if (isRunning) Color.White else PineColor
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,

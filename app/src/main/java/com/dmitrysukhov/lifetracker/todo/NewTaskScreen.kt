@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,8 +59,7 @@ import java.util.Locale
 
 @Composable
 fun NewTaskScreen(
-    setTopBarState: (TopBarState) -> Unit,
-    viewModel: TodoViewModel,
+    setTopBarState: (TopBarState) -> Unit, viewModel: TodoViewModel,
     navController: NavHostController
 ) {
     var title by rememberSaveable { mutableStateOf("") }
@@ -79,17 +79,14 @@ fun NewTaskScreen(
         setTopBarState(
             TopBarState(//todo локализация
                 title = "New Task", topBarActions = {
-                    if (title.isNotEmpty()) {
+                    if (title.isNotEmpty()) IconButton({
+                        viewModel.addTask(title)
+                        Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
+                        navController.navigateUp()
+                    }) {
                         Icon(
-                            painter = painterResource(R.drawable.plus), //todo тут надо галочку
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.clickable {
-                                viewModel.addTask(title)
-                                Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT)
-                                    .show()
-                                navController.navigateUp()
-                            }
+                            painter = painterResource(R.drawable.tick),
+                            contentDescription = null, tint = Color.White,
                         )
                     }
                 }
