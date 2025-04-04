@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -32,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
@@ -46,26 +46,20 @@ import kotlin.random.Random
 fun ProjectsScreen(
     setTopBarState: (TopBarState) -> Unit,
     navController: NavHostController,
-    viewModel: ProjectsViewModel = hiltViewModel()
 ) {
+    val viewModel: ProjectsViewModel = hiltViewModel()
     val projects by remember { derivedStateOf { viewModel.projects } }
 
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState("Projects", {
-                IconButton(onClick = { viewModel.addProject(getRandomProject()) }) {
+            TopBarState("Projects") {
+                IconButton(onClick = { navController.navigate(NEW_PROJECT_SCREEN) }) {
                     Icon(
                         painter = painterResource(R.drawable.plus),
                         contentDescription = null, tint = Color.White
                     )
                 }
-                IconButton(onClick = { navController.navigate(NEW_PROJECT_SCREEN) }) {
-                    Icon(
-                        painter = painterResource(R.drawable.lightning),
-                        contentDescription = null, tint = Color.White
-                    )
-                }
-            })
+            }
         )
     }
 
@@ -83,7 +77,7 @@ fun ProjectsScreen(
                 SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
             } ?: "Без дедлайна"
 
-            Item(
+            ProjectItem(
                 title = project.title,
                 progress = "${project.completedTasks}/${project.totalTasks} выполнено",
                 deadline = deadlineText, showImage = project == projects[0],
@@ -98,20 +92,6 @@ fun ProjectsScreen(
     }
 }
 
-fun getRandomProject(): Project {
-    val random = Random(System.currentTimeMillis())
-    val title = "Проект ${('A'..'Z').random()}"
-    val color = generateRandomColor()
-    val newProject = Project(
-        title = title, color = color,
-        deadlineMillis = System.currentTimeMillis() + random.nextLong(1_000_000_000L),
-        completedTasks = random.nextInt(0, 5),
-        totalTasks = random.nextInt(5, 10),
-        description = "lalali lalala"
-    )
-    return newProject
-}
-
 fun generateRandomColor(): Int {
     val hue = Random.nextFloat() * 360f
     val saturation = 0.7f + Random.nextFloat() * 0.3f
@@ -121,24 +101,24 @@ fun generateRandomColor(): Int {
 }
 
 @Composable
-fun Item(
+fun ProjectItem(
     title: String, progress: String, deadline: String, gradient: Brush, onClick: () -> Unit,
     showImage: Boolean
 ) {
-
     Box(
         modifier = Modifier
             .clickable { onClick() }
             .fillMaxWidth()
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(gradient)
-//            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .then (
+                if (showImage) Modifier.background(Color.Black) else Modifier.background(gradient)
+                )
     ) {
         if (showImage) Image(
             painter = painterResource(R.drawable.egg),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().alpha(0.9f),
             contentScale = ContentScale.Crop
         )
         Text(

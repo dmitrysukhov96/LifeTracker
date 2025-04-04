@@ -351,7 +351,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                         composable(NEW_TASK_SCREEN) { NewTaskScreen(setTopBarState) }
                                         composable(NEW_PROJECT_SCREEN) {
-                                            NewProjectScreen(setTopBarState)
+                                            NewProjectScreen(setTopBarState, navController, )
                                         }
                                     }
                                 }
