@@ -1,5 +1,7 @@
 package com.dmitrysukhov.lifetracker.todo
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,8 +47,11 @@ import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
+const val TODOLIST_SCREEN = "Todo List"
 
 @Composable
 fun TodoListScreen(
@@ -128,26 +134,29 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
                 item.durationMinutes?.let { duration -> DurationBadge(duration, isRunning) }
                 if (item.reminderTime != null || item.repeatInterval != null) {
                     Spacer(modifier = Modifier.height(4.dp))
-
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         item.reminderTime?.let { time ->
+                            val startOfDay = getStartOfDay(time)
+                            val animatedTime = remember { Animatable(startOfDay.toFloat()) }
+                            LaunchedEffect(time) {
+                                animatedTime.animateTo(
+                                    targetValue = time.toFloat(),
+                                    animationSpec = tween(durationMillis = 1000)
+                                )
+                            }
                             Text(
-                                text = formatTime(time),
-                                color = Color.Red,
-                                fontSize = 12.sp,
-                                fontFamily = Montserrat,
+                                text = formatTime(animatedTime.value.toLong()), color = Color.Red,
+                                fontSize = 12.sp, fontFamily = Montserrat,
                                 fontWeight = FontWeight.Medium
                             )
+
                             Icon(
                                 painter = painterResource(R.drawable.bell),
-                                contentDescription = null,
-                                tint = Color.Red,
-                                modifier = Modifier
+                                contentDescription = null, tint = Color.Red, modifier = Modifier
                                     .padding(start = 4.dp)
                                     .size(14.dp)
                             )
                         }
-
                         item.repeatInterval?.let {
                             Icon(
                                 painter = painterResource(R.drawable.repeat),
@@ -165,8 +174,6 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
     }
 }
 
-const val TODOLIST_SCREEN = "Todo List"
-
 fun formatDuration(seconds: Int): String {
     val hrs = seconds / 3600
     val mins = (seconds % 3600) / 60
@@ -179,8 +186,25 @@ fun formatTime(timestamp: Long): String {
     return formatter.format(Date(timestamp))
 }
 
+fun getStartOfDay(currentTime: Long): Long {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = currentTime
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    return calendar.timeInMillis
+}
+
 @Composable
 fun DurationBadge(duration: Int, isRunning: Boolean) {
+    val animatedDuration = remember { Animatable(0f) }
+    LaunchedEffect(duration) {
+        animatedDuration.animateTo(
+            targetValue = duration.toFloat(),
+            animationSpec = tween(durationMillis = 1000) // 1 секунда
+        )
+    }
     val backgroundColor = if (isRunning) PineColor else BgColor
     val contentColor = if (isRunning) Color.White else PineColor
     Row(
@@ -201,7 +225,7 @@ fun DurationBadge(duration: Int, isRunning: Boolean) {
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            text = formatDuration(duration),
+            text = formatDuration(animatedDuration.value.toInt()), // Используем анимированное значение
             color = contentColor,
             fontSize = 12.sp, lineHeight = 10.sp,
             fontFamily = Montserrat,
@@ -209,7 +233,6 @@ fun DurationBadge(duration: Int, isRunning: Boolean) {
         )
     }
 }
-
 
 @Composable
 fun ProjectTag(text: String, color: Color) {
