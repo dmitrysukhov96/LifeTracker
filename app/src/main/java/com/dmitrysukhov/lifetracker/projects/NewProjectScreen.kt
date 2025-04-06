@@ -93,9 +93,7 @@ fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHo
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (description.isEmpty()) Text(
                         stringResource(R.string.description),
-                        fontSize = 16.sp,
-                        fontWeight = W500,
-                        fontFamily = Montserrat,
+                        fontSize = 16.sp, fontWeight = W500, fontFamily = Montserrat,
                         color = PineColor.copy(0.5f)
                     )
                     innerTextField()

@@ -82,7 +82,7 @@ fun ProjectsScreen(
                 progress = "${project.completedTasks}/${project.totalTasks} выполнено",
                 deadline = deadlineText, showImage = project == projects[0],
                 gradient = generateGradient(Color(project.color)), onClick = {
-                    // navController.navigate(...) если нужно
+                     navController.navigate(VIEW_PROJECT_SCREEN)
                 })
 
             Spacer(modifier = Modifier.height(16.dp))
