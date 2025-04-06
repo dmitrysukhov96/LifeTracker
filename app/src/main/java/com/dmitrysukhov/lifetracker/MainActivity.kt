@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -100,6 +101,7 @@ import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
+import com.google.android.gms.tasks.Task
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -396,11 +398,11 @@ class MainActivity : ComponentActivity() {
             ) {
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Описание:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Blue)
+                Text("Описание:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF669DE5))
                 Text("написать диплом Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum", fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Цель:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Blue)
+                    Text("Цель:", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF669DE5))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("закончить универ", fontSize = 14.sp)
                 }
@@ -409,31 +411,43 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(Color.Blue)
+                        .background(Color(0xFF669DE5))
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.task),
+                        contentDescription = "Иконка задач",
+                        tint = Color(0xFF669DE5),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Задачи:", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(290.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                     IconButton(onClick = {}) {
-                        Icon(Icons.Default.Add, contentDescription = "Добавить задачу", tint = Color.Blue, modifier = Modifier.size(32.dp))
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Добавить задачу",
+                            tint = Color(0xFF669DE5),
+                            modifier = Modifier.size(32.dp)
+                        )
+
+
                     }
                 }
-                Spacer(modifier = Modifier.height(4.dp)) // Added some space before the line
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(Color.Blue)
+                        .background(Color(0xFF669DE5))
                 )
             }
-        }
-    }
+
+}}}
     private fun NewTaskScreen(setTopBarState: (TopBarState) -> Unit) {
         TODO("Not yet implemented")
     }
-}
+
 
 data class Destination(val title: String, val route: String, val icon: Painter)
 
