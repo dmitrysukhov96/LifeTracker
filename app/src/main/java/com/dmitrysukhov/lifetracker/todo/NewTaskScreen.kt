@@ -34,12 +34,9 @@ import java.util.*
 
 @Composable
 fun NewTaskScreen(
-    setTopBarState: (TopBarState) -> Unit,
-    viewModel: TodoViewModel,
+    setTopBarState: (TopBarState) -> Unit, viewModel: TodoViewModel,
     navController: NavHostController
 ) {
-    val selectedTask by viewModel.selectedTask.collectAsState()
-
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
     var selectedTime by rememberSaveable { mutableStateOf("Завтра 15:00") }
@@ -47,14 +44,6 @@ fun NewTaskScreen(
     var repeatDays by rememberSaveable { mutableStateOf(setOf<String>()) }
     var taskDuration by rememberSaveable { mutableStateOf("00:45:00") }
     val context = LocalContext.current
-
-
-    LaunchedEffect(selectedTask) {
-        selectedTask?.let {
-            title = it.text
-            description = it.description ?: ""
-        }
-    }
 
     val globalTextStyle = TextStyle(
         fontFamily = FontFamily(Font(R.font.montserrat_regular)), fontSize = 16.sp,
@@ -70,7 +59,6 @@ fun NewTaskScreen(
                 title = topBarTitle,
                 topBarActions = {
                     if (title.isNotEmpty()) IconButton({
-
                         viewModel.addTask(title)
                         Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
                         navController.navigateUp()
@@ -132,7 +120,6 @@ fun NewTaskScreen(
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
 
-            // Выбор времени
             TaskOption(selectedTime, R.drawable.data) {
                 val calendar = Calendar.getInstance()
                 TimePickerDialog(
@@ -146,8 +133,6 @@ fun NewTaskScreen(
                 ).show()
             }
             HorizontalDivider()
-
-            // Прочие опции задания
             TaskOption(stringResource(R.string.shopping), R.drawable.proekt, showIcon = true) {}
             HorizontalDivider()
             TaskOption(stringResource(R.string.reminders), R.drawable.bell) {}
@@ -179,8 +164,6 @@ fun NewTaskScreen(
             }
 
             HorizontalDivider()
-
-            // Повтор
             TaskOption(stringResource(R.string.repeat), R.drawable.repeat) {}
             Row(
                 Modifier
@@ -210,12 +193,12 @@ fun NewTaskScreen(
             }
             HorizontalDivider()
 
-            // Время для задания
             TaskOption(stringResource(R.string.time_for_task), R.drawable.vremya) {
                 TimePickerDialog(
                     context,
                     { _, hour, minute ->
-                        taskDuration = String.format(Locale.getDefault(), "%02d:%02d:00", hour, minute)
+                        taskDuration =
+                            String.format(Locale.getDefault(), "%02d:%02d:00", hour, minute)
                     }, 0, 45, true
                 ).show()
             }

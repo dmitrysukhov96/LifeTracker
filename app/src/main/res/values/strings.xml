@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">LifeTracker</string>
+    <string name="main_screen">Main Screen</string>
+    <string name="description">Description</string>
+    <string name="goal_colon">Goal:</string>
     <string name="new_task">New Task</string>
     <string name="save_task_toast">Task saved</string>
     <string name="title_hint">Title</string>
