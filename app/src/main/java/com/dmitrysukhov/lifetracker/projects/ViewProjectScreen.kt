@@ -53,13 +53,13 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavH
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             "Описание:", lineHeight = 20.sp,
-            fontSize = 12.sp, fontFamily = Montserrat,
+            fontSize = 14.sp, fontFamily = Montserrat,
             fontWeight = FontWeight.Bold, letterSpacing = 0.sp,
             color = color
         )
         Text(
             "написать диплом Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum",
-            fontSize = 12.sp, fontFamily = Montserrat, lineHeight = 18.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.sp
+            fontSize = 14.sp, fontFamily = Montserrat, lineHeight = 18.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row {
@@ -72,7 +72,7 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavH
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 "закончить универ",
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 fontFamily = Montserrat,
                 letterSpacing = 0.sp,
                 lineHeight = 18.sp,

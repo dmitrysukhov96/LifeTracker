@@ -193,7 +193,7 @@ class MainActivity : ComponentActivity() {
                                         if (isRootScreen) {
                                             IconButton(
                                                 onClick = { scope.launch { drawerState.open() } },
-                                                modifier = Modifier.padding(start = 10.dp)
+                                                modifier = Modifier.padding(start = 10.dp).align(Alignment.CenterStart)
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Menu,
@@ -203,7 +203,7 @@ class MainActivity : ComponentActivity() {
                                         } else {
                                             IconButton(
                                                 onClick = { navController.popBackStack() },
-                                                modifier = Modifier.padding(start = 10.dp)
+                                                modifier = Modifier.padding(start = 10.dp).align(Alignment.CenterStart)
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
