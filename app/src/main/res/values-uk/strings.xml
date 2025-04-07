@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_screen">Головний екран</string>
+    <string name="description">Опис</string>
+    <string name="goal_colon">Ціль:</string>
     <string name="new_task">Нове завдання</string>
     <string name="save_task_toast">Завдання збережено</string>
     <string name="title_hint">Заголовок</string>

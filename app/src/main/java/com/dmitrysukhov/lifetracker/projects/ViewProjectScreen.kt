@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
@@ -60,7 +61,7 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavH
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row {
-            Text("Цель:", style = BoldText, color = color)
+            Text(stringResource(R.string.goal_colon), style = BoldText, color = color)
             Spacer(modifier = Modifier.width(8.dp))
             Text("закончить универ", style = SimpleText, color = InverseColor)
         }
