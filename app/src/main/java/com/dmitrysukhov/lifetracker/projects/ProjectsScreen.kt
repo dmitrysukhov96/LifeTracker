@@ -28,14 +28,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
-import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.utils.H2
+import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -116,35 +115,21 @@ fun ProjectItem(
                 )
     ) {
         if (showImage) Image(
-            painter = painterResource(R.drawable.egg),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize().alpha(0.9f),
-            contentScale = ContentScale.Crop
+            painter = painterResource(R.drawable.egg), contentDescription = null,
+            modifier = Modifier.fillMaxSize().alpha(0.9f), contentScale = ContentScale.Crop
         )
         Text(
-            text = title,
-            fontSize = 14.sp,
-            fontFamily = Montserrat,
-            fontWeight = FontWeight.Medium,
-            color = Color.White,
+            text = title, style = H2, color = Color.White,
             modifier = Modifier.padding(start = 20.dp, top = 8.dp)
         )
         Text(
-            text = progress,
-            fontSize = 12.sp,
-            fontFamily = Montserrat,
-            fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.8f),
+            text = progress, style = SimpleText, color = Color.White.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 8.dp)
         )
         Text(
-            text = deadline,
-            fontSize = 12.sp,
-            fontFamily = Montserrat,
-            fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha = 0.8f),
+            text = deadline, style = SimpleText, color = Color.White.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 8.dp)

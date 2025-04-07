@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.text.font.FontWeight.Companion.W700
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +32,8 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.H1
+import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
@@ -64,15 +65,11 @@ fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHo
     ) {
         Spacer(modifier = Modifier.height(24.dp))
         BasicTextField(
-            value = title, onValueChange = { title = it }, textStyle = TextStyle(
-                fontSize = 18.sp, fontWeight = W700, fontFamily = Montserrat,
-                color = InverseColor,
-            ), decorationBox = { innerTextField ->
+            value = title, onValueChange = { title = it },
+            textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    if (title.isEmpty()) Text(
-                        "Заголовок", fontSize = 18.sp, fontWeight = W700,
-                        fontFamily = Montserrat, color = PineColor.copy(0.5f)
-                    )
+                    if (title.isEmpty())
+                        Text("Заголовок", style = H1, color = PineColor.copy(0.5f))
                     innerTextField()
                 }
             }, modifier = Modifier.fillMaxWidth()
@@ -93,8 +90,7 @@ fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHo
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (description.isEmpty()) Text(
                         stringResource(R.string.description),
-                        fontSize = 16.sp, fontWeight = W500, fontFamily = Montserrat,
-                        color = PineColor.copy(0.5f)
+                        style = H2, color = PineColor.copy(0.5f)
                     )
                     innerTextField()
                 }

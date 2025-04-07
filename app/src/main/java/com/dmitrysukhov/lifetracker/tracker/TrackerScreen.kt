@@ -23,9 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.todo.formatTime
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import kotlinx.coroutines.delay
 
@@ -100,7 +100,7 @@ fun TrackerScreen(
             items(todayEvents) { event ->
                 val start = formatTime(event.startTime)
                 val end = event.endTime?.let { formatTime(it) } ?: "…"
-                Text("• $start – $end", fontSize = 14.sp)
+                Text("• $start – $end", style = SimpleText)
             }
         }
     }

@@ -50,9 +50,12 @@ import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.DarkerPine
+import com.dmitrysukhov.lifetracker.utils.H1
+import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.util.Calendar
 import java.util.Locale
@@ -102,10 +105,8 @@ fun NewTaskScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             BasicTextField(
-                value = title, onValueChange = { title = it }, textStyle = TextStyle(
-                    fontSize = 18.sp, fontWeight = W700, fontFamily = Montserrat,
-                    color = InverseColor,
-                ), decorationBox = { innerTextField ->
+                value = title, onValueChange = { title = it },
+                textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (title.isEmpty()) Text(
                             "Заголовок", fontSize = 18.sp, fontWeight = W700,
@@ -119,14 +120,8 @@ fun NewTaskScreen(
             HorizontalDivider()
 
             BasicTextField(
-                value = description,
-                onValueChange = { description = it },
-                textStyle = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = W700,
-                    fontFamily = Montserrat,
-                    color = InverseColor
-                ),
+                value = description, onValueChange = { description = it },
+                textStyle = SimpleText.copy(color = InverseColor),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (description.isEmpty()) Text(
@@ -173,25 +168,15 @@ fun NewTaskScreen(
                 reminders.forEach { reminder ->
                     Row(
                         modifier = Modifier
-                            .background(
-                                AccentColor,
-                                shape = RoundedCornerShape(20.dp)
-                            ) // Овальный фон
+                            .background(AccentColor, shape = RoundedCornerShape(20.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = reminder,
-                            fontSize = 14.sp,
-                            color = DarkerPine,
-                            fontWeight = W500,
-                            fontFamily = Montserrat
-                        )
+                        Text(text = reminder, style = SimpleText, color = DarkerPine,)
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
-                            painter = painterResource(id = R.drawable.krest), // Замените на ваш ресурс
-                            contentDescription = null,
-                            tint = DarkerPine,
+                            painter = painterResource(id = R.drawable.krest),
+                            contentDescription = null, tint = DarkerPine,
                             modifier = Modifier
                                 .size(16.dp)
                                 .clickable { reminders = reminders - reminder }
@@ -210,26 +195,21 @@ fun NewTaskScreen(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-
                 days.forEach { day ->
                     val isSelected = repeatDays.contains(day)
                     Box(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(if (isSelected) AccentColor else Color.White)
+                            .background(if (isSelected) AccentColor else Color.Unspecified)
                             .border(2.dp, AccentColor, CircleShape)
                             .clickable {
                                 repeatDays = if (isSelected) repeatDays - day else repeatDays + day
-                            },
-                        contentAlignment = Alignment.Center
+                            }, contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = day,
-                            fontSize = 14.sp,
-                            fontWeight = W500,
-                            fontFamily = FontFamily.SansSerif,
-                            color = if (isSelected) Color.Black else Color.Black
+                            text = day, style = SimpleText,
+                            color = if (isSelected) Color.Black else InverseColor
                         )
                     }
                 }
@@ -254,15 +234,7 @@ fun NewTaskScreen(
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = taskDuration,
-                    fontSize = 18.sp,
-                    fontWeight = W500,
-                    fontFamily = FontFamily.SansSerif,
-                    color = Color.Black
-                )
-            }
+            ) { Text(text = taskDuration, style = H2, color = InverseColor) }
             HorizontalDivider()
         }
     }
@@ -279,20 +251,14 @@ fun TaskOption(text: String, iconRes: Int, showIcon: Boolean = false, onClick: (
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = null,
-                tint = PineColor
-            )
+            Icon(painter = painterResource(iconRes), contentDescription = null, tint = PineColor)
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text, fontSize = 16.sp, color = InverseColor)
+            Text(text, style = H2, color = InverseColor)
         }
-        if (showIcon) {
-            Icon(
-                painter = painterResource(id = R.drawable.ministrelka),
-                contentDescription = null, tint = PineColor
-            )
-        }
+        if (showIcon) Icon(
+            painter = painterResource(id = R.drawable.ministrelka),
+            contentDescription = null, tint = PineColor
+        )
     }
 }
 

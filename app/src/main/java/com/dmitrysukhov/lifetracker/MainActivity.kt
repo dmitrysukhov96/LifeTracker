@@ -90,6 +90,7 @@ import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
@@ -262,7 +263,7 @@ class MainActivity : ComponentActivity() {
                                                             Text(
                                                                 "Введите задачу...",
                                                                 color = Color.White,
-                                                                fontSize = 14.sp
+                                                                style = H2
                                                             )
 
                                                         }

@@ -34,17 +34,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.InverseColor
-import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
-import com.dmitrysukhov.lifetracker.TodoItem
+import com.dmitrysukhov.lifetracker.utils.SimpleText
+import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -99,8 +98,7 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
     ) {
         Image(
             painter = painterResource(if (item.isDone) R.drawable.checked else R.drawable.not_checked),
-            contentDescription = null,
-            modifier = Modifier
+            contentDescription = null, modifier = Modifier
                 .clickable { onCheckedChange(!item.isDone) }
                 .size(20.dp)
         )
@@ -113,19 +111,14 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
             ) {
                 Text(
                     text = item.text, textDecoration = if (item.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                    fontFamily = Montserrat,
-                    fontSize = 14.sp, lineHeight = 19.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = if (item.isDone) PineColor else InverseColor,
+                    style = SimpleText, color = if (item.isDone) PineColor else InverseColor,
                     modifier = Modifier.weight(1f)
                 )
                 item.projectId?.let { //todo project name by id
                     ProjectTag(text = "Покупки", color = Color(0xFFFFA726))
                 }
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -146,8 +139,7 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
                             }
                             Text(
                                 text = formatTime(animatedTime.value.toLong()), color = Color.Red,
-                                fontSize = 12.sp, fontFamily = Montserrat,
-                                fontWeight = FontWeight.Medium
+                                style = Small
                             )
 
                             Icon(
@@ -219,17 +211,12 @@ fun DurationBadge(duration: Int, isRunning: Boolean) {
     ) {
         Icon(
             painter = painterResource(if (isRunning) R.drawable.stop else R.drawable.play),
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(8.dp)
+            contentDescription = null, tint = contentColor, modifier = Modifier.size(8.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            text = formatDuration(animatedDuration.value.toInt()), // Используем анимированное значение
-            color = contentColor,
-            fontSize = 12.sp, lineHeight = 10.sp,
-            fontFamily = Montserrat,
-            fontWeight = FontWeight.Medium
+            text = formatDuration(animatedDuration.value.toInt()),
+            color = contentColor, style = Small
         )
     }
 }
@@ -240,10 +227,5 @@ fun ProjectTag(text: String, color: Color) {
         Modifier
             .background(color, shape = RoundedCornerShape(52))
             .padding(horizontal = 8.dp, vertical = 2.dp)
-    ) {
-        Text(
-            fontFamily = Montserrat, text = text, color = Color.White, fontSize = 12.sp,
-            lineHeight = 18.sp, fontWeight = FontWeight.Medium,
-        )
-    }
+    ) { Text(text = text, color = Color.White, style = Small) }
 }
