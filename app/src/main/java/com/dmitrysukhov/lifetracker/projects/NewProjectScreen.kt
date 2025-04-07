@@ -89,7 +89,7 @@ fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHo
             decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (description.isEmpty()) Text(
-                        stringResource(R.string.description),
+                        stringResource(R.string.description_hint),
                         style = H2, color = PineColor.copy(0.5f)
                     )
                     innerTextField()
