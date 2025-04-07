@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">LifeTracker</string>
-    <string name="main_screen">Main Screen</string>
-    <string name="description">Description</string>
+    <string name="new_task">New Task</string>
+    <string name="save_task_toast">Task saved</string>
+    <string name="title_hint">Title</string>
+    <string name="description_hint">Description</string>
+    <string name="reminders">Reminders</string>
+    <string name="repeat">Repeat</string>
+    <string name="time_for_task">Time for task</string>
+    <string name="category">Category</string>
+    <string name="shopping">Shopping</string>
 </resources>

@@ -5,32 +5,13 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,18 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
-import com.dmitrysukhov.lifetracker.utils.AccentColor
-import com.dmitrysukhov.lifetracker.utils.BgColor
-import com.dmitrysukhov.lifetracker.utils.DarkerPine
-import com.dmitrysukhov.lifetracker.utils.H1
-import com.dmitrysukhov.lifetracker.utils.H2
-import com.dmitrysukhov.lifetracker.utils.InverseColor
-import com.dmitrysukhov.lifetracker.utils.Montserrat
-import com.dmitrysukhov.lifetracker.utils.PineColor
-import com.dmitrysukhov.lifetracker.utils.SimpleText
-import com.dmitrysukhov.lifetracker.utils.TopBarState
-import java.util.Calendar
-import java.util.Locale
+import com.dmitrysukhov.lifetracker.utils.*
+import java.util.*
 
 @Composable
 fun NewTaskScreen(
@@ -67,24 +38,28 @@ fun NewTaskScreen(
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
-    var selectedTime by rememberSaveable { mutableStateOf("Завтра 15:00") } //todo до этого дойдем
-    var reminders by rememberSaveable { mutableStateOf(listOf("Сегодня 22:30", "Завтра 11:00")) } //
-    var repeatDays by rememberSaveable { mutableStateOf(setOf<String>()) }//
-    var taskDuration by rememberSaveable { mutableStateOf("00:45:00") }//
+    var selectedTime by rememberSaveable { mutableStateOf("Завтра 15:00") }
+    var reminders by rememberSaveable { mutableStateOf(listOf("Сегодня 22:30", "Завтра 11:00")) }
+    var repeatDays by rememberSaveable { mutableStateOf(setOf<String>()) }
+    var taskDuration by rememberSaveable { mutableStateOf("00:45:00") }
     val context = LocalContext.current
-    //Подобавлять всем текстам вес и шрифт
+
     val globalTextStyle = TextStyle(
         fontFamily = FontFamily(Font(R.font.montserrat_regular)), fontSize = 16.sp,
         color = Color.Black
     )
 
+    val topBarTitle = stringResource(R.string.new_task)
+    val saveToastText = stringResource(R.string.save_task_toast)
+
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState(//todo локализация
-                title = "New Task", topBarActions = {
+            TopBarState(
+                title = topBarTitle,
+                topBarActions = {
                     if (title.isNotEmpty()) IconButton({
                         viewModel.addTask(title)
-                        Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
                         navController.navigateUp()
                     }) {
                         Icon(
@@ -96,6 +71,7 @@ fun NewTaskScreen(
             )
         )
     }
+
     CompositionLocalProvider(LocalTextStyle provides globalTextStyle) {
         Column(
             modifier = Modifier
@@ -109,13 +85,16 @@ fun NewTaskScreen(
                 textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (title.isEmpty()) Text(
-                            "Заголовок", fontSize = 18.sp, fontWeight = W700,
-                            fontFamily = Montserrat, color = PineColor.copy(0.5f)
+                            stringResource(R.string.title_hint),
+                            fontSize = 18.sp,
+                            fontWeight = W700,
+                            fontFamily = Montserrat,
+                            color = PineColor.copy(0.5f)
                         )
                         innerTextField()
                     }
                 }, modifier = Modifier.fillMaxWidth()
-            ) //todo диме посмотреть как ограничить высоту компонента или кол-во символов
+            )
             Spacer(modifier = Modifier.height(8.dp))
             HorizontalDivider()
 
@@ -125,7 +104,7 @@ fun NewTaskScreen(
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (description.isEmpty()) Text(
-                            stringResource(R.string.description),
+                            stringResource(R.string.description_hint),
                             fontSize = 16.sp,
                             fontWeight = W500,
                             fontFamily = Montserrat,
@@ -153,13 +132,10 @@ fun NewTaskScreen(
                 ).show()
             }
             HorizontalDivider()
-            TaskOption("Покупки", R.drawable.proekt, showIcon = true) {}
+            TaskOption(stringResource(R.string.shopping), R.drawable.proekt, showIcon = true) {}
             HorizontalDivider()
-            TaskOption("Напоминания", R.drawable.bell) {}
+            TaskOption(stringResource(R.string.reminders), R.drawable.bell) {}
 
-
-            //Сделать функцию добовления
-            //заменить крестик как на дизайне,тонкий и серый
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -172,7 +148,7 @@ fun NewTaskScreen(
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = reminder, style = SimpleText, color = DarkerPine,)
+                        Text(text = reminder, style = SimpleText, color = DarkerPine)
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.krest),
@@ -187,7 +163,7 @@ fun NewTaskScreen(
             }
 
             HorizontalDivider()
-            TaskOption("Повторение", R.drawable.repeat) {}
+            TaskOption(stringResource(R.string.repeat), R.drawable.repeat) {}
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -216,9 +192,7 @@ fun NewTaskScreen(
             }
             HorizontalDivider()
 
-            (Modifier
-                .width(352.dp))
-            TaskOption("Время на задачу", R.drawable.vremya) {
+            TaskOption(stringResource(R.string.time_for_task), R.drawable.vremya) {
                 TimePickerDialog(
                     context,
                     { _, hour, minute ->
@@ -234,7 +208,9 @@ fun NewTaskScreen(
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
-            ) { Text(text = taskDuration, style = H2, color = InverseColor) }
+            ) {
+                Text(text = taskDuration, style = H2, color = InverseColor)
+            }
             HorizontalDivider()
         }
     }

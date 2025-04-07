@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="main_screen">Главный экран</string>
-    <string name="description">Описание</string>
+    <string name="new_task">Новая задача</string>
+    <string name="save_task_toast">Задача сохранена</string>
+    <string name="title_hint">Заголовок</string>
+    <string name="description_hint">Описание</string>
+    <string name="reminders">Напоминания</string>
+    <string name="repeat">Повторение</string>
+    <string name="time_for_task">Время на задачу</string>
+    <string name="category">Категория</string>
+    <string name="shopping">Покупки</string>
 </resources>
