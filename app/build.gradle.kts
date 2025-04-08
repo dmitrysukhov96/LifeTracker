@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.play.services.tasks)
     ksp(libs.hilt.compiler)
     implementation(libs.joda.time)
     ksp(libs.androidx.room.compiler)

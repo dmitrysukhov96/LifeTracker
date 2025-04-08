@@ -2,6 +2,9 @@
 <resources>
     <string name="main_screen">Главный экран</string>
     <string name="description">Описание</string>
+    <string name="description_colon">Описание:</string>
+    <string name="tasks_colon">Задачи:</string>
+    <string name="add_task">Добавить задачу</string>
     <string name="goal_colon">Цель:</string>
     <string name="new_task">Новая задача</string>
     <string name="save_task_toast">Задача сохранена</string>

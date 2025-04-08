@@ -52,7 +52,7 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavH
             .padding(horizontal = 24.dp),
     ) {
         Spacer(modifier = Modifier.height(20.dp))
-        Text("Описание:", style = BoldText, color = color)
+        Text(stringResource(R.string.description_colon), style = BoldText, color = color)
         Text(
             "написать диплом Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum",
             style = SimpleText,
@@ -74,12 +74,12 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavH
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Задачи:", style = H2, color = InverseColor)
+            Text(stringResource(R.string.tasks_colon), style = H2, color = InverseColor)
             Spacer(modifier = Modifier.weight(1f))
             IconButton(modifier = Modifier.size(16.dp), onClick = {}) {
                 Icon(
                     painter = painterResource(R.drawable.plus),
-                    contentDescription = "Добавить задачу",
+                    contentDescription = stringResource(R.string.add_task),
                     tint = Color(0xFF669DE5)
                 )
             }

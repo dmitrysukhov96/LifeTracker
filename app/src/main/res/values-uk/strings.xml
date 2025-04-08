@@ -2,8 +2,11 @@
 <resources>
     <string name="main_screen">Головний екран</string>
     <string name="description">Опис</string>
+    <string name="description_colon">Опис:</string>
     <string name="goal_colon">Ціль:</string>
     <string name="new_task">Нове завдання</string>
+    <string name="tasks_colon">Завдання:</string>
+    <string name="add_task">Додати завдання</string>
     <string name="save_task_toast">Завдання збережено</string>
     <string name="title_hint">Заголовок</string>
     <string name="description_hint">Опис</string>
