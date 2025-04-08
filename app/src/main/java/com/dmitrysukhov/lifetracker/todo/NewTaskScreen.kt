@@ -36,8 +36,8 @@ fun NewTaskScreen(
     setTopBarState: (TopBarState) -> Unit, viewModel: TodoViewModel,
     navController: NavHostController
 ) {
-    var title by rememberSaveable { mutableStateOf("") }
-    var description by rememberSaveable { mutableStateOf("") }
+    var title by rememberSaveable { mutableStateOf(viewModel.selectedTask?.text ?: "") }
+    var description by rememberSaveable { mutableStateOf(viewModel.selectedTask?.description ?: "") }
     var selectedTime by rememberSaveable { mutableStateOf("Завтра 15:00") }
     var reminders by rememberSaveable { mutableStateOf(listOf("Сегодня 22:30", "Завтра 11:00")) }
     var repeatDays by rememberSaveable { mutableStateOf(setOf<String>()) }

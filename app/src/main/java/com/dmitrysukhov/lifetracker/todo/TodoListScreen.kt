@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
@@ -57,17 +58,17 @@ fun TodoListScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
     viewModel: TodoViewModel
 ) {
-    val todoList by viewModel.todoList.collectAsState()
-
+    val todoList by viewModel.todoList.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState("LifeTracker") {
-            IconButton({ navController.navigate(NEW_TASK_SCREEN) }) {
+            IconButton({
+                viewModel.selectedTask = null
+                navController.navigate(NEW_TASK_SCREEN) }) {
                 Icon(
                     painterResource(R.drawable.plus),
-                    contentDescription = null,
-                    tint = Color.White
-            )
-    }
+                    contentDescription = null, tint = Color.White
+                )
+            }
         })
     }
     Column(
@@ -77,12 +78,16 @@ fun TodoListScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         LazyColumn(Modifier.padding(horizontal = 24.dp)) {
-        items(todoList) { todoItem ->
+            items(todoList) { todoItem ->
                 TodoListItem(
                     item = todoItem,
                     onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) },
-                    todoList.indexOf(todoItem) == 0 //todo real watching in tracker db
-        )
+                    isRunning = todoList.indexOf(todoItem) == 0,
+                    onClick = {
+                        viewModel.selectedTask = todoItem
+                        navController.navigate(NEW_TASK_SCREEN)
+                    }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -91,10 +96,11 @@ fun TodoListScreen(
 
 
 @Composable
-fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: Boolean) {
+fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.Top
     ) {
@@ -112,8 +118,10 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = item.text, textDecoration = if (item.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                    style = SimpleText, color = if (item.isDone) PineColor else InverseColor,
+                    text = item.text,
+                    textDecoration = if (item.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                    style = SimpleText,
+                    color = if (item.isDone) PineColor else InverseColor,
                     modifier = Modifier.weight(1f)
                 )
                 item.projectId?.let { //todo project name by id

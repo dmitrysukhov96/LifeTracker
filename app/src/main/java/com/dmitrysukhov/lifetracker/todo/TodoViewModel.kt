@@ -14,6 +14,7 @@ import javax.inject.Inject
 class TodoViewModel @Inject constructor(
     private val todoDao: TodoDao
 ) : ViewModel() {
+    var selectedTask: TodoItem? = null
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
     val todoList: StateFlow<List<TodoItem>> = _todoList.asStateFlow()
 
