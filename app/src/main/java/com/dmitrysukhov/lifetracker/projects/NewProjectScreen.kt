@@ -3,7 +3,7 @@ package com.dmitrysukhov.lifetracker.projects
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -110,8 +109,12 @@ fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHo
             modifier = Modifier.fillMaxWidth()
         )
         Column(Modifier.padding(top = 32.dp)) {
-            Row () {
-                Image(painter = painterResource(R.drawable.palette), contentDescription = "", Modifier.padding(end = 8.dp))
+            Row (Modifier.padding(bottom = 10.dp)){
+                Image(
+                    painter = painterResource(R.drawable.palette),
+                    contentDescription = "",
+                    Modifier.padding(end = 8.dp)
+                )
                 Text(text = "Выберите цвет проекта", style = H2)
             }
             val colors = listOf(
@@ -139,28 +142,54 @@ fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHo
 
             var selectedColor by remember { mutableStateOf(colors[0]) }
 
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
-                    .padding(10.dp)
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
             ) {
-                colors.forEach { color ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(8.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .clickable { selectedColor = color }
-                    ) {
-                        if (selectedColor == color) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Выбран",
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        for (i in 0 until 10) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(colors[i])
+                                    .clickable { selectedColor = colors[i] }
+                            ) {
+                                if (selectedColor == colors[i]) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.padding(4.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        for (i in 10 until 20) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(colors[i])
+                                    .clickable { selectedColor = colors[i] }
+                            ) {
+                                if (selectedColor == colors[i]) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
