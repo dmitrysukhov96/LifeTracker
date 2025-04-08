@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
-import com.dmitrysukhov.lifetracker.todo.TodoListItem
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.BoldText
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -86,18 +85,15 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavH
             }
             Spacer(Modifier.width(20.dp))
         }
-        TodoListItem(
-            TodoItem(
-                0, "Купить удлинитель, порошок", "", null,
-                System.currentTimeMillis(), 2345, "", 456, false
-            ), {}, false
+        TodoItem(
+            0, "Купить удлинитель, порошок", "", null,
+            System.currentTimeMillis(), 2345, "", 456, false
         )
         Spacer(Modifier.height(28.dp))
         HorizontalDivider(color = color.copy(alpha = 0.5f))
     }
 
 }
-
 
 
 val VIEW_PROJECT_SCREEN = "view project screen"

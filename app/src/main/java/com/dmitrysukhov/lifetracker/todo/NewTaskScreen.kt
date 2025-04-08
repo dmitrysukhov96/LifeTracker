@@ -1,6 +1,5 @@
 package com.dmitrysukhov.lifetracker.todo
 
-import TodoViewModel
 import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.background

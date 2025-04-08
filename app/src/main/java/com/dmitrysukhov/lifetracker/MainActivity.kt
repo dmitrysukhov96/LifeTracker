@@ -1,8 +1,5 @@
 package com.dmitrysukhov.lifetracker
 
-
-
-import TodoViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -89,6 +86,7 @@ import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
 import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
 import com.dmitrysukhov.lifetracker.todo.TodoListScreen
+import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
 import com.dmitrysukhov.lifetracker.utils.BgColor
@@ -311,11 +309,8 @@ class MainActivity : ComponentActivity() {
                                             )
                                     ) {
                                         composable(TODOLIST_SCREEN) {
-                                            val viewModel: TodoViewModel = hiltViewModel()
                                             TodoListScreen(
-                                                setTopBarState = setTopBarState,
-                                                navController = navController,
-                                                viewModel = viewModel
+                                                setTopBarState, navController, viewModel
                                             )
                                         }
                                         composable(VIEW_PROJECT_SCREEN) { ViewProjectScreen(setTopBarState, navController) }
