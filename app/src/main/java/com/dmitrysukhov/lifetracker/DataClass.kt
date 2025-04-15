@@ -33,6 +33,7 @@ data class Project(
 data class Event(
     @PrimaryKey(autoGenerate = true) val eventId: Long = 0,
     val projectId: Long,
+    val name: String? = null,
     val startTime: Long,
     val endTime: Long?
 )

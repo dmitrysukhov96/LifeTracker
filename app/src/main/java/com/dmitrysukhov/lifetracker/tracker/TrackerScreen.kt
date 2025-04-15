@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -37,14 +35,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.todo.ProjectTag
-import com.dmitrysukhov.lifetracker.todo.formatTime
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.BlackPine
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.Orange
 import com.dmitrysukhov.lifetracker.utils.PineColor
-import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import kotlinx.coroutines.delay
 
@@ -65,26 +61,16 @@ fun TrackerScreen(
             .background(BgColor)
     ) {
         TimeTracker(trackerViewModel)
-
+        
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Сегодняшние события:",
-            fontSize = 16.sp,
-            fontWeight = Bold,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        LazyColumn(
+        
+        TrackerTimeline(
+            events = todayEvents,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 16.dp)
-        ) {
-            items(todayEvents) { event ->
-                val start = formatTime(event.startTime)
-                val end = event.endTime?.let { formatTime(it) } ?: "…"
-                Text("• $start – $end", style = SimpleText)
-            }
-        }
+        )
     }
 }
 
@@ -115,10 +101,17 @@ fun TimeTracker(trackerViewModel: TrackerViewModel) {
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                "Task1lkmefklmfrkmlr lkm23", color = BlackPine, fontWeight = Bold,
-                fontFamily = Montserrat, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis
+                lastEvent?.name ?: "Без задачи...",
+                color = BlackPine,
+                fontWeight = Bold,
+                fontFamily = Montserrat,
+                fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            ProjectTag("Tag123", Orange)
+            lastEvent?.projectId?.let { projectId ->
+                ProjectTag("Project $projectId", Orange)
+            }
         }
 
         val timeText = when {
@@ -133,7 +126,9 @@ fun TimeTracker(trackerViewModel: TrackerViewModel) {
             fontWeight = Bold,
             fontFamily = Montserrat,
             fontSize = 20.sp,
-            modifier = Modifier.width(130.dp).padding(horizontal = 12.dp)
+            modifier = Modifier
+                .width(130.dp)
+                .padding(horizontal = 12.dp)
         )
 
         Row {
@@ -171,4 +166,5 @@ fun formatTimeElapsed(seconds: Long): String {
     val secs = seconds % 60
     return String.format("%02d:%02d:%02d", hrs, mins, secs)
 }
+
 const val TRACKER_SCREEN = "Tracker"
