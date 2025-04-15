@@ -1,5 +1,7 @@
 package com.dmitrysukhov.lifetracker.tracker
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.todo.ProjectTag
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.BlackPine
@@ -62,6 +66,7 @@ fun TrackerScreen(
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val events by trackerViewModel.getEventsForDate(selectedDate).collectAsState(initial = emptyList())
+    val projects by trackerViewModel.projects.collectAsState()
     var showTaskDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -85,6 +90,7 @@ fun TrackerScreen(
             events = events,
             selectedDate = selectedDate,
             onDateSelected = { selectedDate = it },
+            projects = projects,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -105,6 +111,11 @@ fun TimeTracker(
     var taskName by remember { mutableStateOf("") }
     var selectedProjectId by remember { mutableStateOf<Long?>(null) }
     var expanded by remember { mutableStateOf(false) }
+    
+    val backgroundColor by animateColorAsState(
+        targetValue = if (lastEvent?.endTime == null) AccentColor else Color(0xFFC2EBD6),
+        animationSpec = tween(durationMillis = 300)
+    )
 
     LaunchedEffect(lastEvent) {
         while (true) {
@@ -133,13 +144,14 @@ fun TimeTracker(
                     Text(
                         text = if (lastEvent == null) "Start New Task" else "Edit Task",
                         style = MaterialTheme.typography.titleLarge,
+                        fontFamily = Montserrat,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     
                     OutlinedTextField(
                         value = taskName,
                         onValueChange = { taskName = it },
-                        label = { Text("Task Name") },
+                        label = { Text("Task Name", fontFamily = Montserrat) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp)
@@ -157,7 +169,8 @@ fun TimeTracker(
                             Text(
                                 text = selectedProjectId?.let { id ->
                                     projects.find { it.projectId == id }?.title ?: "Select Project"
-                                } ?: "Select Project"
+                                } ?: "Select Project",
+                                fontFamily = Montserrat
                             )
                         }
                         DropdownMenu(
@@ -167,7 +180,7 @@ fun TimeTracker(
                         ) {
                             projects.forEach { project ->
                                 DropdownMenuItem(
-                                    text = { Text(project.title) },
+                                    text = { Text(project.title, fontFamily = Montserrat) },
                                     onClick = {
                                         selectedProjectId = project.projectId
                                         expanded = false
@@ -184,7 +197,7 @@ fun TimeTracker(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = { onShowTaskDialogChange(false) }) {
-                            Text("Cancel")
+                            Text("Cancel", fontFamily = Montserrat)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -202,7 +215,7 @@ fun TimeTracker(
                             },
                             enabled = taskName.isNotBlank() && selectedProjectId != null
                         ) {
-                            Text("OK")
+                            Text("OK", fontFamily = Montserrat)
                         }
                     }
                 }
@@ -216,7 +229,7 @@ fun TimeTracker(
             .padding(12.dp)
             .height(64.dp)
             .clip(RoundedCornerShape(100.dp))
-            .background(AccentColor)
+            .background(backgroundColor)
             .padding(horizontal = 20.dp)
             .clickable { 
                 taskName = lastEvent?.name ?: ""
@@ -235,16 +248,13 @@ fun TimeTracker(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = if (lastEvent?.endTime == null) {
-                    lastEvent?.projectId?.let { projectId ->
-                        projects.find { it.projectId == projectId }?.title ?: ""
-                    } ?: ""
-                } else "",
-                color = BlackPine.copy(alpha = 0.7f),
-                fontSize = 12.sp,
-                maxLines = 1
-            )
+            if (lastEvent?.endTime == null) {
+                lastEvent?.projectId?.let { projectId ->
+                    projects.find { it.projectId == projectId }?.let { project ->
+                        ProjectTag(text = project.title, color = Color(project.color))
+                    }
+                }
+            }
         }
 
         val timeText = when {

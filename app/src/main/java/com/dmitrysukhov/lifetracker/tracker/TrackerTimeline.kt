@@ -2,9 +2,11 @@ package com.dmitrysukhov.lifetracker.tracker
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,8 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dmitrysukhov.lifetracker.Event
+import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TimelineColor
 import org.joda.time.DateTime
@@ -40,6 +43,7 @@ fun TrackerTimeline(
     events: List<Event>,
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
+    projects: List<Project>,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -58,7 +62,7 @@ fun TrackerTimeline(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowLeft,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = "Previous day",
                 tint = PineColor,
                 modifier = Modifier
@@ -76,7 +80,7 @@ fun TrackerTimeline(
             )
             
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Next day",
                 tint = PineColor,
                 modifier = Modifier
@@ -154,8 +158,12 @@ fun TrackerTimeline(
                     val topPadding = ((startMinutes * 80) / 60).dp
                     val height = ((durationMinutes * 80) / 60).toInt().dp
 
+                    val project = projects.find { it.projectId == event.projectId }
+                    val color = project?.let { Color(it.color) } ?: Color(0xFF4CAF50)
+
                     EventBlock(
                         event = event,
+                        color = color,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(height)
@@ -176,30 +184,84 @@ fun TrackerTimeline(
 @Composable
 fun EventBlock(
     event: Event,
+    color: Color = Color(0xFF4CAF50),
     modifier: Modifier = Modifier
 ) {
+    val startTime = DateTime(event.startTime)
+    val endTime = event.endTime?.let { DateTime(it) } ?: DateTime.now()
+    val duration = Duration(startTime, endTime)
+    val durationMinutes = duration.standardMinutes
+    val isShortEvent = durationMinutes < 30
+
     Box(
         modifier = modifier
             .background(
-                color = Color(0xFF4CAF50),
+                color = color,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
             )
             .padding(8.dp)
     ) {
-        Column {
-            Text(
-                text = event.name ?: "Без названия",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                maxLines = 1
-            )
-            Text(
-                text = "Project ${event.projectId}",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 12.sp,
-                maxLines = 1
-            )
+        if (isShortEvent) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = event.name ?: "Без названия",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = formatDuration(durationMinutes),
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 12.sp,
+                    maxLines = 1
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = event.name ?: "Без названия",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    maxLines = 1
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Project ${event.projectId}",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = formatDuration(durationMinutes),
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        maxLines = 1
+                    )
+                }
+            }
         }
+    }
+}
+
+private fun formatDuration(minutes: Long): String {
+    val hours = minutes / 60
+    val remainingMinutes = minutes % 60
+    return if (hours > 0) {
+        String.format("%dh %dm", hours, remainingMinutes)
+    } else {
+        String.format("%dm", remainingMinutes)
     }
 } 
