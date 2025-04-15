@@ -3,60 +3,70 @@ package com.dmitrysukhov.lifetracker.tracker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitrysukhov.lifetracker.Event
+import com.dmitrysukhov.lifetracker.Project
+import com.dmitrysukhov.lifetracker.projects.ProjectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.joda.time.DateTime
-import org.joda.time.Duration
+import org.joda.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class TrackerViewModel @Inject constructor(
-    private val eventDao: EventDao
+    private val eventRepository: EventRepository,
+    private val projectRepository: ProjectRepository
 ) : ViewModel() {
-    val todayEvents: StateFlow<List<Event>> = flow {
-        val now = DateTime.now()
-        val startOfDay = now.withTimeAtStartOfDay().millis
-        val endOfDay = startOfDay + Duration.standardDays(1).millis - 1
-        emitAll(eventDao.getEventsForPeriod(startOfDay, endOfDay))
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        emptyList()
-    )
 
-    // Flow для получения последнего активного ивента
-    private val _lastEvent = eventDao.getLastEventForProject(1).stateIn(
-        viewModelScope, SharingStarted.Lazily, null // начальное значение
-    )
+    private val _lastEvent = MutableStateFlow<Event?>(null)
     val lastEvent: StateFlow<Event?> = _lastEvent
 
-    // Метод для начала события
-    fun startEvent(projectId: Long) {
-        val startTime = System.currentTimeMillis()
-        val newEvent = Event(
-            projectId = projectId,
-            startTime = startTime,
-            endTime = null
-        )
+    private val _projects = MutableStateFlow<List<Project>>(emptyList())
+    val projects: StateFlow<List<Project>> = _projects
 
+    init {
         viewModelScope.launch {
-            eventDao.insertEvent(newEvent)  // Вставляем новое событие в базу
+            eventRepository.getLastEvent().collect { event ->
+                _lastEvent.value = event
+            }
+        }
+        loadProjects()
+    }
+
+    private fun loadProjects() {
+        viewModelScope.launch {
+            projectRepository.getAllProjects().collect { projects ->
+                _projects.value = projects
+            }
         }
     }
 
-    // Метод для остановки события
+    fun getEventsForDate(date: LocalDate): Flow<List<Event>> {
+        val startOfDay = date.toDateTimeAtStartOfDay().millis
+        val endOfDay = date.plusDays(1).toDateTimeAtStartOfDay().minusMillis(1).millis
+        return eventRepository.getEventsForTimeRange(startOfDay, endOfDay)
+    }
+
+    fun startEvent(projectId: Long, taskName: String) {
+        viewModelScope.launch {
+            val event = Event(
+                projectId = projectId,
+                name = taskName,
+                startTime = System.currentTimeMillis(),
+                endTime = null
+            )
+            eventRepository.insertEvent(event)
+            _lastEvent.value = event
+        }
+    }
+
     fun stopEvent() {
         viewModelScope.launch {
-            val currentEvent = _lastEvent.value
-            if (currentEvent != null && currentEvent.endTime == null) {
-                val endTime = System.currentTimeMillis()
-                val updatedEvent = currentEvent.copy(endTime = endTime)
-                eventDao.updateEvent(updatedEvent)  // Обновляем событие в базе
+            _lastEvent.value?.let { event ->
+                val updatedEvent = event.copy(endTime = System.currentTimeMillis())
+                eventRepository.updateEvent(updatedEvent)
+                _lastEvent.value = updatedEvent
             }
         }
     }

@@ -3,6 +3,8 @@ package com.dmitrysukhov.lifetracker
 import android.content.Context
 import androidx.room.Room
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
+import com.dmitrysukhov.lifetracker.projects.ProjectRepository
+import com.dmitrysukhov.lifetracker.projects.ProjectRepositoryImpl
 import com.dmitrysukhov.lifetracker.todo.TodoDao
 import com.dmitrysukhov.lifetracker.tracker.EventDao
 import com.dmitrysukhov.lifetracker.tracker.EventRepository
@@ -21,9 +23,7 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
-            context.applicationContext,
-            AppDatabase::class.java,
-            "lifetracker_database"
+            context.applicationContext, AppDatabase::class.java, "lifetracker_database"
         ).build()
     }
 
@@ -47,5 +47,11 @@ object AppModule {
     @Singleton
     fun provideEventRepository(eventDao: EventDao): EventRepository {
         return EventRepository(eventDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProjectRepository(projectDao: ProjectDao): ProjectRepository {
+        return ProjectRepositoryImpl(projectDao)
     }
 }

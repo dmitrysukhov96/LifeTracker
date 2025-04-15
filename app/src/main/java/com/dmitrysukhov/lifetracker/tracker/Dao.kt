@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.Flow
 interface EventDao {
 
     @Insert
-    suspend fun insertEvent(event: Event)
+    suspend fun insertEvent(event: Event): Long
 
     @Update
     suspend fun updateEvent(event: Event)
 
-    @Query("SELECT * FROM events WHERE (startTime BETWEEN :startMillis AND :endMillis OR endTime BETWEEN :startMillis AND :endMillis)")
-    fun getEventsForPeriod(startMillis: Long, endMillis: Long): Flow<List<Event>>
+    @Query("SELECT * FROM events WHERE startTime >= :startTime AND startTime <= :endTime ORDER BY startTime ASC")
+    fun getEventsForPeriod(startTime: Long, endTime: Long): Flow<List<Event>>
 
-    @Query("SELECT * FROM events WHERE projectId = :projectId AND endTime IS NULL ORDER BY startTime DESC LIMIT 1")
-    fun getLastEventForProject(projectId: Long): Flow<Event?>
+    @Query("SELECT * FROM events ORDER BY startTime DESC LIMIT 1")
+    fun getLastEvent(): Flow<Event?>
 }
