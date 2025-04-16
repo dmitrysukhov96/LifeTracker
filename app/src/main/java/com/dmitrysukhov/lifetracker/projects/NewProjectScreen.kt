@@ -59,6 +59,8 @@ fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHo
         setTopBarState(TopBarState("New Project") {
             IconButton(onClick = {
                 viewModel.addProject(Project(title = title, color = generateRandomColor()))
+                //todo вот тут генерируется рандомный цвет а надо сюад подставить выбранный цвет на палитре
+                //todo для этого переменную селектед колор надо перетащить выше, туда же где тайтл и дескрипшн. тогда сможешь ее тут использовать
                 navController.navigateUp()
             }) {
                 if (title.isNotBlank()) Icon(
