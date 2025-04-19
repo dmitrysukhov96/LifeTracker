@@ -82,6 +82,7 @@ import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
+import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
 import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
@@ -116,7 +117,8 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
                 var topBarState by remember { mutableStateOf(TopBarState("LifeTracker")) }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
-                val viewModel: TodoViewModel = hiltViewModel()
+                val todoViewModel: TodoViewModel = hiltViewModel()
+                val projectViewModel: ProjectsViewModel = hiltViewModel()
                 val navController = rememberNavController()
                 val scope = rememberCoroutineScope()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -275,7 +277,7 @@ class MainActivity : ComponentActivity() {
                                                 ),
                                                 keyboardActions = KeyboardActions(onDone = {
                                                     if (taskText.isNotBlank()) {
-                                                        viewModel.addTask(taskText)
+                                                        todoViewModel.addTask(taskText)
                                                         taskText = ""
                                                     }
                                                 })
@@ -286,7 +288,7 @@ class MainActivity : ComponentActivity() {
                                         Spacer(Modifier.width(16.dp))
                                         IconButton({
                                             if (taskText.isNotBlank()) {
-                                                viewModel.addTask(taskText)
+                                                todoViewModel.addTask(taskText)
                                                 taskText = ""
                                             }
                                         }, modifier = Modifier.size(22.dp)) {
@@ -310,20 +312,20 @@ class MainActivity : ComponentActivity() {
                                     ) {
                                         composable(TODOLIST_SCREEN) {
                                             TodoListScreen(
-                                                setTopBarState, navController, viewModel
+                                                setTopBarState, navController, todoViewModel
                                             )
                                         }
-                                        composable(VIEW_PROJECT_SCREEN) { ViewProjectScreen(setTopBarState, navController) }
+                                        composable(VIEW_PROJECT_SCREEN) { ViewProjectScreen(setTopBarState, projectViewModel) }
                                         composable(TRACKER_SCREEN) { TrackerScreen(setTopBarState) }
                                         composable(HABIT_SCREEN) { HabitScreen(setTopBarState) }
                                         composable(PROJECTS_SCREEN) {
-                                            ProjectsScreen(setTopBarState, navController)
+                                            ProjectsScreen(setTopBarState, navController, projectViewModel)
                                         }
                                         composable(NEW_TASK_SCREEN) {
-                                            NewTaskScreen(setTopBarState, viewModel, navController)
+                                            NewTaskScreen(setTopBarState, todoViewModel, navController)
                                         }
                                         composable(NEW_PROJECT_SCREEN) {
-                                            NewProjectScreen(setTopBarState, navController)
+                                            NewProjectScreen(setTopBarState, navController, projectViewModel)
                                         }
                                     }
                                 }

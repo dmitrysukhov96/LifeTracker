@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.utils.BgColor
@@ -34,10 +33,10 @@ import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 
 @Composable
-fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHostController) {
+fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, viewModel: ProjectsViewModel) {
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState("Диплом") { //todo real project name
+            TopBarState(viewModel.selectedProject?.title ?: "") {
                 IconButton(onClick = { }) {
                     Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White)
                 }
@@ -54,7 +53,7 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavH
         Spacer(modifier = Modifier.height(20.dp))
         Text(stringResource(R.string.description_colon), style = BoldText, color = color)
         Text(
-            "написать диплом Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum",
+            viewModel.selectedProject?.description ?: "",
             style = SimpleText,
             color = InverseColor
         )

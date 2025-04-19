@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
@@ -43,10 +41,9 @@ import kotlin.random.Random
 
 @Composable
 fun ProjectsScreen(
-    setTopBarState: (TopBarState) -> Unit,
-    navController: NavHostController,
+    setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
+    viewModel: ProjectsViewModel,
 ) {
-    val viewModel: ProjectsViewModel = hiltViewModel()
     val projects by remember { derivedStateOf { viewModel.projects } }
 
     LaunchedEffect(Unit) {
@@ -69,8 +66,8 @@ fun ProjectsScreen(
             .padding(horizontal = 24.dp)
     ) {
         item { Spacer(Modifier.height(24.dp)) }
-
-        items(projects) { project ->
+        items(projects.size) { index ->
+            val project = projects[index]
             val deadlineText = project.deadlineMillis?.let {
                 val date = Date(it)
                 SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
@@ -81,7 +78,8 @@ fun ProjectsScreen(
                 progress = "${project.completedTasks}/${project.totalTasks} выполнено",
                 deadline = deadlineText, showImage = project == projects[0],
                 gradient = generateGradient(Color(project.color)), onClick = {
-                     navController.navigate(VIEW_PROJECT_SCREEN)
+                    viewModel.selectedProject = project
+                    navController.navigate(VIEW_PROJECT_SCREEN)
                 })
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -110,13 +108,15 @@ fun ProjectItem(
             .fillMaxWidth()
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))
-            .then (
+            .then(
                 if (showImage) Modifier.background(Color.Black) else Modifier.background(gradient)
-                )
+            )
     ) {
         if (showImage) Image(
             painter = painterResource(R.drawable.egg), contentDescription = null,
-            modifier = Modifier.fillMaxSize().alpha(0.9f), contentScale = ContentScale.Crop
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(0.9f), contentScale = ContentScale.Crop
         )
         Text(
             text = title, style = H2, color = Color.White,

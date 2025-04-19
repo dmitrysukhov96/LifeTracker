@@ -13,7 +13,7 @@ import javax.inject.Inject
 class ProjectsViewModel @Inject constructor(
     private val projectDao: ProjectDao
 ) : ViewModel() {
-
+    var selectedProject: Project? = null
     private val _projects = mutableStateListOf<Project>()
     val projects: List<Project> get() = _projects
 

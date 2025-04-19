@@ -51,7 +51,11 @@ import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 
 @Composable
-fun NewProjectScreen(setTopBarState: (TopBarState) -> Unit, navController: NavHostController) {
+fun NewProjectScreen(
+    setTopBarState: (TopBarState) -> Unit,
+    navController: NavHostController,
+    viewModel: ProjectsViewModel
+) {
     val viewModel: ProjectsViewModel = hiltViewModel()
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
