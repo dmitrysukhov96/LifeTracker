@@ -70,4 +70,28 @@ class TrackerViewModel @Inject constructor(
             }
         }
     }
+
+    fun insertEvent(event: Event) {
+        viewModelScope.launch {
+            eventRepository.insertEvent(event)
+        }
+    }
+
+    fun updateEvent(event: Event) {
+        viewModelScope.launch {
+            eventRepository.updateEvent(event)
+            if (_lastEvent.value?.eventId == event.eventId) {
+                _lastEvent.value = event
+            }
+        }
+    }
+
+    fun deleteEvent(eventId: Long) {
+        viewModelScope.launch {
+            eventRepository.deleteEvent(eventId)
+            if (_lastEvent.value?.eventId == eventId) {
+                _lastEvent.value = null
+            }
+        }
+    }
 }

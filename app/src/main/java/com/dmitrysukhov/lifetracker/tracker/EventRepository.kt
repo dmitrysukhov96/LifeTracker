@@ -19,6 +19,10 @@ class EventRepository @Inject constructor(
         eventDao.updateEvent(event)
     }
 
+    suspend fun deleteEvent(eventId: Long) {
+        eventDao.deleteEvent(eventId)
+    }
+
     fun getLastEvent(): Flow<Event?> {
         return eventDao.getLastEvent()
     }
