@@ -38,6 +38,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
+import java.util.Locale
 
 @Composable
 fun TrackerTimeline(
@@ -107,7 +108,7 @@ fun TrackerTimeline(
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Text(
-                                    text = String.format("%02d:00", hour),
+                                    text = String.format(Locale.getDefault(), "%02d:00", hour),
                                     color = PineColor,
                                     fontSize = 14.sp,
                                     fontFamily = Montserrat
@@ -120,7 +121,7 @@ fun TrackerTimeline(
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Text(
-                                    text = String.format("%02d:30", hour),
+                                    text = String.format(Locale.getDefault(), "%02d:30", hour),
                                     color = PineColor,
                                     fontSize = 14.sp,
                                     fontFamily = Montserrat
@@ -184,7 +185,7 @@ fun TrackerTimeline(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(2.dp)
-                                .offset(y = currentPosition)
+                                .offset(y = currentPosition + 20.dp)
                                 .background(Color.Red)
                         )
                     }
@@ -268,6 +269,6 @@ fun EventBlock(event: Event, color: Color = Color(0xFF4CAF50), projects: List<Pr
 private fun formatDuration(minutes: Long): String {
     val hours = minutes / 60
     val remainingMinutes = minutes % 60
-    return if (hours > 0) String.format("%dh %dm", hours, remainingMinutes)
-    else String.format("%dm", remainingMinutes)
+    return if (hours > 0) String.format(Locale.getDefault(), "%dh %dm", hours, remainingMinutes)
+    else String.format(Locale.getDefault(), "%dm", remainingMinutes)
 } 

@@ -315,8 +315,8 @@ class MainActivity : ComponentActivity() {
                                                 setTopBarState, navController, todoViewModel
                                             )
                                         }
-                                        composable(VIEW_PROJECT_SCREEN) { ViewProjectScreen(setTopBarState, projectViewModel) }
-                                        composable(TRACKER_SCREEN) { TrackerScreen(setTopBarState) }
+                                        composable(VIEW_PROJECT_SCREEN) { ViewProjectScreen(setTopBarState, projectViewModel, navController) }
+                                        composable(TRACKER_SCREEN) { TrackerScreen(setTopBarState, navController = navController) }
                                         composable(HABIT_SCREEN) { HabitScreen(setTopBarState) }
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(setTopBarState, navController, projectViewModel)

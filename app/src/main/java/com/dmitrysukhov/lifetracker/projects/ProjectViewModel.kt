@@ -31,4 +31,16 @@ class ProjectsViewModel @Inject constructor(
             projectDao.insert(project)
         }
     }
+    
+    fun deleteProject(projectId: Long) {
+        viewModelScope.launch {
+            projectDao.deleteProject(projectId)
+        }
+    }
+    
+    fun updateProject(project: Project) {
+        viewModelScope.launch {
+            projectDao.update(project)
+        }
+    }
 }

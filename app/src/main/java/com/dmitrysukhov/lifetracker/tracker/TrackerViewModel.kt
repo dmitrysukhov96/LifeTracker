@@ -25,6 +25,8 @@ class TrackerViewModel @Inject constructor(
     private val _projects = MutableStateFlow<List<Project>>(emptyList())
     val projects: StateFlow<List<Project>> = _projects
 
+    private val _refreshTrigger = MutableStateFlow(0)
+
     init {
         viewModelScope.launch {
             eventRepository.getLastEvent().collect { event ->
@@ -42,23 +44,20 @@ class TrackerViewModel @Inject constructor(
         }
     }
 
+    fun refreshEvents() {
+        viewModelScope.launch {
+            eventRepository.getLastEvent().collect { event ->
+                _lastEvent.value = event
+                return@collect
+            }
+            _refreshTrigger.value += 1
+        }
+    }
+
     fun getEventsForDate(date: LocalDate): Flow<List<Event>> {
         val startOfDay = date.toDateTimeAtStartOfDay().millis
         val endOfDay = date.plusDays(1).toDateTimeAtStartOfDay().minusMillis(1).millis
         return eventRepository.getEventsForTimeRange(startOfDay, endOfDay)
-    }
-
-    fun startEvent(projectId: Long?, taskName: String) {
-        viewModelScope.launch {
-            val event = Event(
-                projectId = projectId,
-                name = taskName,
-                startTime = System.currentTimeMillis(),
-                endTime = null
-            )
-            eventRepository.insertEvent(event)
-            _lastEvent.value = event
-        }
     }
 
     fun stopEvent() {
@@ -67,6 +66,7 @@ class TrackerViewModel @Inject constructor(
                 val updatedEvent = event.copy(endTime = System.currentTimeMillis())
                 eventRepository.updateEvent(updatedEvent)
                 _lastEvent.value = updatedEvent
+                refreshEvents()
             }
         }
     }
@@ -74,6 +74,7 @@ class TrackerViewModel @Inject constructor(
     fun insertEvent(event: Event) {
         viewModelScope.launch {
             eventRepository.insertEvent(event)
+            refreshEvents()
         }
     }
 
@@ -83,6 +84,7 @@ class TrackerViewModel @Inject constructor(
             if (_lastEvent.value?.eventId == event.eventId) {
                 _lastEvent.value = event
             }
+            refreshEvents()
         }
     }
 
@@ -92,6 +94,7 @@ class TrackerViewModel @Inject constructor(
             if (_lastEvent.value?.eventId == eventId) {
                 _lastEvent.value = null
             }
+            refreshEvents()
         }
     }
 }

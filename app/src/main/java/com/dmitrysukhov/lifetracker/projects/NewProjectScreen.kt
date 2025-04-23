@@ -17,10 +17,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -54,26 +57,96 @@ import com.dmitrysukhov.lifetracker.utils.TopBarState
 fun NewProjectScreen(
     setTopBarState: (TopBarState) -> Unit,
     navController: NavHostController,
-    viewModel: ProjectsViewModel
+    viewModel: ProjectsViewModel = hiltViewModel()
 ) {
-    val viewModel: ProjectsViewModel = hiltViewModel()
+    val colors = listOf(
+        Color(0xFFFA3535),
+        Color(0xFFFF582E),
+        Color(0xFFFFA91F),
+        Color(0xFFFFE030),
+        Color(0xFFDBE204),
+        Color(0xFFC1FF4D),
+        Color(0xFF8FFF2E),
+        Color(0xFF84E09E),
+        Color(0xFF39E25D),
+        Color(0xFF14C56D),
+        Color(0xFF0ECC8A),
+        Color(0xFF29B8D9),
+        Color(0xFF669DE5),
+        Color(0xFF737AFF),
+        Color(0xFF7940FF),
+        Color(0xFF983DC2),
+        Color(0xFFC02A39),
+        Color(0xFFED1F60),
+        Color(0xFFE056CE),
+        Color(0xFFF87687)
+    )
+    
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
+    var selectedColorIndex by rememberSaveable { mutableStateOf(0) }
+    val selectedColor = colors[selectedColorIndex]
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    val project = viewModel.selectedProject
+    val isEditMode = project != null
+//    val context = LocalContext.current
+    
+    // If in edit mode, load project data
+    LaunchedEffect(project) {
+        project?.let {
+            title = it.title
+            description = it.description
+            // Find matching color in our palette or default to first color
+            val projectColor = Color(it.color)
+            val closestColorIndex = findClosestColorIndex(projectColor, colors)
+            selectedColorIndex = closestColorIndex
+        }
+    }
     LaunchedEffect(Unit) {
-        setTopBarState(TopBarState("New Project") {
-            IconButton(onClick = {
-                viewModel.addProject(Project(title = title, color = generateRandomColor()))
-                //todo вот тут генерируется рандомный цвет а надо сюад подставить выбранный цвет на палитре
-                //todo для этого переменную селектед колор надо перетащить выше, туда же где тайтл и дескрипшн. тогда сможешь ее тут использовать
-                navController.navigateUp()
-            }) {
-                if (title.isNotBlank()) Icon(
-                    painter = painterResource(R.drawable.tick),
-                    contentDescription = null, tint = Color.White
-                )
+        setTopBarState(TopBarState(if (isEditMode) "Edit Project" else "New Project") {
+            Row {
+                if (isEditMode) {
+                    IconButton(onClick = {
+                        showDeleteConfirmation = true
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.delete),
+                            contentDescription = stringResource(R.string.delete),
+                            tint = Color.White
+                        )
+                    }
+                }
+                IconButton(onClick = {
+                    if (isEditMode) {
+                        project?.let {
+                            viewModel.updateProject(
+                                it.copy(
+                                    title = title,
+                                    description = description,
+                                    color = colors[selectedColorIndex].toArgb()
+                                )
+                            )
+                        }
+                    } else {
+                        viewModel.addProject(
+                            Project(
+                                title = title,
+                                description = description,
+                                color = colors[selectedColorIndex].toArgb()
+                            )
+                        )
+                    }
+                    navController.navigateUp()
+                }) {
+                    if (title.isNotBlank()) Icon(
+                        painter = painterResource(R.drawable.tick),
+                        contentDescription = null, tint = Color.White
+                    )
+                }
             }
         })
     }
+    
     Column(
         modifier = Modifier
             .background(BgColor)
@@ -123,30 +196,6 @@ fun NewProjectScreen(
                 )
                 Text(text = "Выберите цвет проекта", style = H2)
             }
-            val colors = listOf(
-                Color(0xFFFA3535),
-                Color(0xFFFF582E),
-                Color(0xFFFFA91F),
-                Color(0xFFFFE030),
-                Color(0xFFDBE204),
-                Color(0xFFC1FF4D),
-                Color(0xFF8FFF2E),
-                Color(0xFF84E09E),
-                Color(0xFF39E25D),
-                Color(0xFF14C56D),
-                Color(0xFF0ECC8A),
-                Color(0xFF29B8D9),
-                Color(0xFF669DE5),
-                Color(0xFF737AFF),
-                Color(0xFF7940FF),
-                Color(0xFF983DC2),
-                Color(0xFFC02A39),
-                Color(0xFFED1F60),
-                Color(0xFFE056CE),
-                Color(0xFFF87687)
-            )
-
-            var selectedColor by remember { mutableStateOf(colors[0]) }
 
             Box(
                 modifier = Modifier.fillMaxWidth(),
@@ -161,7 +210,7 @@ fun NewProjectScreen(
                                     .size(24.dp)
                                     .clip(CircleShape)
                                     .background(colors[i])
-                                    .clickable { selectedColor = colors[i] }
+                                    .clickable { selectedColorIndex = i }
                             ) {
                                 if (selectedColor == colors[i]) {
                                     Icon(
@@ -185,7 +234,7 @@ fun NewProjectScreen(
                                     .size(24.dp)
                                     .clip(CircleShape)
                                     .background(colors[i])
-                                    .clickable { selectedColor = colors[i] }
+                                    .clickable { selectedColorIndex = i }
                             ) {
                                 if (selectedColor == colors[i]) {
                                     Icon(
@@ -202,6 +251,51 @@ fun NewProjectScreen(
             }
         }
     }
+    
+    // Delete confirmation dialog
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text(stringResource(R.string.delete_project)) },
+            text = { Text(stringResource(R.string.delete_project_confirmation)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    project?.let { viewModel.deleteProject(it.projectId) }
+                    showDeleteConfirmation = false
+                    viewModel.selectedProject = null
+                    navController.popBackStack(PROJECTS_SCREEN, false, false)
+                }) { Text(stringResource(R.string.delete)) }
+            }, dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+}
+
+// Helper function to find the closest matching color
+fun findClosestColorIndex(targetColor: Color, colorList: List<Color>): Int {
+    var closestIndex = 0
+    var minDistance = Float.MAX_VALUE
+    
+    colorList.forEachIndexed { index, color ->
+        val distance = colorDistance(targetColor, color)
+        if (distance < minDistance) {
+            minDistance = distance
+            closestIndex = index
+        }
+    }
+    
+    return closestIndex
+}
+
+// Calculate "distance" between two colors
+fun colorDistance(c1: Color, c2: Color): Float {
+    val rDiff = c1.red - c2.red
+    val gDiff = c1.green - c2.green
+    val bDiff = c1.blue - c2.blue
+    return rDiff * rDiff + gDiff * gDiff + bDiff * bDiff
 }
 
 const val NEW_PROJECT_SCREEN = "new_project_screen"

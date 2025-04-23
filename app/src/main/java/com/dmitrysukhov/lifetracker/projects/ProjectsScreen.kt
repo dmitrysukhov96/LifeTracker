@@ -39,7 +39,6 @@ import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.random.Random
 
 @Composable
 fun ProjectsScreen(
@@ -51,7 +50,10 @@ fun ProjectsScreen(
     LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState("Projects") {
-                IconButton(onClick = { navController.navigate(NEW_PROJECT_SCREEN) }) {
+                IconButton(onClick = { 
+                    viewModel.selectedProject = null
+                    navController.navigate(NEW_PROJECT_SCREEN) 
+                }) {
                     Icon(
                         painter = painterResource(R.drawable.plus),
                         contentDescription = null, tint = Color.White
@@ -117,14 +119,6 @@ fun ProjectsScreen(
 
         item { Spacer(Modifier.height(64.dp)) }
     }
-}
-
-fun generateRandomColor(): Int {
-    val hue = Random.nextFloat() * 360f
-    val saturation = 0.7f + Random.nextFloat() * 0.3f
-    val value = 0.7f + Random.nextFloat() * 0.3f
-    val hsv = floatArrayOf(hue, saturation, value)
-    return android.graphics.Color.HSVToColor(hsv)
 }
 
 @Composable

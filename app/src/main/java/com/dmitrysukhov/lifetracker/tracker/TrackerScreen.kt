@@ -10,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,9 +58,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.todo.ProjectTag
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
@@ -76,26 +79,32 @@ import java.util.Locale
 
 @Composable
 fun TrackerScreen(
-    setTopBarState: (TopBarState) -> Unit,
-    trackerViewModel: TrackerViewModel = hiltViewModel()
+    setTopBarState: (TopBarState) -> Unit, trackerViewModel: TrackerViewModel = hiltViewModel(),
+    navController: NavHostController
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    val events by trackerViewModel.getEventsForDate(selectedDate)
-        .collectAsState(initial = emptyList())
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+    val events by trackerViewModel.getEventsForDate(selectedDate).collectAsState(emptyList())
     val projects by trackerViewModel.projects.collectAsState()
     var showTaskDialog by remember { mutableStateOf(false) }
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
+    var isTrackerStart by remember { mutableStateOf(false) }
     val title = stringResource(R.string.tracker)
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60000); refreshTrigger += 1
+        }
+    }
+    LaunchedEffect(refreshTrigger, selectedDate) { trackerViewModel.refreshEvents() }
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState(title) {
             IconButton(onClick = {
                 selectedEvent = null
+                isTrackerStart = false
                 showTaskDialog = true
             }) {
                 Icon(
-                    painterResource(R.drawable.plus),
-                    contentDescription = null,
-                    tint = Color.White
+                    painterResource(R.drawable.plus), contentDescription = null, tint = Color.White
                 )
             }
         })
@@ -107,250 +116,65 @@ fun TrackerScreen(
             .background(BgColor)
     ) {
         TimeTracker(
-            trackerViewModel = trackerViewModel,
-            showTaskDialog = showTaskDialog,
-            onShowTaskDialogChange = { showTaskDialog = it }
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        TrackerTimeline(
-            events = events,
-            selectedDate = selectedDate,
-            onDateSelected = { selectedDate = it },
-            projects = projects,
-            onEventClick = { event ->
-                selectedEvent = event
+            trackerViewModel = trackerViewModel, onStartQuickTask = {
+                selectedEvent = null
+                isTrackerStart = true
                 showTaskDialog = true
-            },
-            modifier = Modifier
+            }
+        )
+        Spacer(Modifier.height(16.dp))
+        TrackerTimeline(
+            events = events, selectedDate = selectedDate, onDateSelected = { selectedDate = it },
+            projects = projects, onEventClick = { event ->
+                selectedEvent = event
+                isTrackerStart = false
+                showTaskDialog = true
+            }, modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 16.dp)
         )
     }
-
     if (showTaskDialog) {
         EventDialog(
-            event = selectedEvent,
-            projects = projects,
-            onDismiss = {
+            event = selectedEvent, projects = projects, onDismiss = {
                 showTaskDialog = false
                 selectedEvent = null
-            },
-            onSave = { event ->
-                if (event.eventId == 0L) {
-                    trackerViewModel.insertEvent(event)
-                } else {
-                    trackerViewModel.updateEvent(event)
-                }
+            }, onSave = { event ->
+                if (event.eventId == 0L) trackerViewModel.insertEvent(event)
+                else trackerViewModel.updateEvent(event)
                 showTaskDialog = false
                 selectedEvent = null
-            },
-            onDelete = { event ->
+            }, onDelete = { event ->
                 trackerViewModel.deleteEvent(event.eventId)
                 showTaskDialog = false
                 selectedEvent = null
-            }
+            }, trackerStart = isTrackerStart, navController = navController
         )
     }
 }
 
 @Composable
-fun TimeTracker(
-    trackerViewModel: TrackerViewModel,
-    showTaskDialog: Boolean,
-    onShowTaskDialogChange: (Boolean) -> Unit
-) {
+fun TimeTracker(trackerViewModel: TrackerViewModel, onStartQuickTask: () -> Unit) {
     val lastEvent by trackerViewModel.lastEvent.collectAsState()
     val projects by trackerViewModel.projects.collectAsState()
     var timeElapsed by remember { mutableLongStateOf(0L) }
-    var taskName by remember { mutableStateOf("") }
-    var selectedProjectId by remember { mutableStateOf<Long?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-    
     val backgroundColor by animateColorAsState(
         targetValue = if (lastEvent?.endTime == null) AccentColor else Color(0xFFC2EBD6),
         animationSpec = tween(durationMillis = 300)
     )
-
     LaunchedEffect(lastEvent) {
         while (true) {
             timeElapsed = when {
                 lastEvent == null -> 0L
-                lastEvent?.endTime == null -> (System.currentTimeMillis() - (lastEvent?.startTime ?: 0)) / 1000
+                lastEvent?.endTime == null -> (System.currentTimeMillis() - (lastEvent?.startTime
+                    ?: 0)) / 1000
+
                 else -> (System.currentTimeMillis() - lastEvent?.endTime!!) / 1000
             }
             delay(1000)
         }
     }
-
-    if (showTaskDialog) {
-        Dialog(onDismissRequest = { onShowTaskDialogChange(false) }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(BgColor)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = if (lastEvent == null) stringResource(R.string.start_new_task) else stringResource(R.string.edit_task),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontFamily = Montserrat,
-                        fontWeight = Bold,
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    
-                    OutlinedTextField(
-                        value = taskName,
-                        colors = colors(
-                            focusedBorderColor = PineColor,
-                            unfocusedBorderColor = InverseColor.copy(0.5f)
-                        ),
-                        onValueChange = { taskName = it },
-                        label = {
-                            Text(
-                                stringResource(R.string.task_name),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        },
-                        textStyle = TextStyle(
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
-                    
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .clickable { expanded = true }
-                                .fillMaxWidth()
-                                .height(48.dp)
-                                .border(
-                                    if (expanded) 2.dp else 1.dp,
-                                    if (expanded) PineColor else InverseColor.copy(0.5f),
-                                    RoundedCornerShape(4.dp)
-                                )
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = selectedProjectId?.let { id ->
-                                    projects.find { it.projectId == id }?.title
-                                        ?: stringResource(R.string.select_project)
-                                } ?: stringResource(R.string.no_project),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Icon(
-                                painterResource(R.drawable.arrow_down),
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .padding(top = 1.dp)
-                                    .rotate(if (expanded) 180f else 0f)
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier
-                                .background(BgColor)
-                                .width(IntrinsicSize.Max)
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        stringResource(R.string.no_project),
-                                        fontFamily = Montserrat,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                },
-                                onClick = {
-                                    selectedProjectId = null
-                                    expanded = false
-                                }
-                            )
-                            projects.forEach { project ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            project.title,
-                                            fontFamily = Montserrat,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    },
-                                    onClick = {
-                                        selectedProjectId = project.projectId
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(onClick = { onShowTaskDialogChange(false) }) {
-                            Text(
-                                stringResource(R.string.cancel),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                if (taskName.isBlank()) {
-                                    return@Button
-                                }
-                                if (lastEvent != null) {
-                                    trackerViewModel.stopEvent()
-                                }
-                                trackerViewModel.startEvent(selectedProjectId, taskName)
-                                onShowTaskDialogChange(false)
-                            },
-                            enabled = taskName.isNotBlank()
-                        ) {
-                            Text(
-                                stringResource(R.string.ok),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     Row(
         Modifier
             .fillMaxWidth()
@@ -359,23 +183,18 @@ fun TimeTracker(
             .clip(RoundedCornerShape(100.dp))
             .background(backgroundColor)
             .padding(horizontal = 20.dp)
-            .clickable { 
-                taskName = lastEvent?.name ?: ""
-                selectedProjectId = lastEvent?.projectId
-                onShowTaskDialogChange(true) 
-            },
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { onStartQuickTask() }, verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                if (lastEvent?.endTime == null && lastEvent != null) lastEvent?.name
-                    ?: stringResource(R.string.no_task) else "Нет активной задачи",
-                color = BlackPine,
-                fontWeight = Bold,
-                fontFamily = Montserrat,
-                fontSize = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                when {
+                    lastEvent == null -> stringResource(R.string.no_task)
+                    lastEvent!!.endTime == null -> lastEvent!!.name
+                        ?: stringResource(R.string.no_task)
+
+                    else -> stringResource(R.string.no_task)
+                }, color = BlackPine, fontWeight = Bold, fontFamily = Montserrat, fontSize = 14.sp,
+                maxLines = 1, overflow = TextOverflow.Ellipsis
             )
             if (lastEvent?.endTime == null && lastEvent != null) {
                 lastEvent?.projectId?.let { projectId ->
@@ -387,43 +206,31 @@ fun TimeTracker(
         }
 
         val timeText = when {
-            lastEvent == null || lastEvent?.endTime != null -> "∞"  // Нет активной задачи
-            else -> formatTimeElapsed(timeElapsed)  // Событие идет
+            lastEvent == null -> "∞"
+            lastEvent!!.endTime == null -> formatTimeElapsed(timeElapsed)
+            else -> formatTimeElapsed(timeElapsed)
         }
 
         Text(
-            timeText,
-            color = BlackPine,
-            fontWeight = Bold,
-            fontFamily = Montserrat,
-            fontSize = 20.sp,
-            modifier = Modifier
+            timeText, color = BlackPine, fontWeight = Bold, fontFamily = Montserrat,
+            fontSize = 20.sp, modifier = Modifier
                 .width(130.dp)
                 .padding(horizontal = 12.dp)
         )
-
         Row {
             Box(
                 modifier = Modifier
                     .clickable {
-                        if (lastEvent == null || lastEvent?.endTime != null) {
-                            taskName = ""
-                            selectedProjectId = null
-                            onShowTaskDialogChange(true)
-                        } else {
-                            trackerViewModel.stopEvent()
-                        }
+                        if (lastEvent == null || lastEvent?.endTime != null) onStartQuickTask()
+                        else trackerViewModel.stopEvent()
                     }
                     .clip(CircleShape)
                     .background(PineColor)
                     .size(45.dp)
             ) {
                 Image(
-                    painter = painterResource(
-                        id = if (lastEvent?.endTime == null && lastEvent != null) R.drawable.stop else R.drawable.play
-                    ),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
+                    painter = painterResource(if (lastEvent?.endTime == null && lastEvent != null) R.drawable.stop else R.drawable.play),
+                    contentDescription = null, contentScale = ContentScale.FillBounds,
                     modifier = Modifier
                         .size(21.dp)
                         .align(Alignment.Center)
@@ -442,79 +249,66 @@ fun formatTimeElapsed(seconds: Long): String {
 
 @Composable
 fun EventDialog(
-    event: Event?,
-    projects: List<Project>,
-    onDismiss: () -> Unit,
+    event: Event?, 
+    projects: List<Project>, 
+    onDismiss: () -> Unit, 
     onSave: (Event) -> Unit,
-    onDelete: (Event) -> Unit
+    onDelete: (Event) -> Unit, 
+    trackerStart: Boolean = false,
+    navController: NavHostController
 ) {
     var taskName by remember { mutableStateOf(event?.name ?: "") }
     var selectedProjectId by remember { mutableStateOf(event?.projectId) }
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    
     val startDateTime = event?.let { DateTime(it.startTime) } ?: DateTime.now()
     val endDateTime = event?.endTime?.let { DateTime(it) } ?: DateTime.now()
-    
     var startDate by remember { mutableStateOf(startDateTime.toString("dd.MM.yyyy")) }
     var startTime by remember { mutableStateOf(startDateTime.toString("HH:mm")) }
     var endDate by remember { mutableStateOf(endDateTime.toString("dd.MM.yyyy")) }
     var endTime by remember { mutableStateOf(endDateTime.toString("HH:mm")) }
-
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp)
+                .padding(16.dp), shape = RoundedCornerShape(16.dp)
         ) {
             Column(
-                modifier = Modifier
+                Modifier
                     .fillMaxWidth()
                     .background(BgColor)
                     .padding(16.dp)
             ) {
                 Text(
-                    text = if (event == null) stringResource(R.string.new_event) else stringResource(R.string.edit_event),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontFamily = Montserrat,
-                    fontWeight = Bold,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    text = when {
+                        trackerStart -> stringResource(R.string.start_new_task)
+                        event == null -> stringResource(R.string.new_event)
+                        else -> stringResource(R.string.edit_event)
+                    }, style = MaterialTheme.typography.titleLarge, fontFamily = Montserrat,
+                    fontWeight = Bold, fontSize = 20.sp, modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
                 OutlinedTextField(
-                    value = taskName,
-                    colors = colors(
+                    value = taskName, colors = colors(
                         focusedBorderColor = PineColor,
                         unfocusedBorderColor = InverseColor.copy(0.5f)
-                    ),
-                    onValueChange = { taskName = it },
-                    label = {
+                    ), onValueChange = { taskName = it }, label = {
                         Text(
-                            stringResource(R.string.task_name),
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                            stringResource(R.string.task_name), fontFamily = Montserrat,
+                            fontSize = 16.sp, fontWeight = FontWeight.Medium
                         )
-                    },
-                    textStyle = TextStyle(
-                        fontFamily = Montserrat,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    modifier = Modifier
+                    }, textStyle = TextStyle(
+                        fontFamily = Montserrat, fontSize = 16.sp, fontWeight = FontWeight.Medium
+                    ), modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 )
-                
                 Box(
-                    modifier = Modifier
+                    Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 ) {
                     Row(
-                        modifier = Modifier
+                        Modifier
                             .clickable { expanded = true }
                             .fillMaxWidth()
                             .height(48.dp)
@@ -527,40 +321,138 @@ fun EventDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = selectedProjectId?.let { id ->
-                                projects.find { it.projectId == id }?.title
-                                    ?: stringResource(R.string.select_project)
-                            } ?: stringResource(R.string.select_project),
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(
+                                        selectedProjectId?.let { id ->
+                                            projects.find { it.projectId == id }?.let { project ->
+                                                Color(project.color)
+                                            } ?: Color.Transparent
+                                        } ?: Color.Transparent,
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .let { modifier ->
+                                        if (selectedProjectId == null) {
+                                            modifier.border(
+                                                1.dp,
+                                                InverseColor.copy(0.5f),
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                        } else {
+                                            modifier
+                                        }
+                                    }
+                            )
+                            Text(
+                                text = selectedProjectId?.let { id ->
+                                    projects.find { it.projectId == id }?.title
+                                        ?: stringResource(R.string.select_project)
+                                } ?: stringResource(R.string.no_project),
+                                fontFamily = Montserrat,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = InverseColor
+                            )
+                        }
                         Icon(
-                            painterResource(R.drawable.arrow_down),
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier
+                            painterResource(R.drawable.arrow_down), contentDescription = null,
+                            tint = PineColor, modifier = Modifier
                                 .padding(top = 1.dp)
                                 .rotate(if (expanded) 180f else 0f)
                         )
                     }
                     DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
+                        expanded = expanded, onDismissRequest = { expanded = false },
                         modifier = Modifier
                             .background(BgColor)
-                            .width(IntrinsicSize.Max)
+                            .padding(horizontal = 8.dp)
                     ) {
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.plus),
+                                        contentDescription = null,
+                                        tint = PineColor
+                                    )
+                                    Text(
+                                        stringResource(R.string.add_project),
+                                        fontFamily = Montserrat,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = PineColor
+                                    )
+                                }
+                            },
+                            onClick = {
+                                expanded = false
+                                navController.navigate(NEW_PROJECT_SCREEN)
+                            }
+                        )
+                        HorizontalDivider()
+                        // No project option
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .background(Color.Transparent, RoundedCornerShape(4.dp))
+                                            .border(
+                                                1.dp,
+                                                InverseColor.copy(0.5f),
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                    )
+                                    Text(
+                                        stringResource(R.string.no_project),
+                                        fontFamily = Montserrat,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = InverseColor
+                                    )
+                                }
+                            },
+                            onClick = {
+                                selectedProjectId = null
+                                expanded = false
+                            }
+                        )
                         projects.forEach { project ->
                             DropdownMenuItem(
                                 text = {
-                                    Text(
-                                        project.title,
-                                        fontFamily = Montserrat,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .background(
+                                                    Color(project.color),
+                                                    RoundedCornerShape(4.dp)
+                                                )
+                                        )
+                                        Text(
+                                            project.title,
+                                            fontFamily = Montserrat,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = InverseColor
+                                        )
+                                    }
                                 },
                                 onClick = {
                                     selectedProjectId = project.projectId
@@ -570,212 +462,173 @@ fun EventDialog(
                         }
                     }
                 }
-
-                // Start
-                Text(
-                    text = stringResource(R.string.start),
-                    fontFamily = Montserrat,
-                    fontWeight = Bold,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = startDate,
-                        colors = colors(
-                            focusedBorderColor = PineColor,
-                            unfocusedBorderColor = InverseColor.copy(0.5f)
-                        ),
-                        onValueChange = { startDate = it },
-                        label = {
-                            Text(
-                                stringResource(R.string.date),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        },
-                        textStyle = TextStyle(
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier.weight(1f)
+                if (!trackerStart) {
+                    Text(
+                        text = stringResource(R.string.start), fontFamily = Montserrat,
+                        fontWeight = Bold, fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    OutlinedTextField(
-                        value = startTime,
-                        colors = colors(
-                            focusedBorderColor = PineColor,
-                            unfocusedBorderColor = InverseColor.copy(0.5f)
-                        ),
-                        onValueChange = { startTime = it },
-                        label = {
-                            Text(
-                                stringResource(R.string.time),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = startDate, colors = colors(
+                                focusedBorderColor = PineColor,
+                                unfocusedBorderColor = InverseColor.copy(0.5f)
+                            ), onValueChange = { startDate = it }, label = {
+                                Text(
+                                    stringResource(R.string.date), fontFamily = Montserrat,
+                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
+                                )
+                            }, textStyle = TextStyle(
+                                fontFamily = Montserrat, fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium
-                            )
-                        },
-                        textStyle = TextStyle(
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier.weight(1f)
+                            ), modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = startTime, colors = colors(
+                                focusedBorderColor = PineColor,
+                                unfocusedBorderColor = InverseColor.copy(0.5f)
+                            ), onValueChange = { startTime = it }, label = {
+                                Text(
+                                    stringResource(R.string.time), fontFamily = Montserrat,
+                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
+                                )
+                            }, textStyle = TextStyle(
+                                fontFamily = Montserrat, fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            ), modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.end), fontFamily = Montserrat,
+                        fontWeight = Bold, fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = endDate, colors = colors(
+                                focusedBorderColor = PineColor,
+                                unfocusedBorderColor = InverseColor.copy(0.5f)
+                            ), onValueChange = { endDate = it }, label = {
+                                Text(
+                                    stringResource(R.string.date), fontFamily = Montserrat,
+                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
+                                )
+                            }, textStyle = TextStyle(
+                                fontFamily = Montserrat, fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            ), modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = endTime, colors = colors(
+                                focusedBorderColor = PineColor,
+                                unfocusedBorderColor = InverseColor.copy(0.5f)
+                            ), onValueChange = { endTime = it }, label = {
+                                Text(
+                                    stringResource(R.string.time), fontFamily = Montserrat,
+                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
+                                )
+                            }, textStyle = TextStyle(
+                                fontFamily = Montserrat, fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            ), modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
 
-                // End
-                Text(
-                    text = stringResource(R.string.end),
-                    fontFamily = Montserrat,
-                    fontWeight = Bold,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(top = 16.dp), horizontalArrangement = Arrangement.End
                 ) {
-                    OutlinedTextField(
-                        value = endDate,
-                        colors = colors(
-                            focusedBorderColor = PineColor,
-                            unfocusedBorderColor = InverseColor.copy(0.5f)
-                        ),
-                        onValueChange = { endDate = it },
-                        label = {
-                            Text(
-                                stringResource(R.string.date),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        },
-                        textStyle = TextStyle(
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = endTime,
-                        colors = colors(
-                            focusedBorderColor = PineColor,
-                            unfocusedBorderColor = InverseColor.copy(0.5f)
-                        ),
-                        onValueChange = { endTime = it },
-                        label = {
-                            Text(
-                                stringResource(R.string.time),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        },
-                        textStyle = TextStyle(
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    if (event != null) {
+                    if (event != null && !trackerStart) {
                         IconButton(
-                            onClick = { onDelete(event) },
-                            modifier = Modifier.padding(end = 8.dp)
+                            onClick = { onDelete(event) }, modifier = Modifier.padding(end = 8.dp)
                         ) {
                             Icon(
-                                painterResource(R.drawable.delete),
+                                painterResource(R.drawable.delete), tint = InverseColor,
                                 contentDescription = stringResource(R.string.delete),
-                                tint = InverseColor
                             )
                         }
                     }
                     TextButton(onClick = onDismiss) {
                         Text(
-                            stringResource(R.string.cancel),
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                            stringResource(R.string.cancel), fontFamily = Montserrat,
+                            fontSize = 16.sp, fontWeight = FontWeight.Medium
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            if (taskName.isBlank() || selectedProjectId == null) {
-                                return@Button
-                            }
-                            try {
-                                val startDateTime = DateTime.parse(
-                                    "$startDate $startTime",
-                                    DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
-                                )
-                                val endDateTime = DateTime.parse(
-                                    "$endDate $endTime",
-                                    DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
-                                )
-                                
-                                if (endDateTime.isBefore(startDateTime)) {
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(R.string.error_end_time_before_start),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    return@Button
-                                }
-                                
+                            if (taskName.isBlank()) return@Button
+                            if (trackerStart) {
                                 val newEvent = Event(
-                                    eventId = event?.eventId ?: 0,
-                                    projectId = selectedProjectId!!,
-                                    name = taskName,
-                                    startTime = startDateTime.millis,
-                                    endTime = endDateTime.millis
+                                    eventId = 0, projectId = selectedProjectId ?: 0,
+                                    name = taskName, startTime = DateTime.now().millis,
+                                    endTime = null
                                 )
                                 onSave(newEvent)
-                            } catch (e: Exception) {
-                                when (e) {
-                                    is IllegalArgumentException -> {
+                            } else {
+                                try {
+                                    val startDateTime = DateTime.parse(
+                                        "$startDate $startTime",
+                                        DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
+                                    )
+                                    val endDateTime = DateTime.parse(
+                                        "$endDate $endTime",
+                                        DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
+                                    )
+
+                                    if (endDateTime.isBefore(startDateTime)) {
                                         Toast.makeText(
                                             context,
-                                            context.getString(R.string.error_invalid_date_format),
+                                            context.getString(R.string.error_end_time_before_start),
                                             Toast.LENGTH_SHORT
                                         ).show()
+                                        return@Button
                                     }
-                                    else -> {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.error_parsing_date),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+
+                                    val newEvent = Event(
+                                        eventId = event?.eventId ?: 0,
+                                        projectId = selectedProjectId ?: 0, name = taskName,
+                                        startTime = startDateTime.millis,
+                                        endTime = endDateTime.millis
+                                    )
+                                    onSave(newEvent)
+                                } catch (e: Exception) {
+                                    when (e) {
+                                        is IllegalArgumentException -> {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.error_invalid_date_format),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+
+                                        else -> {
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.error_parsing_date),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     }
                                 }
                             }
-                        },
-                        enabled = taskName.isNotBlank() && selectedProjectId != null
+                        }, enabled = taskName.isNotBlank()
                     ) {
                         Text(
-                            stringResource(R.string.save),
-                            fontFamily = Montserrat,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                            stringResource(R.string.save), fontFamily = Montserrat,
+                            fontSize = 16.sp, fontWeight = FontWeight.Medium
                         )
                     }
                 }

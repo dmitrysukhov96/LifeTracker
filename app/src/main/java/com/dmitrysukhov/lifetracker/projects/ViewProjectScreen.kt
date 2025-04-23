@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.utils.BgColor
@@ -33,17 +34,27 @@ import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 
 @Composable
-fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, viewModel: ProjectsViewModel) {
+fun ViewProjectScreen(
+    setTopBarState: (TopBarState) -> Unit, 
+    viewModel: ProjectsViewModel,
+    navController: NavHostController
+) {
+    val project = viewModel.selectedProject
+    val projectColor = project?.let { Color(it.color) } ?: Color(0xFF669DE5)
+    
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState(viewModel.selectedProject?.title ?: "") {
-                IconButton(onClick = { }) {
+            TopBarState(project?.title ?: "") {
+                IconButton(onClick = { 
+                    // Keep the selected project and navigate to edit screen
+                    navController.navigate(NEW_PROJECT_SCREEN)
+                }) {
                     Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White)
                 }
             }
         )
     }
-    val color = Color(0xFF669DE5)
+
     Column(
         modifier = Modifier
             .background(BgColor)
@@ -51,25 +62,25 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, viewModel: Projects
             .padding(horizontal = 24.dp),
     ) {
         Spacer(modifier = Modifier.height(20.dp))
-        Text(stringResource(R.string.description_colon), style = BoldText, color = color)
+        Text(stringResource(R.string.description_colon), style = BoldText, color = projectColor)
         Text(
-            viewModel.selectedProject?.description ?: "",
+            project?.description ?: "",
             style = SimpleText,
             color = InverseColor
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row {
-            Text(stringResource(R.string.goal_colon), style = BoldText, color = color)
+            Text(stringResource(R.string.goal_colon), style = BoldText, color = projectColor)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("закончить универ", style = SimpleText, color = InverseColor)
+            Text(project?.goal ?: "Нет цели", style = SimpleText, color = InverseColor)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider(color = color.copy(alpha = 0.5f))
+        HorizontalDivider(color = projectColor.copy(alpha = 0.5f))
         Spacer(modifier = Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 painter = painterResource(id = R.drawable.task),
-                contentDescription = null, tint = color,
+                contentDescription = null, tint = projectColor,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -79,7 +90,7 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, viewModel: Projects
                 Icon(
                     painter = painterResource(R.drawable.plus),
                     contentDescription = stringResource(R.string.add_task),
-                    tint = Color(0xFF669DE5)
+                    tint = projectColor
                 )
             }
             Spacer(Modifier.width(20.dp))
@@ -89,10 +100,8 @@ fun ViewProjectScreen(setTopBarState: (TopBarState) -> Unit, viewModel: Projects
             System.currentTimeMillis(), 2345, "", 456, false
         )
         Spacer(Modifier.height(28.dp))
-        HorizontalDivider(color = color.copy(alpha = 0.5f))
+        HorizontalDivider(color = projectColor.copy(alpha = 0.5f))
     }
-
 }
 
-
-val VIEW_PROJECT_SCREEN = "view project screen"
+const val VIEW_PROJECT_SCREEN = "view_project_screen"

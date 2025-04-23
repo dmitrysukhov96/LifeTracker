@@ -70,4 +70,6 @@
     <string name="friday">Fri</string>
     <string name="saturday">Sat</string>
     <string name="sunday">Sun</string>
+    <string name="delete_project">Delete Project</string>
+    <string name="delete_project_confirmation">Are you sure you want to delete this project? This action cannot be undone.</string>
 </resources>

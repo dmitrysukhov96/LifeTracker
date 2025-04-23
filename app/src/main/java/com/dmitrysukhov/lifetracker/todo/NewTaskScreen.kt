@@ -276,14 +276,9 @@ fun NewTaskScreen(
                     )
                 }
                 DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .background(BgColor)
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
+                    expanded = expanded, onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(BgColor).padding(horizontal = 8.dp)
                 ) {
-                    // Add project option
                     DropdownMenuItem(
                         text = {
                             Row(
