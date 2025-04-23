@@ -61,7 +61,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
@@ -76,13 +78,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
-import com.dmitrysukhov.lifetracker.projects.VIEW_PROJECT_SCREEN
-import com.dmitrysukhov.lifetracker.projects.ViewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
 import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
+import com.dmitrysukhov.lifetracker.projects.VIEW_PROJECT_SCREEN
+import com.dmitrysukhov.lifetracker.projects.ViewProjectScreen
 import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
 import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
@@ -95,7 +97,6 @@ import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
-import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -108,14 +109,15 @@ class MainActivity : ComponentActivity() {
 //        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
+            val context = LocalContext.current
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = false
-            LaunchedEffect(Unit) {
-                systemUiController.setStatusBarColor(PineColor, darkIcons = useDarkIcons)
-                systemUiController.setNavigationBarColor(PineColor, darkIcons = useDarkIcons)
+            var topBarState by remember { mutableStateOf(TopBarState(context.getString(R.string.app_name))) }
+            LaunchedEffect(topBarState.color) {
+                systemUiController.setStatusBarColor(topBarState.color, darkIcons = useDarkIcons)
+                systemUiController.setNavigationBarColor(topBarState.color, darkIcons = useDarkIcons)
             }
             MyApplicationTheme {
-                var topBarState by remember { mutableStateOf(TopBarState("LifeTracker")) }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val projectViewModel: ProjectsViewModel = hiltViewModel()
@@ -125,10 +127,10 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination?.route ?: ""
                 val drawerMenuDestinations = listOf(
-                    Destination("Список дел", TODOLIST_SCREEN, painterResource(R.drawable.spisok)),
-                    Destination("Трекер", TRACKER_SCREEN, painterResource(R.drawable.tracker)),
-                    Destination("Привычки", HABIT_SCREEN, painterResource(R.drawable.habits)),
-                    Destination("Проекты", PROJECTS_SCREEN, painterResource(R.drawable.projects))
+                    Destination(stringResource(R.string.todo_list), TODOLIST_SCREEN, painterResource(R.drawable.spisok)),
+                    Destination(stringResource(R.string.tracker), TRACKER_SCREEN, painterResource(R.drawable.tracker)),
+                    Destination(stringResource(R.string.habits), HABIT_SCREEN, painterResource(R.drawable.habits)),
+                    Destination(stringResource(R.string.projects), PROJECTS_SCREEN, painterResource(R.drawable.projects))
                 )
                 val isRootScreen = drawerMenuDestinations.any { it.route == currentDestination }
                 val isTodo = currentDestination == TODOLIST_SCREEN
@@ -136,7 +138,7 @@ class MainActivity : ComponentActivity() {
                     drawerState = drawerState, gesturesEnabled = isRootScreen, drawerContent = {
                         ModalDrawerSheet(drawerContainerColor = BgColor) {
                             Text(
-                                text = "LifeTracker", fontFamily = Montserrat,
+                                text = stringResource(R.string.app_title), fontFamily = Montserrat,
                                 fontSize = 20.sp, color = InverseColor,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(16.dp)
@@ -156,10 +158,10 @@ class MainActivity : ComponentActivity() {
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }, colors = NavigationDrawerItemDefaults.colors(
-                                        selectedTextColor = PineColor,
-                                        selectedContainerColor = PineColor.copy(0.1f),
+                                        selectedTextColor = topBarState.color,
+                                        selectedContainerColor = topBarState.color.copy(0.1f),
                                         unselectedTextColor = InverseColor,
-                                        selectedIconColor = PineColor
+                                        selectedIconColor = topBarState.color
                                     ), shape = RectangleShape,
                                     selected = currentDestination == destination.route,
                                     onClick = {
@@ -177,7 +179,7 @@ class MainActivity : ComponentActivity() {
                         Box(
                             Modifier
                                 .fillMaxSize()
-                                .background(PineColor)
+                                .background(topBarState.color)
                         ) {
 //                            SharedTransitionLayout {
                             Scaffold(
@@ -200,7 +202,7 @@ class MainActivity : ComponentActivity() {
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Menu,
-                                                    contentDescription = "Меню", tint = WhitePine
+                                                    contentDescription = stringResource(R.string.menu), tint = WhitePine
                                                 )
                                             }
                                         } else {
@@ -210,7 +212,7 @@ class MainActivity : ComponentActivity() {
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                    contentDescription = "Назад", tint = WhitePine
+                                                    contentDescription = stringResource(R.string.back), tint = WhitePine
                                                 )
                                             }
                                         }
@@ -235,7 +237,7 @@ class MainActivity : ComponentActivity() {
                                             .clip(
                                                 RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)
                                             )
-                                            .background(PineColor)
+                                            .background(topBarState.color)
                                             .fillMaxWidth()
                                             .height(72.dp)
                                             .padding(horizontal = 24.dp)
@@ -304,7 +306,7 @@ class MainActivity : ComponentActivity() {
                                     NavHost(
                                         navController = navController,
                                         startDestination = TODOLIST_SCREEN, modifier = Modifier
-                                            .background(PineColor)
+                                            .background(topBarState.color)
                                             .padding(padding)
                                             .clip(
                                                 RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)

@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +41,7 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
@@ -66,8 +68,7 @@ fun TodoListScreen(
                 viewModel.selectedTask = null
                 navController.navigate(NEW_TASK_SCREEN) }) {
                 Icon(
-                    painterResource(R.drawable.plus),
-                    contentDescription = null, tint = Color.White
+                    painterResource(R.drawable.plus), contentDescription = null, tint = Color.White
                 )
             }
         })
@@ -90,14 +91,11 @@ fun TodoListScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Нет задач",
-                        style = SimpleText,
-                        color = PineColor,
+                        text = stringResource(R.string.no_tasks), style = H2, color = PineColor,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     Text(
-                        text = "Нажмите + чтобы добавить задачу",
-                        style = Small,
+                        text = stringResource(R.string.add_task_hint), style = Small,
                         color = InverseColor.copy(alpha = 0.7f)
                     )
                 }

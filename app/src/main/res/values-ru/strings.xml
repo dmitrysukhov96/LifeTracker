@@ -67,4 +67,12 @@
     <string name="friday">Пт</string>
     <string name="saturday">Сб</string>
     <string name="sunday">Вс</string>
+    <string name="no_tasks">Нет задач</string>
+    <string name="add_task_hint">Нажмите + чтобы добавить задачу</string>
+    <string name="app_title">LifeTracker</string>
+    <string name="menu">Меню</string>
+    <string name="back">Назад</string>
+    <string name="no_projects">Нет проектов</string>
+    <string name="create_project_hint">Нажмите + чтобы создать проект</string>
+    <string name="tasks_completed_format">%1$d/%2$d выполнено</string>
 </resources>

@@ -35,8 +35,7 @@ import com.dmitrysukhov.lifetracker.utils.TopBarState
 
 @Composable
 fun ViewProjectScreen(
-    setTopBarState: (TopBarState) -> Unit, 
-    viewModel: ProjectsViewModel,
+    setTopBarState: (TopBarState) -> Unit, viewModel: ProjectsViewModel,
     navController: NavHostController
 ) {
     val project = viewModel.selectedProject
@@ -44,7 +43,7 @@ fun ViewProjectScreen(
     
     LaunchedEffect(Unit) {
         setTopBarState(
-            TopBarState(project?.title ?: "") {
+            TopBarState(project?.title ?: "", color = projectColor) {
                 IconButton(onClick = { 
                     // Keep the selected project and navigate to edit screen
                     navController.navigate(NEW_PROJECT_SCREEN)

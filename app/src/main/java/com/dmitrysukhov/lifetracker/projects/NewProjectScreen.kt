@@ -1,6 +1,5 @@
 package com.dmitrysukhov.lifetracker.projects
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,64 +46,61 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.Blue
+import com.dmitrysukhov.lifetracker.utils.BlueViolet
+import com.dmitrysukhov.lifetracker.utils.DarkOrange
+import com.dmitrysukhov.lifetracker.utils.ForestGreen
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
+import com.dmitrysukhov.lifetracker.utils.LightGreen
+import com.dmitrysukhov.lifetracker.utils.Magenta
+import com.dmitrysukhov.lifetracker.utils.Mauve
 import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.utils.Olive
+import com.dmitrysukhov.lifetracker.utils.OliveGreen
+import com.dmitrysukhov.lifetracker.utils.Orange
+import com.dmitrysukhov.lifetracker.utils.PeriwinkleBlue
 import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.Pink
+import com.dmitrysukhov.lifetracker.utils.Purple
+import com.dmitrysukhov.lifetracker.utils.Red
+import com.dmitrysukhov.lifetracker.utils.RedViolet
+import com.dmitrysukhov.lifetracker.utils.SkyBlue
+import com.dmitrysukhov.lifetracker.utils.Teal
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import com.dmitrysukhov.lifetracker.utils.Turquoise
+import com.dmitrysukhov.lifetracker.utils.Yellow
 
 @Composable
 fun NewProjectScreen(
-    setTopBarState: (TopBarState) -> Unit,
-    navController: NavHostController,
+    setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
     viewModel: ProjectsViewModel = hiltViewModel()
 ) {
     val colors = listOf(
-        Color(0xFFFA3535),
-        Color(0xFFFF582E),
-        Color(0xFFFFA91F),
-        Color(0xFFFFE030),
-        Color(0xFFDBE204),
-        Color(0xFFC1FF4D),
-        Color(0xFF8FFF2E),
-        Color(0xFF84E09E),
-        Color(0xFF39E25D),
-        Color(0xFF14C56D),
-        Color(0xFF0ECC8A),
-        Color(0xFF29B8D9),
-        Color(0xFF669DE5),
-        Color(0xFF737AFF),
-        Color(0xFF7940FF),
-        Color(0xFF983DC2),
-        Color(0xFFC02A39),
-        Color(0xFFED1F60),
-        Color(0xFFE056CE),
-        Color(0xFFF87687)
+        Red, DarkOrange, Orange, Yellow, Olive, OliveGreen, LightGreen, Teal, PineColor,
+        ForestGreen, Turquoise, Blue, SkyBlue, PeriwinkleBlue, BlueViolet, Purple, Mauve, RedViolet,
+        Magenta, Pink
     )
-    
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
-    var selectedColorIndex by rememberSaveable { mutableStateOf(0) }
+    var selectedColorIndex by rememberSaveable { mutableIntStateOf(8) }
     val selectedColor = colors[selectedColorIndex]
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val project = viewModel.selectedProject
     val isEditMode = project != null
-//    val context = LocalContext.current
-    
-    // If in edit mode, load project data
     LaunchedEffect(project) {
         project?.let {
             title = it.title
             description = it.description
-            // Find matching color in our palette or default to first color
             val projectColor = Color(it.color)
             val closestColorIndex = findClosestColorIndex(projectColor, colors)
             selectedColorIndex = closestColorIndex
         }
     }
-    LaunchedEffect(Unit) {
-        setTopBarState(TopBarState(if (isEditMode) "Edit Project" else "New Project") {
+    LaunchedEffect(selectedColor) {
+        setTopBarState(TopBarState(if (isEditMode) "Edit Project" else "New Project",
+            color = selectedColor) {
             Row {
                 if (isEditMode) {
                     IconButton(onClick = {
@@ -146,7 +143,7 @@ fun NewProjectScreen(
             }
         })
     }
-    
+
     Column(
         modifier = Modifier
             .background(BgColor)
@@ -159,7 +156,7 @@ fun NewProjectScreen(
             textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (title.isEmpty())
-                        Text("Заголовок", style = H1, color = PineColor.copy(0.5f))
+                        Text("Заголовок", style = H1, color = selectedColor.copy(0.5f))
                     innerTextField()
                 }
             }, modifier = Modifier.fillMaxWidth()
@@ -180,7 +177,7 @@ fun NewProjectScreen(
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (description.isEmpty()) Text(
                         stringResource(R.string.description_hint),
-                        style = H2, color = PineColor.copy(0.5f)
+                        style = H2, color = selectedColor.copy(0.5f)
                     )
                     innerTextField()
                 }
@@ -188,11 +185,11 @@ fun NewProjectScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Column(Modifier.padding(top = 32.dp)) {
-            Row (Modifier.padding(bottom = 10.dp)){
-                Image(
+            Row(Modifier.padding(bottom = 10.dp)) {
+                Icon(
                     painter = painterResource(R.drawable.palette),
-                    contentDescription = "",
-                    Modifier.padding(end = 8.dp)
+                    contentDescription = "", tint = selectedColor,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
                 Text(text = "Выберите цвет проекта", style = H2)
             }
@@ -251,7 +248,7 @@ fun NewProjectScreen(
             }
         }
     }
-    
+
     // Delete confirmation dialog
     if (showDeleteConfirmation) {
         AlertDialog(
@@ -278,7 +275,7 @@ fun NewProjectScreen(
 fun findClosestColorIndex(targetColor: Color, colorList: List<Color>): Int {
     var closestIndex = 0
     var minDistance = Float.MAX_VALUE
-    
+
     colorList.forEachIndexed { index, color ->
         val distance = colorDistance(targetColor, color)
         if (distance < minDistance) {
@@ -286,7 +283,7 @@ fun findClosestColorIndex(targetColor: Color, colorList: List<Color>): Int {
             closestIndex = index
         }
     }
-    
+
     return closestIndex
 }
 

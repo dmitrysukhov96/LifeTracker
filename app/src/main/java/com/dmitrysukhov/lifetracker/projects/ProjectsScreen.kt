@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
@@ -56,7 +58,7 @@ fun ProjectsScreen(
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.plus),
-                        contentDescription = null, tint = Color.White
+                        contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -73,9 +75,7 @@ fun ProjectsScreen(
         if (projects.isEmpty()) {
             item {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -83,15 +83,13 @@ fun ProjectsScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Нет проектов",
-                            style = H2,
-                            color = Color.White,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            text = stringResource(R.string.no_projects),
+                            style = MaterialTheme.typography.titleLarge
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Нажмите + чтобы создать проект",
-                            style = SimpleText,
-                            color = Color.White.copy(alpha = 0.7f)
+                            text = stringResource(R.string.create_project_hint),
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
@@ -102,7 +100,7 @@ fun ProjectsScreen(
                 val deadlineText = project.deadlineMillis?.let {
                     val date = Date(it)
                     SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
-                } ?: "Без дедлайна"
+                } ?: stringResource(R.string.no_deadline)
 
                 ProjectItem(
                     title = project.title,
@@ -143,17 +141,17 @@ fun ProjectItem(
                 .alpha(0.9f), contentScale = ContentScale.Crop
         )
         Text(
-            text = title, style = H2, color = Color.White,
+            text = title, style = H2, color = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.padding(start = 20.dp, top = 8.dp)
         )
         Text(
-            text = progress, style = SimpleText, color = Color.White.copy(alpha = 0.8f),
+            text = progress, style = SimpleText, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 8.dp)
         )
         Text(
-            text = deadline, style = SimpleText, color = Color.White.copy(alpha = 0.8f),
+            text = deadline, style = SimpleText, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 8.dp)

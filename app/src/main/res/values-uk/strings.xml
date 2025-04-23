@@ -67,4 +67,9 @@
     <string name="friday">Пт</string>
     <string name="saturday">Сб</string>
     <string name="sunday">Нд</string>
+    <string name="no_tasks">Немає завдань</string>
+    <string name="add_task_hint">Натисніть + щоб додати завдання</string>
+    <string name="app_title">LifeTracker</string>
+    <string name="menu">Меню</string>
+    <string name="back">Назад</string>
 </resources>
