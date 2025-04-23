@@ -21,13 +21,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,11 +64,21 @@ fun TodoListScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
     viewModel: TodoViewModel
 ) {
+    var showImportDialog by remember { mutableStateOf(false) }
+    var importText by remember { mutableStateOf("") }
+
     val todoList by viewModel.todoList.collectAsStateWithLifecycle()
     val projects by viewModel.projects.collectAsStateWithLifecycle()
     
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState("LifeTracker") {
+            IconButton(onClick = { showImportDialog = true }) {
+                Icon(
+                    painterResource(R.drawable.spisok),
+                    contentDescription = stringResource(R.string.import_tasks),
+                    tint = Color.White
+                )
+            }
             IconButton({
                 viewModel.selectedTask = null
                 navController.navigate(NEW_TASK_SCREEN) }) {
@@ -117,6 +132,42 @@ fun TodoListScreen(
                 }
             }
         }
+    }
+
+    if (showImportDialog) {
+        AlertDialog(
+            onDismissRequest = { showImportDialog = false },
+            title = { Text(text = stringResource(R.string.import_tasks)) },
+            text = {
+                Column {
+                    Text(text = stringResource(R.string.import_tasks_hint))
+                    OutlinedTextField(
+                        value = importText,
+                        onValueChange = { importText = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp),
+                        maxLines = 10
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    importText.lines().forEach { line ->
+                        if (line.isNotBlank()) {
+                            viewModel.addTask(text = line.trim())
+                        }
+                    }
+                    showImportDialog = false
+                    importText = ""
+                }) { Text(text = stringResource(R.string.imp)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showImportDialog = false }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
 
