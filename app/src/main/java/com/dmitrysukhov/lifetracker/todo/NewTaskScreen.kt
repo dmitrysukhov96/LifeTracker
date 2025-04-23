@@ -1,21 +1,42 @@
 package com.dmitrysukhov.lifetracker.todo
 
-import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -28,8 +49,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
-import com.dmitrysukhov.lifetracker.utils.*
-import java.util.*
+import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
+import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.H1
+import com.dmitrysukhov.lifetracker.utils.H2
+import com.dmitrysukhov.lifetracker.utils.InverseColor
+import com.dmitrysukhov.lifetracker.utils.Montserrat
+import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.SimpleText
+import com.dmitrysukhov.lifetracker.utils.TopBarState
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun NewTaskScreen(
@@ -37,35 +69,89 @@ fun NewTaskScreen(
     navController: NavHostController
 ) {
     var title by rememberSaveable { mutableStateOf(viewModel.selectedTask?.text ?: "") }
-    var description by rememberSaveable { mutableStateOf(viewModel.selectedTask?.description ?: "") }
-    var selectedTime by rememberSaveable { mutableStateOf("Завтра 15:00") }
-    var reminders by rememberSaveable { mutableStateOf(listOf("Сегодня 22:30", "Завтра 11:00")) }
-    var repeatDays by rememberSaveable { mutableStateOf(setOf<String>()) }
-    var taskDuration by rememberSaveable { mutableStateOf("00:45:00") }
+    var description by rememberSaveable {
+        mutableStateOf(
+            viewModel.selectedTask?.description ?: ""
+        )
+    }
+    var selectedProjectId by rememberSaveable {
+        mutableStateOf(viewModel.selectedTask?.projectId)
+    }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var deadline by rememberSaveable {
+        mutableStateOf(viewModel.selectedTask?.dateTime)
+    }
     val context = LocalContext.current
+    val projects by viewModel.projects.collectAsState()
+
+    // Determine if we're editing an existing task
+    val isEditing = viewModel.selectedTask != null
 
     val globalTextStyle = TextStyle(
         fontFamily = FontFamily(Font(R.font.montserrat_regular)), fontSize = 16.sp,
         color = Color.Black
     )
 
-    val topBarTitle = stringResource(R.string.new_task)
-    val saveToastText = stringResource(R.string.save_task_toast)
+    val topBarTitle =
+        if (isEditing) stringResource(R.string.edit_task) else stringResource(R.string.new_task)
+    val saveToastText = if (isEditing) stringResource(R.string.update_task_toast) else stringResource(R.string.save_task_toast)
 
     LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState(
                 title = topBarTitle,
                 topBarActions = {
-                    if (title.isNotEmpty()) IconButton({
-                        viewModel.addTask(title)
-                        Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
-                        navController.navigateUp()
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.tick),
-                            contentDescription = null, tint = Color.White,
-                        )
+                    Row {
+                        // Show delete button only when editing
+                        if (isEditing) {
+                            IconButton({
+                                viewModel.selectedTask?.let { task ->
+                                    viewModel.deleteTask(task)
+                                    Toast.makeText(context, context.getString(R.string.task_deleted), Toast.LENGTH_SHORT).show()
+                                    navController.navigateUp()
+                                }
+                            }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.delete),
+                                    contentDescription = stringResource(R.string.delete),
+                                    tint = Color.White,
+                                )
+                            }
+                        }
+                        
+                        // Save/Update button
+                        if (title.isNotEmpty()) {
+                            IconButton({
+                                if (isEditing) {
+                                    // Update existing task
+                                    viewModel.selectedTask?.let { task ->
+                                        viewModel.updateTask(
+                                            task.copy(
+                                                text = title,
+                                                description = description,
+                                                projectId = selectedProjectId,
+                                                dateTime = deadline
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    // Create new task
+                                    viewModel.addTask(
+                                        text = title,
+                                        description = description,
+                                        projectId = selectedProjectId,
+                                        deadline = deadline
+                                    )
+                                }
+                                Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
+                                navController.navigateUp()
+                            }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.tick),
+                                    contentDescription = null, tint = Color.White,
+                                )
+                            }
+                        }
                     }
                 }
             )
@@ -82,6 +168,7 @@ fun NewTaskScreen(
             Spacer(modifier = Modifier.height(24.dp))
             BasicTextField(
                 value = title, onValueChange = { title = it },
+                cursorBrush = SolidColor(PineColor),
                 textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (title.isEmpty()) Text(
@@ -101,6 +188,7 @@ fun NewTaskScreen(
             BasicTextField(
                 value = description, onValueChange = { description = it },
                 textStyle = SimpleText.copy(color = InverseColor),
+                cursorBrush = SolidColor(PineColor),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (description.isEmpty()) Text(
@@ -119,97 +207,195 @@ fun NewTaskScreen(
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
 
-            TaskOption(selectedTime, R.drawable.data) {
-                val calendar = Calendar.getInstance()
-                TimePickerDialog(
-                    context,
-                    { _, hour, minute ->
-                        selectedTime = "$hour:$minute"
-                    },
-                    calendar.get(Calendar.HOUR_OF_DAY),
-                    calendar.get(Calendar.MINUTE),
-                    true
-                ).show()
-            }
-            HorizontalDivider()
-            TaskOption(stringResource(R.string.shopping), R.drawable.proekt, showIcon = true) {}
-            HorizontalDivider()
-            TaskOption(stringResource(R.string.reminders), R.drawable.bell) {}
-
-            Row(
-                Modifier
+            // Project selection
+            Box(
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(vertical = 8.dp)
             ) {
-                reminders.forEach { reminder ->
+                Row(
+                    modifier = Modifier
+                        .clickable { expanded = true }
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .border(
+                            if (expanded) 2.dp else 1.dp,
+                            if (expanded) PineColor else InverseColor.copy(0.5f),
+                            RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Row(
-                        modifier = Modifier
-                            .background(AccentColor, shape = RoundedCornerShape(20.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = reminder, style = SimpleText, color = DarkerPine)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            painter = painterResource(id = R.drawable.krest),
-                            contentDescription = null, tint = DarkerPine,
+                        Box(
                             modifier = Modifier
                                 .size(16.dp)
-                                .clickable { reminders = reminders - reminder }
+                                .background(
+                                    selectedProjectId?.let { id ->
+                                        projects.find { it.projectId == id }?.let { project ->
+                                            Color(project.color)
+                                        } ?: Color.Transparent
+                                    } ?: Color.Transparent,
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .let { modifier ->
+                                    if (selectedProjectId == null) {
+                                        modifier.border(
+                                            1.dp,
+                                            InverseColor.copy(0.5f),
+                                            RoundedCornerShape(4.dp)
+                                        )
+                                    } else {
+                                        modifier
+                                    }
+                                }
                         )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
-
-            HorizontalDivider()
-            TaskOption(stringResource(R.string.repeat), R.drawable.repeat) {}
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-                days.forEach { day ->
-                    val isSelected = repeatDays.contains(day)
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(if (isSelected) AccentColor else Color.Unspecified)
-                            .border(2.dp, AccentColor, CircleShape)
-                            .clickable {
-                                repeatDays = if (isSelected) repeatDays - day else repeatDays + day
-                            }, contentAlignment = Alignment.Center
-                    ) {
                         Text(
-                            text = day, style = SimpleText,
-                            color = if (isSelected) Color.Black else InverseColor
+                            text = selectedProjectId?.let { id ->
+                                projects.find { it.projectId == id }?.title
+                                    ?: stringResource(R.string.select_project)
+                            } ?: stringResource(R.string.no_project),
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = W500,
+                            color = InverseColor
+                        )
+                    }
+                    Icon(
+                        painterResource(R.drawable.arrow_down),
+                        contentDescription = null,
+                        tint = PineColor,
+                        modifier = Modifier
+                            .padding(top = 1.dp)
+                            .rotate(if (expanded) 180f else 0f)
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .background(BgColor)
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                ) {
+                    // Add project option
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.plus),
+                                    contentDescription = null,
+                                    tint = PineColor
+                                )
+                                Text(
+                                    stringResource(R.string.add_project),
+                                    fontFamily = Montserrat,
+                                    fontSize = 16.sp,
+                                    fontWeight = W500,
+                                    color = PineColor
+                                )
+                            }
+                        },
+                        onClick = {
+                            expanded = false
+                            navController.navigate(NEW_PROJECT_SCREEN)
+                        }
+                    )
+                    HorizontalDivider()
+                    // No project option
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .background(Color.Transparent, RoundedCornerShape(4.dp))
+                                        .border(
+                                            1.dp,
+                                            InverseColor.copy(0.5f),
+                                            RoundedCornerShape(4.dp)
+                                        )
+                                )
+                                Text(
+                                    stringResource(R.string.no_project),
+                                    fontFamily = Montserrat,
+                                    fontSize = 16.sp,
+                                    fontWeight = W500,
+                                    color = InverseColor
+                                )
+                            }
+                        },
+                        onClick = {
+                            selectedProjectId = null
+                            expanded = false
+                        }
+                    )
+                    projects.forEach { project ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .background(
+                                                Color(project.color),
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                    )
+                                    Text(
+                                        project.title,
+                                        fontFamily = Montserrat,
+                                        fontSize = 16.sp,
+                                        fontWeight = W500,
+                                        color = InverseColor
+                                    )
+                                }
+                            },
+                            onClick = {
+                                selectedProjectId = project.projectId
+                                expanded = false
+                            }
                         )
                     }
                 }
             }
             HorizontalDivider()
 
-            TaskOption(stringResource(R.string.time_for_task), R.drawable.vremya) {
-                TimePickerDialog(
-                    context,
-                    { _, hour, minute ->
-                        taskDuration =
-                            String.format(Locale.getDefault(), "%02d:%02d:00", hour, minute)
-                    }, 0, 45, true
-                ).show()
-            }
-
-            Row(
-                modifier = Modifier
-                    .background(AccentColor, shape = RoundedCornerShape(15.dp))
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
+            // Deadline selection
+            TaskOption(
+                text = deadline?.let {
+                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
+                } ?: stringResource(R.string.no_deadline),
+                iconRes = R.drawable.data
             ) {
-                Text(text = taskDuration, style = H2, color = InverseColor)
+                val calendar = Calendar.getInstance()
+                val datePicker = android.app.DatePickerDialog(
+                    context,
+                    { _, year, month, day ->
+                        val selectedDate = Calendar.getInstance().apply {
+                            set(year, month, day)
+                        }
+                        deadline = selectedDate.timeInMillis
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                )
+                datePicker.show()
             }
             HorizontalDivider()
         }
@@ -227,12 +413,16 @@ fun TaskOption(text: String, iconRes: Int, showIcon: Boolean = false, onClick: (
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(painter = painterResource(iconRes), contentDescription = null, tint = PineColor)
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = PineColor
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text(text, style = H2, color = InverseColor)
         }
         if (showIcon) Icon(
-            painter = painterResource(id = R.drawable.ministrelka),
+            painter = painterResource(id = R.drawable.arrow_down),
             contentDescription = null, tint = PineColor
         )
     }

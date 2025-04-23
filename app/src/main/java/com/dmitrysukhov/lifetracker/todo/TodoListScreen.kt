@@ -58,6 +58,8 @@ fun TodoListScreen(
     viewModel: TodoViewModel
 ) {
     val todoList by viewModel.todoList.collectAsStateWithLifecycle()
+    val projects by viewModel.projects.collectAsStateWithLifecycle()
+    
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState("LifeTracker") {
             IconButton({
@@ -76,18 +78,45 @@ fun TodoListScreen(
             .fillMaxSize()
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(Modifier.padding(horizontal = 24.dp)) {
-            items(todoList) { todoItem ->
-                TodoListItem(
-                    item = todoItem,
-                    onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) },
-                    isRunning = todoList.indexOf(todoItem) == 0,
-                    onClick = {
-                        viewModel.selectedTask = todoItem
-                        navController.navigate(NEW_TASK_SCREEN)
-                    }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+        if (todoList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Нет задач",
+                        style = SimpleText,
+                        color = PineColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = "Нажмите + чтобы добавить задачу",
+                        style = Small,
+                        color = InverseColor.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        } else {
+            LazyColumn(Modifier.padding(horizontal = 24.dp)) {
+                items(todoList) { todoItem ->
+                    TodoListItem(
+                        item = todoItem,
+                        projects = projects,
+                        onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) },
+                        isRunning = todoList.indexOf(todoItem) == 0,
+                        onClick = {
+                            viewModel.selectedTask = todoItem
+                            navController.navigate(NEW_TASK_SCREEN)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
     }
@@ -95,7 +124,13 @@ fun TodoListScreen(
 
 
 @Composable
-fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: Boolean, onClick: () -> Unit) {
+fun TodoListItem(
+    item: TodoItem, 
+    projects: List<com.dmitrysukhov.lifetracker.Project>,
+    onCheckedChange: (Boolean) -> Unit, 
+    isRunning: Boolean, 
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -123,8 +158,11 @@ fun TodoListItem(item: TodoItem, onCheckedChange: (Boolean) -> Unit, isRunning: 
                     color = if (item.isDone) PineColor else InverseColor,
                     modifier = Modifier.weight(1f)
                 )
-                item.projectId?.let { //todo project name by id
-                    ProjectTag(text = "Покупки", color = Color(0xFFFFA726))
+                item.projectId?.let { projectId ->
+                    val project = projects.find { it.projectId == projectId }
+                    project?.let {
+                        ProjectTag(text = it.title, color = Color(it.color))
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))

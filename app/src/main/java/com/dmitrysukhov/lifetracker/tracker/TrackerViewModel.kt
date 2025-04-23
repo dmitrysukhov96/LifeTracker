@@ -48,7 +48,7 @@ class TrackerViewModel @Inject constructor(
         return eventRepository.getEventsForTimeRange(startOfDay, endOfDay)
     }
 
-    fun startEvent(projectId: Long, taskName: String) {
+    fun startEvent(projectId: Long?, taskName: String) {
         viewModelScope.launch {
             val event = Event(
                 projectId = projectId,

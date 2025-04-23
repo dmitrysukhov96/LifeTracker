@@ -3,10 +3,13 @@ package com.dmitrysukhov.lifetracker.todo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitrysukhov.lifetracker.TodoItem
+import com.dmitrysukhov.lifetracker.Project
+import com.dmitrysukhov.lifetracker.projects.ProjectDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,9 +20,33 @@ class TodoViewModel @Inject constructor(
     var selectedTask: TodoItem? = null
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
     val todoList: StateFlow<List<TodoItem>> = _todoList.asStateFlow()
+    
+    private val _projects = MutableStateFlow<List<Project>>(emptyList())
+    val projects: StateFlow<List<Project>> = _projects.asStateFlow()
+    
+    @Inject
+    lateinit var projectsDao: ProjectDao
 
     init {
         loadTasks()
+        viewModelScope.launch {
+            // Defer projects loading to ensure projectsDao is injected
+            kotlinx.coroutines.delay(100)
+            loadProjects()
+        }
+    }
+
+    private fun loadProjects() {
+        viewModelScope.launch {
+            try {
+                projectsDao.getAllProjects().collectLatest { list ->
+                    _projects.value = list
+                }
+            } catch (e: Exception) {
+                // Handle case when projectsDao is not yet initialized
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun loadTasks() {
@@ -28,21 +55,20 @@ class TodoViewModel @Inject constructor(
         }
     }
 
-    fun addTask(text: String) {
+    fun addTask(
+        text: String,
+        description: String = "",
+        projectId: Long? = null,
+        deadline: Long? = null
+    ) {
         val newTask = TodoItem(
             text = text,
-            description = listOf(
-                "Проверить почту",
-                "Позвонить клиенту",
-                "Прочитать статью",
-                "Почистить входящие",
-                "Повторить материал"
-            ).random(),
-            projectId = listOf(1L, 2L, 3L, null).random(), // пример: случайный проект или без проекта
-            dateTime = System.currentTimeMillis() + (1..7).random() * 24 * 60 * 60 * 1000L, // через 1–7 дней
-            reminderTime = System.currentTimeMillis() + (1..6).random() * 60 * 60 * 1000L, // через 1–6 часов
-            repeatInterval = listOf("daily", "weekly", null).random(),
-            durationMinutes = listOf(15, 30, 60, 90, 120).random(),
+            description = description,
+            projectId = projectId,
+            dateTime = (deadline ?: System.currentTimeMillis()) + 24 * 60 * 60 * 1000L, // default: tomorrow
+            reminderTime = null,
+            repeatInterval = null,
+            durationMinutes = null,
             isDone = false
         )
 
@@ -59,10 +85,10 @@ class TodoViewModel @Inject constructor(
         }
     }
 
-//    fun deleteTask(item: TodoItem) {
-//        viewModelScope.launch {
-//            todoDao.deleteTask(item)
-//            loadTasks()
-//        }
-//    }
+    fun deleteTask(item: TodoItem) {
+        viewModelScope.launch {
+            todoDao.deleteTask(item)
+            loadTasks()
+        }
+    }
 }

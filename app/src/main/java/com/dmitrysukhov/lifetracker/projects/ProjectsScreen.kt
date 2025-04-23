@@ -3,7 +3,9 @@ package com.dmitrysukhov.lifetracker.projects
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,23 +68,51 @@ fun ProjectsScreen(
             .padding(horizontal = 24.dp)
     ) {
         item { Spacer(Modifier.height(24.dp)) }
-        items(projects.size) { index ->
-            val project = projects[index]
-            val deadlineText = project.deadlineMillis?.let {
-                val date = Date(it)
-                SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
-            } ?: "Без дедлайна"
+        if (projects.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Нет проектов",
+                            style = H2,
+                            color = Color.White,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Text(
+                            text = "Нажмите + чтобы создать проект",
+                            style = SimpleText,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+        } else {
+            items(projects.size) { index ->
+                val project = projects[index]
+                val deadlineText = project.deadlineMillis?.let {
+                    val date = Date(it)
+                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
+                } ?: "Без дедлайна"
 
-            ProjectItem(
-                title = project.title,
-                progress = "${project.completedTasks}/${project.totalTasks} выполнено",
-                deadline = deadlineText, showImage = project == projects[0],
-                gradient = generateGradient(Color(project.color)), onClick = {
-                    viewModel.selectedProject = project
-                    navController.navigate(VIEW_PROJECT_SCREEN)
-                })
+                ProjectItem(
+                    title = project.title,
+                    progress = "${project.completedTasks}/${project.totalTasks} выполнено",
+                    deadline = deadlineText, showImage = project == projects[0],
+                    gradient = generateGradient(Color(project.color)), onClick = {
+                        viewModel.selectedProject = project
+                        navController.navigate(VIEW_PROJECT_SCREEN)
+                    })
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
 
         item { Spacer(Modifier.height(64.dp)) }
