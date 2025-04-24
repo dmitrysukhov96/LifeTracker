@@ -74,7 +74,7 @@ fun TodoListScreen(
         setTopBarState(TopBarState("LifeTracker") {
             IconButton(onClick = { showImportDialog = true }) {
                 Icon(
-                    painterResource(R.drawable.spisok),
+                    painterResource(R.drawable.import_icon),
                     contentDescription = stringResource(R.string.import_tasks),
                     tint = Color.White
                 )
@@ -129,6 +129,9 @@ fun TodoListScreen(
                         }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+                }
+                item {
+                    Spacer(modifier = Modifier.height(56.dp))
                 }
             }
         }

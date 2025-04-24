@@ -1,0 +1,62 @@
+package com.dmitrysukhov.lifetracker.habits
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.room.Dao
+import androidx.room.Entity
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.PrimaryKey
+import androidx.room.Query
+import com.dmitrysukhov.lifetracker.Habit
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class HabitsViewModel @Inject constructor(
+    private val habitDao: HabitDao,
+    private val habitEventDao: HabitEventDao
+) : ViewModel() {
+    val habits: StateFlow<List<Habit>> = habitDao.getAllHabits()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun addHabit(habit: Habit) {
+        viewModelScope.launch {
+            habitDao.insert(habit)
+        }
+    }
+
+    fun saveHabitEvent(habitId: Long, dateMs: Long, value: Int) {
+        viewModelScope.launch {
+            val event = HabitEvent(habitId = habitId, date = dateMs, value = value)
+            habitEventDao.insert(event)
+        }
+    }
+
+    fun getEventsForHabit(habitId: Long): Flow<Map<Long, Int>> =
+        habitEventDao.getEventsForHabit(habitId)
+            .map { events -> events.associate { it.date to it.value } }
+}
+
+@Entity(tableName = "habit_events")
+data class HabitEvent(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val habitId: Long,
+    val date: Long,
+    val value: Int
+)
+
+@Dao
+interface HabitEventDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(event: HabitEvent)
+
+    @Query("SELECT * FROM habit_events WHERE habitId = :habitId")
+    fun getEventsForHabit(habitId: Long): Flow<List<HabitEvent>>
+}

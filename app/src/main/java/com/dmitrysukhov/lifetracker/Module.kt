@@ -8,6 +8,8 @@ import com.dmitrysukhov.lifetracker.projects.ProjectRepositoryImpl
 import com.dmitrysukhov.lifetracker.todo.TodoDao
 import com.dmitrysukhov.lifetracker.tracker.EventDao
 import com.dmitrysukhov.lifetracker.tracker.EventRepository
+import com.dmitrysukhov.lifetracker.habits.HabitDao
+import com.dmitrysukhov.lifetracker.habits.HabitEventDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,6 +33,13 @@ object AppModule {
     fun provideTodoDao(database: AppDatabase): TodoDao {
         return database.todoDao()
     }
+
+    @Provides
+    fun provideHabitDao(database: AppDatabase): HabitDao = database.habitDao()
+
+    @Provides
+    fun provideHabitEventDao(database: AppDatabase): HabitEventDao = database.habitEventDao()
+
 
     @Provides
     fun provideProjectDao(database: AppDatabase): ProjectDao {

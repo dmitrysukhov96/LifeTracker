@@ -34,3 +34,12 @@ data class Event(
     @PrimaryKey(autoGenerate = true) val eventId: Long = 0, val projectId: Long? = null,
     val name: String? = null, val startTime: Long, val endTime: Long?
 )
+
+@Entity(tableName = "habits")
+data class Habit(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0L,
+    val title: String,
+    /** 0 = Checkbox, 1 = Number (greater is better), 2 = Number (less is better) */
+    val type: Int,
+    val color: Int
+)

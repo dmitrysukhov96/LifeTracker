@@ -33,8 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -73,6 +75,73 @@ import com.dmitrysukhov.lifetracker.utils.Turquoise
 import com.dmitrysukhov.lifetracker.utils.Yellow
 
 @Composable
+fun ColorPicker(
+    selectedColorIndex: Int, onColorSelected: (Int) -> Unit
+) {
+    val colors = listOf(
+        Red, DarkOrange, Orange, Yellow, Olive, OliveGreen, LightGreen, Teal, PineColor,
+        ForestGreen, Turquoise, Blue, SkyBlue, PeriwinkleBlue, BlueViolet, Purple, Mauve,
+        RedViolet, Magenta, Pink
+    )
+    Column(Modifier.padding(start = 24.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            colors.take(10).forEachIndexed { index, color ->
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .shadow(2.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(color)
+                        .clickable { onColorSelected(color.toArgb()) }
+                ) {
+                    if (selectedColorIndex == index) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            colors.drop(10).forEachIndexed { idx, color ->
+                val index = idx + 10
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .shadow(2.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(color)
+                        .clickable { onColorSelected(color.toArgb()) }
+                ) {
+                    if (selectedColorIndex == index) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun NewProjectScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
     viewModel: ProjectsViewModel = hiltViewModel()
@@ -82,6 +151,7 @@ fun NewProjectScreen(
         ForestGreen, Turquoise, Blue, SkyBlue, PeriwinkleBlue, BlueViolet, Purple, Mauve, RedViolet,
         Magenta, Pink
     )
+    val context = LocalContext.current
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
     var selectedColorIndex by rememberSaveable { mutableIntStateOf(8) }
@@ -99,8 +169,11 @@ fun NewProjectScreen(
         }
     }
     LaunchedEffect(selectedColor) {
-        setTopBarState(TopBarState(if (isEditMode) "Edit Project" else "New Project",
-            color = selectedColor) {
+        setTopBarState(
+            TopBarState(
+                title = if (isEditMode) context.getString(R.string.edit_project) else context.getString(R.string.new_project),
+                color = selectedColor
+            ) {
             Row {
                 if (isEditMode) {
                     IconButton(onClick = {
@@ -156,7 +229,7 @@ fun NewProjectScreen(
             textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (title.isEmpty())
-                        Text("Заголовок", style = H1, color = selectedColor.copy(0.5f))
+                        Text(stringResource(R.string.project_title), style = H1, color = selectedColor.copy(0.5f))
                     innerTextField()
                 }
             }, modifier = Modifier.fillMaxWidth()
@@ -188,64 +261,16 @@ fun NewProjectScreen(
             Row(Modifier.padding(bottom = 10.dp)) {
                 Icon(
                     painter = painterResource(R.drawable.palette),
-                    contentDescription = "", tint = selectedColor,
+                    contentDescription = null, tint = selectedColor,
                     modifier = Modifier.padding(end = 8.dp)
                 )
-                Text(text = "Выберите цвет проекта", style = H2)
+                Text(text = stringResource(R.string.select_project_color), style = H2)
             }
 
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        for (i in 0 until 10) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(colors[i])
-                                    .clickable { selectedColorIndex = i }
-                            ) {
-                                if (selectedColor == colors[i]) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.padding(4.dp))
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        for (i in 10 until 20) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(colors[i])
-                                    .clickable { selectedColorIndex = i }
-                            ) {
-                                if (selectedColor == colors[i]) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            ColorPicker(
+                selectedColorIndex = selectedColorIndex,
+                onColorSelected = { selectedColorIndex = it }
+            )
         }
     }
 

@@ -34,6 +34,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,8 +44,10 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,6 +75,7 @@ import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -78,6 +83,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
+import com.dmitrysukhov.lifetracker.habits.NEW_HABIT_SCREEN
+import com.dmitrysukhov.lifetracker.habits.NewHabitScreen
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
@@ -117,6 +124,58 @@ class MainActivity : ComponentActivity() {
                 systemUiController.setNavigationBarColor(topBarState.color, darkIcons = useDarkIcons)
             }
             MyApplicationTheme {
+                // Name dialog logic
+                val sharedPref = context.getSharedPreferences("user_prefs", MODE_PRIVATE)
+                var showNameDialog by rememberSaveable {
+                    mutableStateOf(
+                        !sharedPref.getBoolean(
+                            "dont_ask_name",
+                            false
+                        )
+                    )
+                }
+                var userName by rememberSaveable { mutableStateOf("") }
+                if (showNameDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showNameDialog = false },
+                        title = { Text(text = stringResource(R.string.dialog_ask_name)) },
+                        text = {
+                            OutlinedTextField(
+                                value = userName,
+                                onValueChange = { userName = it },
+                                placeholder = { Text(text = stringResource(R.string.dialog_ask_name)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    sharedPref.edit {
+                                        putString("user_name", userName.trim())
+                                            .putBoolean("dont_ask_name", true)
+                                    }
+                                    showNameDialog = false
+                                },
+                                enabled = userName.isNotBlank()
+                            ) {
+                                Text(text = stringResource(R.string.ok))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    sharedPref.edit {
+                                        putBoolean("dont_ask_name", true)
+                                    }
+                                    showNameDialog = false
+                                }
+                            ) {
+                                Text(text = stringResource(R.string.dialog_dont_ask_again))
+                            }
+                        }
+                    )
+                }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val projectViewModel: ProjectsViewModel = hiltViewModel()
@@ -197,7 +256,9 @@ class MainActivity : ComponentActivity() {
                                         if (isRootScreen) {
                                             IconButton(
                                                 onClick = { scope.launch { drawerState.open() } },
-                                                modifier = Modifier.padding(start = 10.dp).align(Alignment.CenterStart)
+                                                modifier = Modifier
+                                                    .padding(start = 10.dp)
+                                                    .align(Alignment.CenterStart)
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Menu,
@@ -207,7 +268,9 @@ class MainActivity : ComponentActivity() {
                                         } else {
                                             IconButton(
                                                 onClick = { navController.popBackStack() },
-                                                modifier = Modifier.padding(start = 10.dp).align(Alignment.CenterStart)
+                                                modifier = Modifier
+                                                    .padding(start = 10.dp)
+                                                    .align(Alignment.CenterStart)
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -264,11 +327,10 @@ class MainActivity : ComponentActivity() {
                                                         innerTextField()
                                                         if (taskText.isEmpty()) {
                                                             Text(
-                                                                "Введите задачу...",
+                                                                stringResource(R.string.enter_task_hint),
                                                                 color = Color.White,
                                                                 style = H2
                                                             )
-
                                                         }
                                                     }
                                                 },
@@ -318,7 +380,18 @@ class MainActivity : ComponentActivity() {
                                         }
                                         composable(VIEW_PROJECT_SCREEN) { ViewProjectScreen(setTopBarState, projectViewModel, navController) }
                                         composable(TRACKER_SCREEN) { TrackerScreen(setTopBarState, navController = navController) }
-                                        composable(HABIT_SCREEN) { HabitScreen(setTopBarState) }
+                                        composable(HABIT_SCREEN) {
+                                            HabitScreen(
+                                                setTopBarState,
+                                                navController
+                                            )
+                                        }
+                                        composable(NEW_HABIT_SCREEN) {
+                                            NewHabitScreen(
+                                                setTopBarState,
+                                                navController
+                                            )
+                                        }
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(setTopBarState, navController, projectViewModel)
                                         }

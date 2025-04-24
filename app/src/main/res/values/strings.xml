@@ -37,8 +37,10 @@
     <!-- New strings -->
     <string name="tracker">Tracker</string>
     <string name="habits">Habits</string>
+    <string name="new_habit">New Habit</string>
     <string name="projects">Projects</string>
     <string name="new_project">New Project</string>
+    <string name="edit_project">Edit Project</string>
     <string name="project_title">Project Title</string>
     <string name="project_description">Project Description</string>
     <string name="select_project_color">Select project color</string>
@@ -83,4 +85,15 @@
     <string name="import_tasks">Import Tasks</string>
     <string name="import_tasks_hint">Enter each task on a new line</string>
     <string name="imp">Import</string>
+    <string name="enter_task_hint">Enter task…</string>
+    <string name="dialog_ask_name">What\'s your name?</string>
+    <string name="dialog_dont_ask_again">Don\'t ask again</string>
+    <string name="habit_type">Type</string>
+    <string name="checkbox">Checkbox</string>
+    <string name="number">Number</string>
+    <string name="number_greater">Greater = better</string>
+    <string name="number_less">Less = better</string>
+    <string name="week">Week</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
 </resources>

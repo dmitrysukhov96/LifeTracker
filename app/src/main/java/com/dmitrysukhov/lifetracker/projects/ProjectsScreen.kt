@@ -36,7 +36,10 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
+import com.dmitrysukhov.lifetracker.utils.InverseColor
+import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
+import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -52,9 +55,9 @@ fun ProjectsScreen(
     LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState("Projects") {
-                IconButton(onClick = { 
+                IconButton(onClick = {
                     viewModel.selectedProject = null
-                    navController.navigate(NEW_PROJECT_SCREEN) 
+                    navController.navigate(NEW_PROJECT_SCREEN)
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.plus),
@@ -64,37 +67,41 @@ fun ProjectsScreen(
             }
         )
     }
-
-    LazyColumn(
+    Column(
         modifier = Modifier
-            .fillMaxSize()
             .background(BgColor)
-            .padding(horizontal = 24.dp)
+            .fillMaxSize()
     ) {
-        item { Spacer(Modifier.height(24.dp)) }
         if (projects.isEmpty()) {
-            item {
-                Box(
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = stringResource(R.string.no_projects),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.create_project_hint),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.no_projects),style = H2, color = PineColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.create_project_hint),style = Small,
+                        color = InverseColor.copy(alpha = 0.7f)
+                    )
                 }
             }
         } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(BgColor)
+                    .padding(horizontal = 24.dp)
+            ) {
+                item { Spacer(Modifier.height(24.dp)) }
             items(projects.size) { index ->
                 val project = projects[index]
                 val deadlineText = project.deadlineMillis?.let {
@@ -113,12 +120,12 @@ fun ProjectsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-        }
 
-        item { Spacer(Modifier.height(64.dp)) }
+                item { Spacer(Modifier.height(64.dp)) }
+            }
+        }
     }
 }
-
 @Composable
 fun ProjectItem(
     title: String, progress: String, deadline: String, gradient: Brush, onClick: () -> Unit,
@@ -131,7 +138,9 @@ fun ProjectItem(
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))
             .then(
-                if (showImage) Modifier.background(Color.Black) else Modifier.background(gradient)
+                if (showImage) Modifier.background(Color.Black) else Modifier.background(
+                    gradient
+                )
             )
     ) {
         if (showImage) Image(
@@ -145,13 +154,17 @@ fun ProjectItem(
             modifier = Modifier.padding(start = 20.dp, top = 8.dp)
         )
         Text(
-            text = progress, style = SimpleText, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+            text = progress,
+            style = SimpleText,
+            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 8.dp)
         )
         Text(
-            text = deadline, style = SimpleText, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+            text = deadline,
+            style = SimpleText,
+            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 8.dp)
