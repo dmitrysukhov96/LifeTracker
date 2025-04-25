@@ -1,6 +1,6 @@
 package com.dmitrysukhov.lifetracker.habits
 
-
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +45,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Habit
@@ -55,6 +53,7 @@ import com.dmitrysukhov.lifetracker.common.ui.ThreeButtonsSelector
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.SimpleText
+import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDate
@@ -65,11 +64,11 @@ import java.util.Locale
 fun HabitScreen(
     setTopBarState: (TopBarState) -> Unit,
     navController: NavHostController,
-    viewModel: HabitsViewModel = hiltViewModel()
+    viewModel: HabitsViewModel
 ) {
     val habits by viewModel.habits.collectAsStateWithLifecycle(emptyList())
     var mode by rememberSaveable { mutableStateOf(HabitViewMode.WEEK) }
-    var currentDate by rememberSaveable { mutableStateOf(LocalDate.now()) }
+    var currentDate by rememberSaveable { mutableStateOf(LocalDate.now(DateTimeZone.UTC)) }
 
     val periodTitle = when (mode) {
         HabitViewMode.WEEK -> {
@@ -77,17 +76,21 @@ fun HabitScreen(
             val end = start.withDayOfWeek(7)
             "${start.toString("dd.MM.yyyy")} - ${end.toString("dd.MM.yyyy")}"
         }
+
         HabitViewMode.MONTH -> currentDate.toString("MMMM yyyy")
         HabitViewMode.YEAR -> currentDate.toString("yyyy")
     }
 
-    var dialogData by remember { mutableStateOf<Pair<Habit, LocalDate>?>(null)}
+    var dialogData by remember { mutableStateOf<Pair<Habit, LocalDate>?>(null) }
     var numberInput by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState("Habits") {
-                IconButton(onClick = { navController.navigate(NEW_HABIT_SCREEN) }) {
+                IconButton(onClick = {
+                    viewModel.selectedHabit = null
+                    navController.navigate(NEW_HABIT_SCREEN)
+                }) {
                     Icon(
                         painter = painterResource(R.drawable.plus), contentDescription = null,
                         tint = Color.White
@@ -104,7 +107,8 @@ fun HabitScreen(
             .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        ThreeButtonsSelector(mode.ordinal, stringResource(R.string.week),
+        ThreeButtonsSelector(
+            mode.ordinal, stringResource(R.string.week),
             stringResource(R.string.month), stringResource(R.string.year)
         ) { mode = HabitViewMode.entries[it] }
         Spacer(modifier = Modifier.height(8.dp))
@@ -137,16 +141,26 @@ fun HabitScreen(
         LazyColumn {
             items(habits.size) { index ->
                 val habit = habits[index]
-                val eventsMap by viewModel.getEventsForHabit(habit.id).collectAsState(initial = emptyMap())
+                val eventsMap by viewModel.getEventsForHabit(habit.id)
+                    .collectAsStateWithLifecycle(emptyMap())
 
                 HabitCard(
                     habit = habit,
                     mode = mode,
                     currentDate = currentDate,
                     onSquareClick = { date ->
-                        if (HabitType.entries[habit.type] == HabitType.CHECKBOX) {
-                            viewModel.saveHabitEvent(habit.id, date.toDateTimeAtStartOfDay(DateTimeZone.UTC).millis, 1)
-                        } else { dialogData = habit to date }
+                        if (habit.type < HabitType.entries.size && HabitType.entries[habit.type] == HabitType.CHECKBOX) {
+                            val dateMillis = date.toDateTimeAtStartOfDay(DateTimeZone.UTC).millis
+                            if (eventsMap.containsKey(dateMillis)) {
+                                // Если отметка уже есть - удаляем её
+                                viewModel.deleteHabitEvent(habit.id, dateMillis)
+                            } else {
+                                // Если отметки нет - добавляем её
+                                viewModel.saveHabitEvent(habit.id, dateMillis, 1)
+                            }
+                        } else {
+                            dialogData = habit to date
+                        }
                     }, events = eventsMap
                 ) {
                     viewModel.selectedHabit = habit
@@ -163,7 +177,11 @@ fun HabitScreen(
             confirmButton = {
                 TextButton(onClick = {
                     val (habit, date) = dialogData!!
-                    viewModel.saveHabitEvent(habit.id, date.toDateTimeAtStartOfDay(DateTimeZone.UTC).millis, numberInput.toIntOrNull() ?: 0)
+                    viewModel.saveHabitEvent(
+                        habit.id,
+                        date.toDateTimeAtStartOfDay(DateTimeZone.UTC).millis,
+                        numberInput.toIntOrNull() ?: 0
+                    )
                     dialogData = null
                     numberInput = ""
                 }) {
@@ -202,25 +220,60 @@ fun HabitCard(
             .background(Color(habit.color))
             .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart
         ) {
             Text(
                 habit.title,
-                style = H2.copy(color = Color.White, fontWeight = Bold)
+                style = H2.copy(color = Color.White, fontWeight = Bold),
+                modifier = Modifier.padding(end = 44.dp)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { onEdit() }, modifier = Modifier.padding(end = 16.dp).size(20.dp))
+            IconButton(
+                onClick = { onEdit() }, modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
+                    .size(20.dp)
+            )
             { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White) }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         val isMarked: (LocalDate) -> Boolean = {
-            events.containsKey(it.toDateTimeAtStartOfDay().millis)
+            events.containsKey(it.toDateTimeAtStartOfDay(DateTimeZone.UTC).millis)
         }
-
         when (mode) {
+            HabitViewMode.WEEK -> {
+                val start = currentDate.withDayOfWeek(1)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.horizontalScroll(rememberScrollState())
+                ) {
+                    repeat(7) { i ->
+                        val date = start.plusDays(i.toInt())
+                        var isMarked = isMarked(date)
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(indication = null, interactionSource = null)
+                                { onSquareClick(date) }
+                                .background(
+                                    Color.White.copy(alpha = if (isMarked) 0.6f else 0.4f)
+                                )
+                        ) {
+                            Text(
+                                date.toString("d"),
+                                style = Small,
+                                color = Color.White.copy(0.7f),
+                                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                            )
+                            if (isMarked) Image(painterResource(R.drawable.tick), null, modifier = Modifier.align(
+                                Alignment.Center).padding(start = 1.dp, top = 4.dp).size(20.dp))
+                        }
+                    }
+                }
+            }
+
             HabitViewMode.MONTH -> {
                 val days = generateMonthDays(currentDate)
                 val weeks = days.chunked(7)
@@ -230,7 +283,7 @@ fun HabitCard(
                             week.forEach { day ->
                                 Box(
                                     modifier = Modifier
-                                        .size(16.dp)
+                                        .size(24.dp)
                                         .clip(RoundedCornerShape(4.dp))
                                         .background(
                                             when {
@@ -242,7 +295,14 @@ fun HabitCard(
                                         .clickable(enabled = day != null) {
                                             day?.let(onSquareClick)
                                         }
-                                )
+                                ) {
+                                    Text(
+                                        day?.toString("d") ?: "",
+                                        style = Small,
+                                        color = Color.White.copy(0.7f),
+                                        modifier = Modifier.padding(4.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -287,32 +347,21 @@ fun HabitCard(
                                                 }
                                             )
                                             .clickable(enabled = isDayInMonth && date != null) {
-                                                date?.let(onSquareClick)
+                                                date?.let { onSquareClick(it) }
                                             }
-                                    )
+                                    ) {
+                                        Text(
+                                            date?.toString("d") ?: "",
+                                            style = Small,
+                                            color = Color.White.copy(0.7f),
+                                            modifier = Modifier.padding(4.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                     Spacer(Modifier.width(16.dp))
-                }
-            }
-
-            HabitViewMode.WEEK -> {
-                val start = currentDate.withDayOfWeek(1)
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    repeat(7) { i ->
-                        val date = start.plusDays(i.toInt())
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(
-                                    if (isMarked(date)) Color.White else Color.White.copy(alpha = 0.5f)
-                                )
-                                .clickable { onSquareClick(date) }
-                        )
-                    }
                 }
             }
         }
@@ -333,6 +382,8 @@ fun generateMonthDays(currentDate: LocalDate): List<LocalDate?> {
 }
 
 enum class HabitViewMode { WEEK, MONTH, YEAR }
+
 const val HABIT_SCREEN = "Habits"
-enum class HabitType { CHECKBOX, NUMBER }
+
+enum class HabitType { CHECKBOX, MOREBETTER, LESSBETTER }
 

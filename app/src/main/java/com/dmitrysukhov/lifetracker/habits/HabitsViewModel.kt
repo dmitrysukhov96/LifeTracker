@@ -44,6 +44,12 @@ class HabitsViewModel @Inject constructor(
     fun updateHabit(habit: Habit) {
         viewModelScope.launch { habitDao.update(habit) }
     }
+
+    fun deleteHabitEvent(habitId: Long, date: Long) {
+        viewModelScope.launch { habitEventDao.deleteEvent(habitId, date) }
+    }
+
+    fun deleteHabit(id: Long) = viewModelScope.launch { habitDao.deleteHabit(id) }
 }
 
 @Entity(tableName = "habit_events")
@@ -59,4 +65,7 @@ interface HabitEventDao {
 
     @Query("SELECT * FROM habit_events WHERE habitId = :habitId")
     fun getEventsForHabit(habitId: Long): Flow<List<HabitEvent>>
+
+    @Query("DELETE FROM habit_events WHERE habitId = :habitId AND date = :date")
+    suspend fun deleteEvent(habitId: Long, date: Long)
 }

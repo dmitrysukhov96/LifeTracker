@@ -83,6 +83,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
+import com.dmitrysukhov.lifetracker.habits.HabitsViewModel
 import com.dmitrysukhov.lifetracker.habits.NEW_HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.NewHabitScreen
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
@@ -179,6 +180,7 @@ class MainActivity : ComponentActivity() {
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val projectViewModel: ProjectsViewModel = hiltViewModel()
+                val habitViewModel: HabitsViewModel = hiltViewModel()
                 val navController = rememberNavController()
                 val scope = rememberCoroutineScope()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -383,13 +385,13 @@ class MainActivity : ComponentActivity() {
                                         composable(HABIT_SCREEN) {
                                             HabitScreen(
                                                 setTopBarState,
-                                                navController
+                                                navController, habitViewModel
                                             )
                                         }
                                         composable(NEW_HABIT_SCREEN) {
                                             NewHabitScreen(
                                                 setTopBarState,
-                                                navController
+                                                navController, habitViewModel
                                             )
                                         }
                                         composable(PROJECTS_SCREEN) {

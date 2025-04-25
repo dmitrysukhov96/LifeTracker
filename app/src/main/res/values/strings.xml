@@ -45,7 +45,7 @@
     <string name="edit_project">Edit Project</string>
     <string name="project_title">Project Title</string>
     <string name="project_description">Project Description</string>
-    <string name="select_project_color">Select project color</string>
+    <string name="select_color">Select color</string>
     <string name="no_deadline">No deadline</string>
     <string name="tasks_completed">%1$d/%2$d completed</string>
     <string name="no_task">No task</string>

@@ -25,12 +25,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
+import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TimelineColor
@@ -244,7 +246,7 @@ fun EventBlock(event: Event, color: Color = Color(0xFF4CAF50), projects: List<Pr
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = project?.title ?: "Без проекта",
+                    text = project?.title ?: stringResource(R.string.no_project),
                     color = Color.White.copy(alpha = 0.7f),
                     fontSize = 12.sp,
                     fontFamily = Montserrat,

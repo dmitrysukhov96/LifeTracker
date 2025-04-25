@@ -36,13 +36,13 @@
     <string name="error_parsing_date">Ошибка при разборе даты/времени</string>
     <string name="tracker">Трекер</string>
     <string name="habits">Привычки</string>
-    <string name="edit_habit">Редактировать привычку</string>
+    <string name="edit_habit">Редакт. привычку</string>
     <string name="projects">Проекты</string>
     <string name="new_project">Новый проект</string>
     <string name="edit_project">Редактировать проект</string>
     <string name="project_title">Название проекта</string>
     <string name="project_description">Описание проекта</string>
-    <string name="select_project_color">Выберите цвет проекта</string>
+    <string name="select_color">Выберите цвет</string>
     <string name="no_deadline">Без срока</string>
     <string name="tasks_completed">%1$d/%2$d выполнено</string>
     <string name="no_task">Без задачи</string>

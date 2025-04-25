@@ -34,6 +34,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.font.FontWeight.Companion.Medium
 import androidx.compose.ui.unit.dp
 import com.dmitrysukhov.lifetracker.utils.Blue
 import com.dmitrysukhov.lifetracker.utils.BlueViolet
@@ -53,6 +57,7 @@ import com.dmitrysukhov.lifetracker.utils.Pink
 import com.dmitrysukhov.lifetracker.utils.Purple
 import com.dmitrysukhov.lifetracker.utils.Red
 import com.dmitrysukhov.lifetracker.utils.RedViolet
+import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.SkyBlue
 import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.Teal
@@ -62,17 +67,28 @@ import com.dmitrysukhov.lifetracker.utils.Yellow
 
 @Composable
 fun ThreeButtonsSelector(selected: Int, first: String, second: String, third: String, onSelect:(Int)-> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        Button(colors = buttonColors(containerColor = PineColor.copy(if (selected == 0) 1f else 0.4f)), onClick = {onSelect(0)}) { Text(first, style = H2) }
-        Button(colors = buttonColors(containerColor = PineColor.copy(if (selected == 1) 1f else 0.4f)), onClick = {onSelect(1)}) { Text(second, style = H2) }
-        Button(colors = buttonColors(containerColor = PineColor.copy(if (selected == 2) 1f else 0.4f)), onClick = {onSelect(2)}) { Text(third, style = H2) }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(
+            modifier = Modifier.weight(1f),
+            colors = buttonColors(containerColor = PineColor.copy(if (selected == 0) 1f else 0.4f)),
+            onClick = { onSelect(0) }
+        ) { Text(first, style = SimpleText, fontWeight = if (selected == 0) Bold else Medium) }
+        Button(
+            modifier = Modifier.weight(1f),
+            colors = buttonColors(containerColor = PineColor.copy(if (selected == 1) 1f else 0.4f)),
+            onClick = { onSelect(1) }
+        ) { Text(second, style = SimpleText,  fontWeight = if (selected == 1) Bold else Medium) }
+        Button(
+            modifier = Modifier.weight(1f),
+            colors = buttonColors(containerColor = PineColor.copy(if (selected == 2) 1f else 0.4f)),
+            onClick = { onSelect(2) }
+        ) { Text(third, style = SimpleText,  fontWeight = if (selected == 2) Bold else Medium) }
     }
 }
 
 @Composable
 fun ToggleSelector(
-    leftText: String, rightText: String, selectedIndex: Int,
-    onSelectedChange: (Int) -> Unit
+    leftText: String, rightText: String, selectedIndex: Int, onSelectedChange: (Int) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -82,7 +98,7 @@ fun ToggleSelector(
             text = leftText, style = H2,  modifier = Modifier.padding(8.dp),
             color = if (selectedIndex == 0) PineColor else InverseColor,
         )
-        var checked by rememberSaveable { mutableStateOf(false) }
+        var checked by rememberSaveable { mutableStateOf(selectedIndex == 1) }
         val transition = updateTransition(targetState = checked, label = "switch")
         val knobOffset by transition.animateDp(label = "knobOffset") { if (it) 20.dp else 0.dp }
         Box(
@@ -176,6 +192,19 @@ fun ColorPicker(
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun SubtitleWithIcon(textRes: Int, iconRes: Int, iconColor: Color) {
+    Row(Modifier.padding(bottom = 10.dp)) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null, tint = iconColor,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(text = stringResource(textRes), style = H2)
     }
 }
 

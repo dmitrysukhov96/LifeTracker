@@ -39,6 +39,7 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.ColorPicker
+import com.dmitrysukhov.lifetracker.common.ui.SubtitleWithIcon
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -147,14 +148,9 @@ fun NewProjectScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Column(Modifier.padding(top = 32.dp)) {
-            Row(Modifier.padding(bottom = 10.dp)) {
-                Icon(
-                    painter = painterResource(R.drawable.palette),
-                    contentDescription = null, tint = selectedColor,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(text = stringResource(R.string.select_project_color), style = H2)
-            }
+            SubtitleWithIcon(
+                textRes = R.string.select_color, iconRes = R.drawable.palette, iconColor = selectedColor
+            )
             ColorPicker(
                 selectedColorInt = selectedColorInt,
                 onColorSelected = { selectedColorInt = it }

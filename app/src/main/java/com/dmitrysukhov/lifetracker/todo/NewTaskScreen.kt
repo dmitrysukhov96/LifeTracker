@@ -188,14 +188,11 @@ fun NewTaskScreen(
             BasicTextField(
                 value = description, onValueChange = { description = it },
                 textStyle = SimpleText.copy(color = InverseColor),
-                cursorBrush = SolidColor(PineColor),
+                cursorBrush = SolidColor(PineColor), maxLines = 5,
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         if (description.isEmpty()) Text(
-                            stringResource(R.string.description_hint),
-                            fontSize = 16.sp,
-                            fontWeight = W500,
-                            fontFamily = Montserrat,
+                            stringResource(R.string.description_hint), style = SimpleText,
                             color = PineColor.copy(0.5f)
                         )
                         innerTextField()
@@ -205,6 +202,29 @@ fun NewTaskScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
+            // Deadline selection
+            TaskOption(
+                text = deadline?.let {
+                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
+                } ?: stringResource(R.string.no_deadline),
+                iconRes = R.drawable.data
+            ) {
+                val calendar = Calendar.getInstance()
+                val datePicker = android.app.DatePickerDialog(
+                    context,
+                    { _, year, month, day ->
+                        val selectedDate = Calendar.getInstance().apply {
+                            set(year, month, day)
+                        }
+                        deadline = selectedDate.timeInMillis
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                )
+                datePicker.show()
+            }
             HorizontalDivider()
 
             // Project selection
@@ -277,7 +297,9 @@ fun NewTaskScreen(
                 }
                 DropdownMenu(
                     expanded = expanded, onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(BgColor).padding(horizontal = 8.dp)
+                    modifier = Modifier
+                        .background(BgColor)
+                        .padding(horizontal = 8.dp)
                 ) {
                     DropdownMenuItem(
                         text = {
@@ -370,29 +392,6 @@ fun NewTaskScreen(
             }
             HorizontalDivider()
 
-            // Deadline selection
-            TaskOption(
-                text = deadline?.let {
-                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it))
-                } ?: stringResource(R.string.no_deadline),
-                iconRes = R.drawable.data
-            ) {
-                val calendar = Calendar.getInstance()
-                val datePicker = android.app.DatePickerDialog(
-                    context,
-                    { _, year, month, day ->
-                        val selectedDate = Calendar.getInstance().apply {
-                            set(year, month, day)
-                        }
-                        deadline = selectedDate.timeInMillis
-                    },
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)
-                )
-                datePicker.show()
-            }
-            HorizontalDivider()
         }
     }
 }
