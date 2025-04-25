@@ -42,12 +42,8 @@ import java.util.Locale
 
 @Composable
 fun TrackerTimeline(
-    events: List<Event>,
-    selectedDate: LocalDate,
-    onDateSelected: (LocalDate) -> Unit,
-    projects: List<Project>,
-    onEventClick: (Event) -> Unit,
-    modifier: Modifier = Modifier
+    events: List<Event>, selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit,
+    projects: List<Project>, onEventClick: (Event) -> Unit, modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
     val hourHeight = 80.dp

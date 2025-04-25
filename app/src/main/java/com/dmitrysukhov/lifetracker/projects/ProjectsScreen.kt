@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +60,7 @@ fun ProjectsScreen(
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.plus),
-                        contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary
+                        contentDescription = null, tint = Color.White
                     )
                 }
             }
@@ -126,6 +125,7 @@ fun ProjectsScreen(
         }
     }
 }
+
 @Composable
 fun ProjectItem(
     title: String, progress: String, deadline: String, gradient: Brush, onClick: () -> Unit,
@@ -150,13 +150,13 @@ fun ProjectItem(
                 .alpha(0.9f), contentScale = ContentScale.Crop
         )
         Text(
-            text = title, style = H2, color = MaterialTheme.colorScheme.onPrimary,
+            text = title, style = H2, color = Color.White,
             modifier = Modifier.padding(start = 20.dp, top = 8.dp)
         )
         Text(
             text = progress,
             style = SimpleText,
-            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+            color = Color.White.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 8.dp)
@@ -164,7 +164,7 @@ fun ProjectItem(
         Text(
             text = deadline,
             style = SimpleText,
-            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+            color = Color.White.copy(alpha = 0.8f),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 8.dp)

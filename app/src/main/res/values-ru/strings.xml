@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">ЛайфТрекер</string>
     <string name="main_screen">Главный экран</string>
     <string name="description">Описание</string>
     <string name="description_colon">Описание:</string>
@@ -28,14 +29,17 @@
     <string name="cancel">Отмена</string>
     <string name="save">Сохранить</string>
     <string name="delete">Удалить</string>
+    <string name="enter_value">Введите значение</string>
     <string name="error_end_time_before_start">Время окончания должно быть позже времени начала</string>
     <string name="error_invalid_date_format">Неверный формат даты/времени</string>
     <string name="error_invalid_date_value">Неверное значение даты</string>
     <string name="error_parsing_date">Ошибка при разборе даты/времени</string>
     <string name="tracker">Трекер</string>
     <string name="habits">Привычки</string>
+    <string name="edit_habit">Редактировать привычку</string>
     <string name="projects">Проекты</string>
     <string name="new_project">Новый проект</string>
+    <string name="edit_project">Редактировать проект</string>
     <string name="project_title">Название проекта</string>
     <string name="project_description">Описание проекта</string>
     <string name="select_project_color">Выберите цвет проекта</string>
@@ -52,11 +56,6 @@
     <string name="view_project">Просмотр проекта</string>
     <string name="turbo_screen">Турбо экран</string>
     <string name="todo_list">Список дел</string>
-    <string name="check_email">Проверить почту</string>
-    <string name="call_client">Позвонить клиенту</string>
-    <string name="read_article">Прочитать статью</string>
-    <string name="clean_inbox">Очистить входящие</string>
-    <string name="review_material">Повторить материал</string>
     <string name="tomorrow">Завтра</string>
     <string name="today">Сегодня</string>
     <string name="monday">Пн</string>
@@ -88,5 +87,9 @@
     <string name="number">Число</string>
     <string name="number_greater">Больше = лучше</string>
     <string name="number_less">Меньше = лучше</string>
+    <string name="week">Неделя</string>
+    <string name="month">Месяц</string>
+    <string name="year">Год</string>
+    <string name="new_habit">Новая привычка</string>
 
 </resources>

@@ -20,16 +20,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HabitsViewModel @Inject constructor(
-    private val habitDao: HabitDao,
-    private val habitEventDao: HabitEventDao
+    private val habitDao: HabitDao, private val habitEventDao: HabitEventDao
 ) : ViewModel() {
+    var selectedHabit: Habit? = null
     val habits: StateFlow<List<Habit>> = habitDao.getAllHabits()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun addHabit(habit: Habit) {
-        viewModelScope.launch {
-            habitDao.insert(habit)
-        }
+        viewModelScope.launch { habitDao.insert(habit) }
     }
 
     fun saveHabitEvent(habitId: Long, dateMs: Long, value: Int) {
@@ -42,14 +40,16 @@ class HabitsViewModel @Inject constructor(
     fun getEventsForHabit(habitId: Long): Flow<Map<Long, Int>> =
         habitEventDao.getEventsForHabit(habitId)
             .map { events -> events.associate { it.date to it.value } }
+
+    fun updateHabit(habit: Habit) {
+        viewModelScope.launch { habitDao.update(habit) }
+    }
 }
 
 @Entity(tableName = "habit_events")
 data class HabitEvent(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val habitId: Long,
-    val date: Long,
-    val value: Int
+    @PrimaryKey(autoGenerate = true) val id: Long = 0, val habitId: Long,
+    val date: Long, val value: Int
 )
 
 @Dao

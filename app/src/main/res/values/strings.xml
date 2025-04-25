@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">LifeTracker</string>
+    <string name="app_name">LifeTracker</string>
     <string name="main_screen">Main Screen</string>
     <string name="description">Description</string>
     <string name="description_colon">Description:</string>
@@ -29,6 +29,7 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
+    <string name="enter_value">Enter value</string>
     <string name="error_end_time_before_start">End time must be after start time</string>
     <string name="error_invalid_date_format">Invalid date/time format</string>
     <string name="error_invalid_date_value">Invalid date value</string>
@@ -38,6 +39,7 @@
     <string name="tracker">Tracker</string>
     <string name="habits">Habits</string>
     <string name="new_habit">New Habit</string>
+    <string name="edit_habit">Edit Habit</string>
     <string name="projects">Projects</string>
     <string name="new_project">New Project</string>
     <string name="edit_project">Edit Project</string>
@@ -58,11 +60,6 @@
     <string name="view_project">View Project</string>
     <string name="turbo_screen">Turbo Screen</string>
     <string name="todo_list">Todo List</string>
-    <string name="check_email">Check email</string>
-    <string name="call_client">Call client</string>
-    <string name="read_article">Read article</string>
-    <string name="clean_inbox">Clean inbox</string>
-    <string name="review_material">Review material</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="today">Today</string>
     <string name="monday">Mon</string>

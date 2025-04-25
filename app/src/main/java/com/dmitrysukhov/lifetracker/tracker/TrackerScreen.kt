@@ -62,8 +62,8 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.common.ui.ProjectTag
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
-import com.dmitrysukhov.lifetracker.todo.ProjectTag
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.BlackPine
@@ -249,13 +249,8 @@ fun formatTimeElapsed(seconds: Long): String {
 
 @Composable
 fun EventDialog(
-    event: Event?, 
-    projects: List<Project>, 
-    onDismiss: () -> Unit, 
-    onSave: (Event) -> Unit,
-    onDelete: (Event) -> Unit, 
-    trackerStart: Boolean = false,
-    navController: NavHostController
+    event: Event?, projects: List<Project>, onDismiss: () -> Unit, onSave: (Event) -> Unit,
+    onDelete: (Event) -> Unit, trackerStart: Boolean = false, navController: NavHostController
 ) {
     var taskName by remember { mutableStateOf(event?.name ?: "") }
     var selectedProjectId by remember { mutableStateOf(event?.projectId) }

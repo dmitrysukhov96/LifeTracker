@@ -22,12 +22,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,9 +51,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Habit
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.common.ui.ThreeButtonsSelector
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
-import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import org.joda.time.DateTimeZone
@@ -91,9 +89,8 @@ fun HabitScreen(
             TopBarState("Habits") {
                 IconButton(onClick = { navController.navigate(NEW_HABIT_SCREEN) }) {
                     Icon(
-                        painter = painterResource(R.drawable.plus),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        painter = painterResource(R.drawable.plus), contentDescription = null,
+                        tint = Color.White
                     )
                 }
             }
@@ -150,9 +147,11 @@ fun HabitScreen(
                         if (HabitType.entries[habit.type] == HabitType.CHECKBOX) {
                             viewModel.saveHabitEvent(habit.id, date.toDateTimeAtStartOfDay(DateTimeZone.UTC).millis, 1)
                         } else { dialogData = habit to date }
-                    },
-                    events = eventsMap
-                )
+                    }, events = eventsMap
+                ) {
+                    viewModel.selectedHabit = habit
+                    navController.navigate(NEW_HABIT_SCREEN)
+                }
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -168,7 +167,7 @@ fun HabitScreen(
                     dialogData = null
                     numberInput = ""
                 }) {
-                    Text("ОК")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
@@ -176,10 +175,10 @@ fun HabitScreen(
                     dialogData = null
                     numberInput = ""
                 }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.cancel))
                 }
             },
-            title = { Text("Введите значение") },
+            title = { Text(stringResource(R.string.enter_value)) },
             text = {
                 OutlinedTextField(
                     value = numberInput,
@@ -193,11 +192,8 @@ fun HabitScreen(
 
 @Composable
 fun HabitCard(
-    habit: Habit,
-    mode: HabitViewMode,
-    currentDate: LocalDate,
-    onSquareClick: (LocalDate) -> Unit,
-    events: Map<Long, Int>
+    habit: Habit, mode: HabitViewMode, currentDate: LocalDate, onSquareClick: (LocalDate) -> Unit,
+    events: Map<Long, Int>, onEdit: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -206,7 +202,18 @@ fun HabitCard(
             .background(Color(habit.color))
             .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
     ) {
-        Text(habit.title, style = H2.copy(color = Color.White, fontWeight = Bold))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                habit.title,
+                style = H2.copy(color = Color.White, fontWeight = Bold)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = { onEdit() }, modifier = Modifier.padding(end = 16.dp).size(20.dp))
+            { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White) }
+        }
         Spacer(modifier = Modifier.height(8.dp))
 
         val isMarked: (LocalDate) -> Boolean = {
@@ -309,16 +316,6 @@ fun HabitCard(
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun ThreeButtonsSelector(selected: Int, first: String, second: String, third: String, onSelect:(Int)-> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        Button(colors = buttonColors(containerColor = PineColor.copy(if (selected == 0) 1f else 0.4f)), onClick = {onSelect(0)}) { Text(first, style = H2) }
-        Button(colors = buttonColors(containerColor = PineColor.copy(if (selected == 1) 1f else 0.4f)), onClick = {onSelect(1)}) { Text(second, style = H2) }
-        Button(colors = buttonColors(containerColor = PineColor.copy(if (selected == 2) 1f else 0.4f)), onClick = {onSelect(2)}) { Text(third, style = H2) }
     }
 }
 

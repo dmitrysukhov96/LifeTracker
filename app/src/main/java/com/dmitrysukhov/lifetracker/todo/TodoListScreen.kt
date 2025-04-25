@@ -1,6 +1,6 @@
 package com.dmitrysukhov.lifetracker.todo
 
-import androidx.compose.animation.core.Animatable
+    import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
+import com.dmitrysukhov.lifetracker.common.ui.ProjectTag
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
@@ -318,13 +318,4 @@ fun DurationBadge(duration: Int, isRunning: Boolean) {
             color = contentColor, style = Small
         )
     }
-}
-
-@Composable
-fun ProjectTag(text: String, color: Color) {
-    Box(
-        Modifier
-            .background(color, shape = RoundedCornerShape(52))
-            .padding(horizontal = 8.dp, vertical = 2.dp)
-    ) { Text(text = text, color = Color.White, style = Small) }
 }
