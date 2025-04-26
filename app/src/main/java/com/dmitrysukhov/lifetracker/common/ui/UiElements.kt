@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -66,23 +67,44 @@ import com.dmitrysukhov.lifetracker.utils.WhitePine
 import com.dmitrysukhov.lifetracker.utils.Yellow
 
 @Composable
-fun ThreeButtonsSelector(selected: Int, first: String, second: String, third: String, onSelect:(Int)-> Unit) {
+fun ThreeButtonsSelector(
+    selected: Int, first: String, second: String, third: String, onSelect: (Int) -> Unit
+) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Button(
-            modifier = Modifier.weight(1f),
-            colors = buttonColors(containerColor = PineColor.copy(if (selected == 0) 1f else 0.4f)),
+            modifier = Modifier
+                .weight(1f)
+                .alpha(if (selected == 0) 1f else 0.4f),
+            colors = buttonColors(containerColor = PineColor),
             onClick = { onSelect(0) }
-        ) { Text(first, style = SimpleText, fontWeight = if (selected == 0) Bold else Medium) }
+        ) {
+            Text(
+                first, style = SimpleText, fontWeight = if (selected == 0) Bold else Medium,
+                color = Color.White
+            )
+        }
         Button(
-            modifier = Modifier.weight(1f),
-            colors = buttonColors(containerColor = PineColor.copy(if (selected == 1) 1f else 0.4f)),
-            onClick = { onSelect(1) }
-        ) { Text(second, style = SimpleText,  fontWeight = if (selected == 1) Bold else Medium) }
+            modifier = Modifier
+                .weight(1f)
+                .alpha(if (selected == 1) 1f else 0.4f),
+            colors = buttonColors(containerColor = PineColor), onClick = { onSelect(1) }
+        ) {
+            Text(
+                second, style = SimpleText, fontWeight = if (selected == 1) Bold else Medium,
+                color = Color.White
+            )
+        }
         Button(
-            modifier = Modifier.weight(1f),
-            colors = buttonColors(containerColor = PineColor.copy(if (selected == 2) 1f else 0.4f)),
-            onClick = { onSelect(2) }
-        ) { Text(third, style = SimpleText,  fontWeight = if (selected == 2) Bold else Medium) }
+            modifier = Modifier
+                .weight(1f)
+                .alpha(if (selected == 2) 1f else 0.4f),
+            colors = buttonColors(containerColor = PineColor), onClick = { onSelect(2) }
+        ) {
+            Text(
+                third, style = SimpleText, fontWeight = if (selected == 2) Bold else Medium,
+                color = Color.White
+            )
+        }
     }
 }
 
@@ -95,7 +117,7 @@ fun ToggleSelector(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = leftText, style = H2,  modifier = Modifier.padding(8.dp),
+            text = leftText, style = H2, modifier = Modifier.padding(8.dp),
             color = if (selectedIndex == 0) PineColor else InverseColor,
         )
         var checked by rememberSaveable { mutableStateOf(selectedIndex == 1) }
@@ -198,7 +220,7 @@ fun ColorPicker(
 
 @Composable
 fun SubtitleWithIcon(textRes: Int, iconRes: Int, iconColor: Color) {
-    Row(Modifier.padding(bottom = 10.dp)) {
+    Row(Modifier.padding(bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(
             painter = painterResource(iconRes),
             contentDescription = null, tint = iconColor,

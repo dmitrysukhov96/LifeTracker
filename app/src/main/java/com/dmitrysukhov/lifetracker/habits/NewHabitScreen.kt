@@ -21,7 +21,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -33,10 +32,10 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Habit
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.ColorPicker
+import com.dmitrysukhov.lifetracker.common.ui.SubtitleWithIcon
 import com.dmitrysukhov.lifetracker.common.ui.ToggleSelector
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
-import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
@@ -51,9 +50,7 @@ fun NewHabitScreen(
     val context = LocalContext.current
     val selected = viewModel.selectedHabit
     var title by rememberSaveable { mutableStateOf(selected?.title ?: "") }
-    //mess, i'll change it later
-    var selectedTypeIndex by rememberSaveable { mutableIntStateOf(if (selected == null) 0 else if (selected.type == 0) 0 else 1) }
-    var selectedNumberIndex by rememberSaveable { mutableIntStateOf(if (selected?.type == 0) 0 else if (selected?.type == 2) 1 else 0) }
+    var selectedTypeIndex by rememberSaveable { mutableIntStateOf(selected?.type ?: 0) }
     var selectedColorInt by rememberSaveable {
         mutableIntStateOf(selected?.color ?: PineColor.toArgb()
         )
@@ -79,8 +76,7 @@ fun NewHabitScreen(
                     }
                     IconButton(onClick = {
                         val habit = Habit(
-                            id = selected?.id ?: 0, title = title,
-                            type = if (selectedTypeIndex == 1) if (selectedNumberIndex == 0) 1 else 2 else 0,
+                            id = selected?.id ?: 0, title = title, type = selectedTypeIndex,
                             color = selectedColorInt
                         )
                         if (selected == null) viewModel.addHabit(habit)
@@ -114,51 +110,30 @@ fun NewHabitScreen(
             decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (title.isEmpty()) Text(
-                        stringResource(R.string.new_habit),
-                        style = H1,
-                        color = InverseColor.copy(0.5f)
+                        stringResource(R.string.new_habit), style = H1, color = PineColor.copy(0.5f)
                     )
                     innerTextField()
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
+            }, modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
         HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
         if (selected == null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.habit_type),
-                style = H2,
-                modifier = Modifier.align(Alignment.Start)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            SubtitleWithIcon(R.string.habit_type, R.drawable.switcher, PineColor)
+            Spacer(Modifier.height(8.dp))
             ToggleSelector(
                 leftText = stringResource(R.string.checkbox),
                 rightText = stringResource(R.string.number),
                 selectedIndex = selectedTypeIndex,
                 onSelectedChange = { selectedTypeIndex = it }
             )
-            if (selectedTypeIndex == 1) {
-                Spacer(modifier = Modifier.height(8.dp))
-                ToggleSelector(
-                    leftText = stringResource(R.string.number_greater),
-                    rightText = stringResource(R.string.number_less),
-                    selectedIndex = selectedNumberIndex,
-                    onSelectedChange = { selectedNumberIndex = it }
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
         }
-        Text(
-            text = stringResource(R.string.select_color),
-            style = H2,
-            modifier = Modifier.align(Alignment.Start)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+
+        SubtitleWithIcon(R.string.select_color, R.drawable.palette, PineColor)
+        Spacer(Modifier.height(8.dp))
         ColorPicker(
-            selectedColorInt = selectedColorInt,
-            onColorSelected = { selectedColorInt = it }
-        )
+            selectedColorInt = selectedColorInt, onColorSelected = { selectedColorInt = it })
     }
 }

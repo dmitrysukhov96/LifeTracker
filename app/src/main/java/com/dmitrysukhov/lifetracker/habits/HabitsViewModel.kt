@@ -2,12 +2,8 @@ package com.dmitrysukhov.lifetracker.habits
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Dao
 import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
-import androidx.room.Query
 import com.dmitrysukhov.lifetracker.Habit
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -30,14 +26,14 @@ class HabitsViewModel @Inject constructor(
         viewModelScope.launch { habitDao.insert(habit) }
     }
 
-    fun saveHabitEvent(habitId: Long, dateMs: Long, value: Int) {
+    fun saveHabitEvent(habitId: Long, dateMs: Long, value: Float) {
         viewModelScope.launch {
             val event = HabitEvent(habitId = habitId, date = dateMs, value = value)
             habitEventDao.insert(event)
         }
     }
 
-    fun getEventsForHabit(habitId: Long): Flow<Map<Long, Int>> =
+    fun getEventsForHabit(habitId: Long): Flow<Map<Long, Float>> =
         habitEventDao.getEventsForHabit(habitId)
             .map { events -> events.associate { it.date to it.value } }
 
@@ -49,23 +45,14 @@ class HabitsViewModel @Inject constructor(
         viewModelScope.launch { habitEventDao.deleteEvent(habitId, date) }
     }
 
-    fun deleteHabit(id: Long) = viewModelScope.launch { habitDao.deleteHabit(id) }
+    fun deleteHabit(id: Long) = viewModelScope.launch {
+        habitEventDao.deleteAllEventsForHabit(id)
+        habitDao.deleteHabit(id)
+    }
 }
 
 @Entity(tableName = "habit_events")
 data class HabitEvent(
     @PrimaryKey(autoGenerate = true) val id: Long = 0, val habitId: Long,
-    val date: Long, val value: Int
+    val date: Long, val value: Float
 )
-
-@Dao
-interface HabitEventDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(event: HabitEvent)
-
-    @Query("SELECT * FROM habit_events WHERE habitId = :habitId")
-    fun getEventsForHabit(habitId: Long): Flow<List<HabitEvent>>
-
-    @Query("DELETE FROM habit_events WHERE habitId = :habitId AND date = :date")
-    suspend fun deleteEvent(habitId: Long, date: Long)
-}

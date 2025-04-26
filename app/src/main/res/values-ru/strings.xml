@@ -36,7 +36,7 @@
     <string name="error_parsing_date">Ошибка при разборе даты/времени</string>
     <string name="tracker">Трекер</string>
     <string name="habits">Привычки</string>
-    <string name="edit_habit">Редакт. привычку</string>
+    <string name="edit_habit">Ред. привычку</string>
     <string name="projects">Проекты</string>
     <string name="new_project">Новый проект</string>
     <string name="edit_project">Редактировать проект</string>
@@ -91,5 +91,6 @@
     <string name="month">Месяц</string>
     <string name="year">Год</string>
     <string name="new_habit">Новая привычка</string>
-
+    <string name="no_habits">Нет привычек</string>
+    <string name="create_habit_hint">Нажмите +, чтобы создать привычку</string>
 </resources>

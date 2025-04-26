@@ -101,10 +101,12 @@ import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
+import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -122,7 +124,10 @@ class MainActivity : ComponentActivity() {
             var topBarState by remember { mutableStateOf(TopBarState(context.getString(R.string.app_name))) }
             LaunchedEffect(topBarState.color) {
                 systemUiController.setStatusBarColor(topBarState.color, darkIcons = useDarkIcons)
-                systemUiController.setNavigationBarColor(topBarState.color, darkIcons = useDarkIcons)
+                systemUiController.setNavigationBarColor(
+                    topBarState.color,
+                    darkIcons = useDarkIcons
+                )
             }
             MyApplicationTheme {
                 // Name dialog logic
@@ -139,12 +144,22 @@ class MainActivity : ComponentActivity() {
                 if (showNameDialog) {
                     AlertDialog(
                         onDismissRequest = { showNameDialog = false },
-                        title = { Text(text = stringResource(R.string.dialog_ask_name)) },
+                        title = {
+                            Text(
+                                text = stringResource(R.string.dialog_ask_name),
+                                style = H1
+                            )
+                        },
                         text = {
                             OutlinedTextField(
                                 value = userName,
                                 onValueChange = { userName = it },
-                                placeholder = { Text(text = stringResource(R.string.dialog_ask_name)) },
+                                placeholder = {
+                                    Text(
+                                        text = stringResource(R.string.dialog_ask_name),
+                                        style = SimpleText
+                                    )
+                                },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -160,19 +175,20 @@ class MainActivity : ComponentActivity() {
                                 },
                                 enabled = userName.isNotBlank()
                             ) {
-                                Text(text = stringResource(R.string.ok))
+                                Text(text = stringResource(R.string.ok), style = SimpleText)
                             }
                         },
                         dismissButton = {
                             TextButton(
                                 onClick = {
-                                    sharedPref.edit {
-                                        putBoolean("dont_ask_name", true)
-                                    }
+                                    sharedPref.edit { putBoolean("dont_ask_name", true) }
                                     showNameDialog = false
                                 }
                             ) {
-                                Text(text = stringResource(R.string.dialog_dont_ask_again))
+                                Text(
+                                    text = stringResource(R.string.dialog_dont_ask_again),
+                                    style = SimpleText
+                                )
                             }
                         }
                     )
@@ -187,10 +203,26 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination?.route ?: ""
                 val drawerMenuDestinations = listOf(
-                    Destination(stringResource(R.string.todo_list), TODOLIST_SCREEN, painterResource(R.drawable.spisok)),
-                    Destination(stringResource(R.string.tracker), TRACKER_SCREEN, painterResource(R.drawable.tracker)),
-                    Destination(stringResource(R.string.habits), HABIT_SCREEN, painterResource(R.drawable.habits)),
-                    Destination(stringResource(R.string.projects), PROJECTS_SCREEN, painterResource(R.drawable.projects))
+                    Destination(
+                        stringResource(R.string.todo_list),
+                        TODOLIST_SCREEN,
+                        painterResource(R.drawable.spisok)
+                    ),
+                    Destination(
+                        stringResource(R.string.tracker),
+                        TRACKER_SCREEN,
+                        painterResource(R.drawable.tracker)
+                    ),
+                    Destination(
+                        stringResource(R.string.habits),
+                        HABIT_SCREEN,
+                        painterResource(R.drawable.habits)
+                    ),
+                    Destination(
+                        stringResource(R.string.projects),
+                        PROJECTS_SCREEN,
+                        painterResource(R.drawable.projects)
+                    )
                 )
                 val isRootScreen = drawerMenuDestinations.any { it.route == currentDestination }
                 val isTodo = currentDestination == TODOLIST_SCREEN
@@ -243,6 +275,7 @@ class MainActivity : ComponentActivity() {
                         ) {
 //                            SharedTransitionLayout {
                             Scaffold(
+                                modifier = Modifier,
                                 floatingActionButton = { ActuallyFloatingActionButton { } },
                                 topBar = {
                                     Box(
@@ -264,7 +297,8 @@ class MainActivity : ComponentActivity() {
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Menu,
-                                                    contentDescription = stringResource(R.string.menu), tint = WhitePine
+                                                    contentDescription = stringResource(R.string.menu),
+                                                    tint = WhitePine
                                                 )
                                             }
                                         } else {
@@ -276,7 +310,8 @@ class MainActivity : ComponentActivity() {
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                    contentDescription = stringResource(R.string.back), tint = WhitePine
+                                                    contentDescription = stringResource(R.string.back),
+                                                    tint = WhitePine
                                                 )
                                             }
                                         }
@@ -380,8 +415,19 @@ class MainActivity : ComponentActivity() {
                                                 setTopBarState, navController, todoViewModel
                                             )
                                         }
-                                        composable(VIEW_PROJECT_SCREEN) { ViewProjectScreen(setTopBarState, projectViewModel, navController) }
-                                        composable(TRACKER_SCREEN) { TrackerScreen(setTopBarState, navController = navController) }
+                                        composable(VIEW_PROJECT_SCREEN) {
+                                            ViewProjectScreen(
+                                                setTopBarState,
+                                                projectViewModel,
+                                                navController
+                                            )
+                                        }
+                                        composable(TRACKER_SCREEN) {
+                                            TrackerScreen(
+                                                setTopBarState,
+                                                navController = navController
+                                            )
+                                        }
                                         composable(HABIT_SCREEN) {
                                             HabitScreen(
                                                 setTopBarState,
@@ -395,13 +441,25 @@ class MainActivity : ComponentActivity() {
                                             )
                                         }
                                         composable(PROJECTS_SCREEN) {
-                                            ProjectsScreen(setTopBarState, navController, projectViewModel)
+                                            ProjectsScreen(
+                                                setTopBarState,
+                                                navController,
+                                                projectViewModel
+                                            )
                                         }
                                         composable(NEW_TASK_SCREEN) {
-                                            NewTaskScreen(setTopBarState, todoViewModel, navController)
+                                            NewTaskScreen(
+                                                setTopBarState,
+                                                todoViewModel,
+                                                navController
+                                            )
                                         }
                                         composable(NEW_PROJECT_SCREEN) {
-                                            NewProjectScreen(setTopBarState, navController, projectViewModel)
+                                            NewProjectScreen(
+                                                setTopBarState,
+                                                navController,
+                                                projectViewModel
+                                            )
                                         }
                                     }
                                 }
