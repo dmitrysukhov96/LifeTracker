@@ -34,8 +34,6 @@
     <string name="error_invalid_date_format">Invalid date/time format</string>
     <string name="error_invalid_date_value">Invalid date value</string>
     <string name="error_parsing_date">Error parsing date/time</string>
-    
-    <!-- New strings -->
     <string name="tracker">Tracker</string>
     <string name="habits">Habits</string>
     <string name="new_habit">New Habit</string>
@@ -95,4 +93,11 @@
     <string name="year">Year</string>
     <string name="no_habits">No habits</string>
     <string name="create_habit_hint">Press + to create a habit</string>
+    <string name="select_tasks_for_today">Select tasks you plan to do today</string>
+    <string name="daily_planner">Daily Planner</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="good_night">Good night</string>
 </resources>

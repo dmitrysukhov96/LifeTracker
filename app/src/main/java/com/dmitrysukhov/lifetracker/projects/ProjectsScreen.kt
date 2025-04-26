@@ -3,7 +3,6 @@ package com.dmitrysukhov.lifetracker.projects
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,12 +32,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
-import com.dmitrysukhov.lifetracker.utils.InverseColor
-import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
-import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -71,47 +68,25 @@ fun ProjectsScreen(
             .background(BgColor)
             .fillMaxSize()
     ) {
-        if (projects.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_projects),style = H2, color = PineColor,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.create_project_hint),style = Small,
-                        color = InverseColor.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(BgColor)
-                    .padding(horizontal = 24.dp)
-            ) {
-                item { Spacer(Modifier.height(24.dp)) }
+        if (projects.isEmpty()) EmptyPlaceholder(R.string.no_projects, R.string.create_project_hint)
+        else LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BgColor)
+                .padding(horizontal = 24.dp)
+        ) {
+            item { Spacer(Modifier.height(24.dp)) }
             items(projects.size) { index ->
                 val project = projects[index]
                 val deadlineText = project.deadlineMillis?.let {
                     val date = Date(it)
                     SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
                 } ?: stringResource(R.string.no_deadline)
-
                 ProjectItem(
                     title = project.title,
-                    progress = "${project.completedTasks}/${project.totalTasks} выполнено",
-                    deadline = deadlineText, showImage = project == projects[0],
+                    progress = stringResource(
+                        R.string.tasks_completed, project.completedTasks, project.totalTasks
+                    ), deadline = deadlineText, showImage = project == projects[0],
                     gradient = generateGradient(Color(project.color)), onClick = {
                         viewModel.selectedProject = project
                         navController.navigate(VIEW_PROJECT_SCREEN)
@@ -119,9 +94,7 @@ fun ProjectsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
-                item { Spacer(Modifier.height(64.dp)) }
-            }
+            item { Spacer(Modifier.height(64.dp)) }
         }
     }
 }

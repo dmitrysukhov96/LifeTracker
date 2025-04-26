@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -237,4 +238,28 @@ fun ProjectTag(text: String, color: Color) {
             .background(color, shape = RoundedCornerShape(52))
             .padding(horizontal = 8.dp, vertical = 2.dp)
     ) { Text(text = text, color = Color.White, style = Small) }
+}
+
+@Composable
+fun EmptyPlaceholder(titleRes: Int, textRes: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp), contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(titleRes), style = H2,
+                color = PineColor, modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = stringResource(textRes), style = Small,
+                color = InverseColor.copy(alpha = 0.7f)
+            )
+        }
+    }
 }

@@ -178,7 +178,7 @@ fun TrackerTimeline(
                     if (now.toLocalDate() == selectedDate) {
                         val currentMinutes = now.hourOfDay * 60 + now.minuteOfHour
                         val currentPosition = (currentMinutes * 4f / 3f).dp
-                        
+
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -194,7 +194,9 @@ fun TrackerTimeline(
 }
 
 @Composable
-fun EventBlock(event: Event, color: Color = Color(0xFF4CAF50), projects: List<Project>, modifier: Modifier = Modifier) {
+fun EventBlock(
+    event: Event, color: Color = PineColor, projects: List<Project>, modifier: Modifier = Modifier
+) {
     val startTime = DateTime(event.startTime)
     val endTime = event.endTime?.let { DateTime(it) } ?: DateTime.now()
     val duration = Duration(startTime, endTime)
@@ -213,31 +215,21 @@ fun EventBlock(event: Event, color: Color = Color(0xFF4CAF50), projects: List<Pr
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = event.name ?: "Без названия",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    fontFamily = Montserrat,
+                    text = event.name ?: stringResource(R.string.no_name), color = Color.White,
+                    fontWeight = FontWeight.Bold, fontSize = 14.sp, fontFamily = Montserrat,
                     maxLines = 1
                 )
                 Text(
-                    text = formatDuration(durationMinutes),
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 12.sp,
-                    fontFamily = Montserrat,
-                    maxLines = 1
+                    text = formatDuration(durationMinutes), color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 12.sp, fontFamily = Montserrat, maxLines = 1
                 )
             }
         } else Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = event.name ?: "Без названия",
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                fontFamily = Montserrat,
+                text = event.name ?: stringResource(R.string.no_name), color = Color.White,
+                fontWeight = FontWeight.Bold, fontSize = 14.sp, fontFamily = Montserrat,
                 maxLines = 1
             )
             Row(
@@ -246,18 +238,13 @@ fun EventBlock(event: Event, color: Color = Color(0xFF4CAF50), projects: List<Pr
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = project?.title ?: stringResource(R.string.no_project),
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 12.sp,
+                    text = project?.title ?: stringResource(R.string.no_project), maxLines = 1,
+                    color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp,
                     fontFamily = Montserrat,
-                    maxLines = 1
                 )
                 Text(
-                    text = formatDuration(durationMinutes),
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 12.sp,
-                    fontFamily = Montserrat,
-                    maxLines = 1
+                    text = formatDuration(durationMinutes), color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 12.sp, fontFamily = Montserrat, maxLines = 1
                 )
             }
         }

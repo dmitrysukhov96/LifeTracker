@@ -82,6 +82,7 @@ fun TrackerScreen(
     setTopBarState: (TopBarState) -> Unit, trackerViewModel: TrackerViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
+    //todo plus minus days
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
     val events by trackerViewModel.getEventsForDate(selectedDate).collectAsState(emptyList())

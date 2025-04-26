@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Habit
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
 import com.dmitrysukhov.lifetracker.common.ui.ThreeButtonsSelector
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
@@ -112,26 +113,8 @@ fun HabitScreen(
             .background(BgColor)
             .padding(horizontal = 16.dp)
     ) {
-        if (habits.isEmpty()) Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp), contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.no_habits), style = H2,
-                    color = PineColor, modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = stringResource(R.string.create_habit_hint), style = Small,
-                    color = Color.White.copy(alpha = 0.7f)
-                )
-            }
-        } else {
+        if (habits.isEmpty()) EmptyPlaceholder(R.string.no_habits, R.string.create_habit_hint)
+        else {
             Spacer(modifier = Modifier.height(16.dp))
             ThreeButtonsSelector(
                 mode.ordinal, stringResource(R.string.week),
@@ -190,6 +173,7 @@ fun HabitScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
+                item { Spacer(modifier = Modifier.height(48.dp)) }
             }
         }
     }
@@ -207,7 +191,8 @@ fun HabitScreen(
             }
         }
 
-        AlertDialog(containerColor = BgColor,
+        AlertDialog(
+            containerColor = BgColor,
             onDismissRequest = {
                 dialogData = null
                 numberInput = ""
@@ -385,10 +370,8 @@ fun HabitCard(
                                         val isCurrentDay = day?.isEqual(LocalDate.now()) == true
                                         Text(
                                             day?.toString("d") ?: "",
-                                            style = Small,
-                                            color = if (isCurrentDay) Color.White else Color.White.copy(
-                                                0.7f
-                                            ),
+                                            style = Small, color = if (isCurrentDay) Color.White
+                                            else Color.White.copy(0.7f),
                                             fontWeight = if (isCurrentDay) Bold else null,
                                             modifier = Modifier.align(Alignment.Center)
                                         )
@@ -397,12 +380,11 @@ fun HabitCard(
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .size(16.dp)
-                                    ) else Text(
+                                    ) else Text( //todo animate
                                         if (habitValue.toInt().toFloat() == habitValue)
                                             habitValue.toInt().toString() else habitValue.toString(),
                                         style = Small.copy(
-                                            color = Color.White,
-                                            fontWeight = Bold,
+                                            color = Color.White, fontWeight = Bold,
                                             lineHeight = 12.sp
                                         ),
                                         modifier = Modifier.align(Alignment.Center),
@@ -421,7 +403,6 @@ fun HabitCard(
                     val daysInMonth = LocalDate(year, month, 1).dayOfMonth().maximumValue
                     List(31) { day -> day < daysInMonth }
                 }
-
                 Row(Modifier.horizontalScroll(rememberScrollState())) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         months.forEachIndexed { monthIndex, monthDays ->
@@ -461,11 +442,9 @@ fun HabitCard(
                                             val isCurrentDay =
                                                 date?.isEqual(LocalDate.now()) == true
                                             Text(
-                                                date?.toString("d") ?: "",
-                                                style = Small,
-                                                color = if (isCurrentDay) Color.White else Color.White.copy(
-                                                    0.7f
-                                                ),
+                                                date?.toString("d") ?: "", style = Small,
+                                                color = if (isCurrentDay) Color.White
+                                                else Color.White.copy(0.7f),
                                                 fontWeight = if (isCurrentDay) Bold else null,
                                                 modifier = Modifier.align(Alignment.Center)
                                             )
@@ -476,7 +455,8 @@ fun HabitCard(
                                                 .size(16.dp)
                                         ) else Text(
                                             if (habitValue.toInt().toFloat() == habitValue)
-                                                habitValue.toInt().toString() else habitValue.toString(),
+                                                habitValue.toInt()
+                                                    .toString() else habitValue.toString(),
                                             style = Small.copy(
                                                 color = Color.White,
                                                 fontWeight = Bold,
@@ -514,5 +494,6 @@ enum class HabitViewMode { WEEK, MONTH, YEAR }
 
 const val HABIT_SCREEN = "Habits"
 
-enum class HabitType { CHECKBOX, MOREBETTER, LESSBETTER }
+enum class HabitType { CHECKBOX, NUMBER }
+//todo more better, less better - think how to show it. arrow?
 

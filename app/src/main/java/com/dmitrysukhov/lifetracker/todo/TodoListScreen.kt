@@ -1,13 +1,12 @@
 package com.dmitrysukhov.lifetracker.todo
 
-    import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,15 +37,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
+import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
 import com.dmitrysukhov.lifetracker.common.ui.ProjectTag
 import com.dmitrysukhov.lifetracker.utils.BgColor
-import com.dmitrysukhov.lifetracker.utils.H2
+import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
@@ -66,10 +68,8 @@ fun TodoListScreen(
 ) {
     var showImportDialog by remember { mutableStateOf(false) }
     var importText by remember { mutableStateOf("") }
-
     val todoList by viewModel.todoList.collectAsStateWithLifecycle()
     val projects by viewModel.projects.collectAsStateWithLifecycle()
-    
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState("LifeTracker") {
             IconButton(onClick = { showImportDialog = true }) {
@@ -81,11 +81,8 @@ fun TodoListScreen(
             }
             IconButton({
                 viewModel.selectedTask = null
-                navController.navigate(NEW_TASK_SCREEN) }) {
-                Icon(
-                    painterResource(R.drawable.plus), contentDescription = null, tint = Color.White
-                )
-            }
+                navController.navigate(NEW_TASK_SCREEN)
+            }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
         })
     }
     Column(
@@ -93,57 +90,32 @@ fun TodoListScreen(
             .background(BgColor)
             .fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        if (todoList.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_tasks), style = H2, color = PineColor,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.add_task_hint), style = Small,
-                        color = InverseColor.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        } else {
+        Spacer(Modifier.height(16.dp))
+        if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint) else
             LazyColumn(Modifier.padding(horizontal = 24.dp)) {
                 items(todoList) { todoItem ->
                     TodoListItem(
-                        item = todoItem,
-                        projects = projects,
+                        item = todoItem, projects = projects,
                         onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) },
-                        isRunning = todoList.indexOf(todoItem) == 0,
-                        onClick = {
+                        isRunning = todoList.indexOf(todoItem) == 0, onClick = {
                             viewModel.selectedTask = todoItem
                             navController.navigate(NEW_TASK_SCREEN)
                         }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                item {
-                    Spacer(modifier = Modifier.height(56.dp))
-                }
+                item { Spacer(modifier = Modifier.height(56.dp)) }
             }
-        }
     }
 
     if (showImportDialog) {
         AlertDialog(
             onDismissRequest = { showImportDialog = false },
-            title = { Text(text = stringResource(R.string.import_tasks)) },
+            title = { Text(text = stringResource(R.string.import_tasks), style = H1) },
             text = {
                 Column {
-                    Text(text = stringResource(R.string.import_tasks_hint))
+                    Text(text = stringResource(R.string.import_tasks_hint), style = SimpleText)
+                    Spacer(Modifier.height(16.dp))
                     OutlinedTextField(
                         value = importText,
                         onValueChange = { importText = it },
@@ -163,11 +135,19 @@ fun TodoListScreen(
                     }
                     showImportDialog = false
                     importText = ""
-                }) { Text(text = stringResource(R.string.imp)) }
+                }) {
+                    Text(
+                        text = stringResource(R.string.imp),
+                        style = SimpleText.copy(fontWeight = Bold)
+                    )
+                }
             },
             dismissButton = {
                 TextButton(onClick = { showImportDialog = false }) {
-                    Text(text = stringResource(R.string.cancel))
+                    Text(
+                        text = stringResource(R.string.cancel),
+                        style = SimpleText.copy(fontWeight = Bold)
+                    )
                 }
             }
         )
@@ -177,11 +157,8 @@ fun TodoListScreen(
 
 @Composable
 fun TodoListItem(
-    item: TodoItem, 
-    projects: List<com.dmitrysukhov.lifetracker.Project>,
-    onCheckedChange: (Boolean) -> Unit, 
-    isRunning: Boolean, 
-    onClick: () -> Unit
+    item: TodoItem, projects: List<Project>, onCheckedChange: (Boolean) -> Unit,
+    isRunning: Boolean, onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier

@@ -93,4 +93,11 @@
     <string name="new_habit">Новая привычка</string>
     <string name="no_habits">Нет привычек</string>
     <string name="create_habit_hint">Нажмите +, чтобы создать привычку</string>
+    <string name="select_tasks_for_today">Выберите дела, которые планируете сделать сегодня</string>
+    <string name="daily_planner">Ежедневный планировщик</string>
+    <string name="dashboard">Дашборд</string>
+    <string name="good_morning">Доброе утро</string>
+    <string name="good_afternoon">Добрый день</string>
+    <string name="good_evening">Добрый вечер</string>
+    <string name="good_night">Доброй ночи</string>
 </resources>

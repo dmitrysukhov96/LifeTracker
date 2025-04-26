@@ -81,6 +81,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.dmitrysukhov.lifetracker.daily.DAILY_PLANNER_SCREEN
+import com.dmitrysukhov.lifetracker.daily.DailyPlannerScreen
 import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
 import com.dmitrysukhov.lifetracker.habits.HabitsViewModel
@@ -100,6 +102,8 @@ import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
+import com.dmitrysukhov.lifetracker.dashboard.DASHBOARD_SCREEN
+import com.dmitrysukhov.lifetracker.dashboard.DashboardScreen
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -204,6 +208,11 @@ class MainActivity : ComponentActivity() {
                 val currentDestination = navBackStackEntry?.destination?.route ?: ""
                 val drawerMenuDestinations = listOf(
                     Destination(
+                        stringResource(R.string.dashboard),
+                        DASHBOARD_SCREEN,
+                        painterResource(R.drawable.spisok)
+                    ),
+                    Destination(
                         stringResource(R.string.todo_list),
                         TODOLIST_SCREEN,
                         painterResource(R.drawable.spisok)
@@ -266,8 +275,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                    },
-                    content = {
+                    }, content = {
                         Box(
                             Modifier
                                 .fillMaxSize()
@@ -276,7 +284,7 @@ class MainActivity : ComponentActivity() {
 //                            SharedTransitionLayout {
                             Scaffold(
                                 modifier = Modifier,
-                                floatingActionButton = { ActuallyFloatingActionButton { } },
+                                floatingActionButton = { if (isRootScreen) ActuallyFloatingActionButton { } },
                                 topBar = {
                                     Box(
                                         Modifier
@@ -403,13 +411,20 @@ class MainActivity : ComponentActivity() {
                                 Box(Modifier.fillMaxSize()) {
                                     NavHost(
                                         navController = navController,
-                                        startDestination = TODOLIST_SCREEN, modifier = Modifier
+                                        startDestination = DASHBOARD_SCREEN, modifier = Modifier
                                             .background(topBarState.color)
                                             .padding(padding)
                                             .clip(
                                                 RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)
                                             )
                                     ) {
+                                        composable(DASHBOARD_SCREEN) {
+                                            DashboardScreen(
+                                                setTopBarState,
+                                                navController,
+                                                userName = userName
+                                            )
+                                        }
                                         composable(TODOLIST_SCREEN) {
                                             TodoListScreen(
                                                 setTopBarState, navController, todoViewModel
@@ -432,6 +447,12 @@ class MainActivity : ComponentActivity() {
                                             HabitScreen(
                                                 setTopBarState,
                                                 navController, habitViewModel
+                                            )
+                                        }
+                                        composable(DAILY_PLANNER_SCREEN) {
+                                            DailyPlannerScreen(
+                                                setTopBarState,
+                                                navController
                                             )
                                         }
                                         composable(NEW_HABIT_SCREEN) {
