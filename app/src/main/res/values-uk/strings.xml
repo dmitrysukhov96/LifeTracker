@@ -39,7 +39,7 @@
     <string name="edit_habit">Ред. звичку</string>
     <string name="projects">Проекти</string>
     <string name="new_project">Новий проект</string>
-    <string name="edit_project">Редагувати проект</string>
+    <string name="edit_project">Ред. проект</string>
     <string name="project_title">Назва проекту</string>
     <string name="project_description">Опис проекту</string>
     <string name="select_color">Виберіть колір</string>
@@ -102,4 +102,28 @@
     <string name="good_evening">Добрий вечір</string>
     <string name="good_night">Доброї ночі</string>
     <string name="settings">Налаштування</string>
+    <string name="select_image">Вибрати зображення</string>
+    <string name="selected_image">Вибране зображення</string>
+    <string name="change_image">Змінити зображення</string>
+    <string name="delete_image">Видалити зображення</string>
+    
+    <!-- Turbo Mode strings -->
+    <string name="turbo_mode">Турбо режим</string>
+    <string name="select_task">Виберіть завдання</string>
+    <string name="timer_settings">Налаштування таймера</string>
+    <string name="stopwatch">Секундомір</string>
+    <string name="countdown">Зворотний відлік</string>
+    <string name="hours">Години</string>
+    <string name="minutes">Хвилини</string>
+    <string name="pause">Пауза</string>
+    <string name="resume">Продовжити</string>
+    <string name="stop">Стоп</string>
+    <string name="complete">Завершити</string>
+    <string name="task_completed">Готово!</string>
+    <string name="task_completed_in">Ви виконали %1$s за %2$s!</string>
+    <string name="what_next">Що робимо далі?</string>
+    <string name="go">GO!</string>
+    <string name="task_added">Завдання додано</string>
+    <string name="focus_mode">Режим фокусування</string>
+    <string name="focus_session">Фокус-сесія</string>
 </resources>

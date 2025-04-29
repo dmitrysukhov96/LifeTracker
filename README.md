@@ -1,0 +1,22 @@
+# LifeTracker
+
+A modern Android productivity app designed to help users track their daily tasks, habits, and focus sessions.
+
+## Features
+
+- **Task Management**: Create, track, and complete daily tasks
+- **Habit Tracking**: Build consistency by tracking your daily habits
+- **Turbo Mode**: Focus session timer to boost productivity
+- **Dashboard**: Overview of your daily and weekly progress
+- **Daily Planner**: Plan your day with a structured schedule
+- **Multi-language Support**: Supports English, Russian, and Ukrainian
+
+## Tech Stack
+
+- Kotlin
+- Jetpack Compose for modern UI
+- MVVM Architecture
+- Kotlin Coroutines for asynchronous operations
+- Room Database for local data persistence
+- Hilt for dependency injection
+- Shared Preferences for app settings

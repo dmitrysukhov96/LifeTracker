@@ -5,7 +5,6 @@
     <string name="description">Description</string>
     <string name="description_colon">Description:</string>
     <string name="tasks_colon">Tasks:</string>
-    <string name="add_task">Add task</string>
     <string name="goal_colon">Goal:</string>
     <string name="new_task">New Task</string>
     <string name="save_task_toast">Task saved</string>
@@ -30,6 +29,7 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="enter_value">Enter value</string>
+    <string name="add_task">Add Task</string>
     <string name="error_end_time_before_start">End time must be after start time</string>
     <string name="error_invalid_date_format">Invalid date/time format</string>
     <string name="error_invalid_date_value">Invalid date value</string>
@@ -108,4 +108,25 @@
     <string name="selected_image">Selected image</string>
     <string name="change_image">Change image</string>
     <string name="delete_image">Delete image</string>
+    
+    <!-- Focus Mode strings -->
+    <string name="focus_session">Focus Session</string>
+    
+    <!-- Turbo Mode strings -->
+    <string name="turbo_mode">Turbo Mode</string>
+    <string name="select_task">Select Task</string>
+    <string name="timer_settings">Timer Settings</string>
+    <string name="stopwatch">Stopwatch</string>
+    <string name="countdown">Countdown</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+    <string name="complete">Complete</string>
+    <string name="task_completed">Task Completed!</string>
+    <string name="task_completed_in">You completed %1$s in %2$s!</string>
+    <string name="what_next">What\'s next?</string>
+    <string name="go">GO!</string>
+    <string name="task_added">Task added</string>
 </resources>

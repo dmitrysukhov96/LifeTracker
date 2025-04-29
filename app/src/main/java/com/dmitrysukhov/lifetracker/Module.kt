@@ -40,7 +40,6 @@ object AppModule {
     @Provides
     fun provideHabitEventDao(database: AppDatabase): HabitEventDao = database.habitEventDao()
 
-
     @Provides
     fun provideProjectDao(database: AppDatabase): ProjectDao {
         return database.projectsDao()

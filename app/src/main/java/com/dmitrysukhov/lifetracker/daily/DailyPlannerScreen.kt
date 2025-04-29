@@ -104,11 +104,15 @@ fun DailyPlannerScreen(
                             .clickable {
                                 selectedTasks[task.id] = !(selectedTasks[task.id] ?: false)
                             }
+                            .background(if (selectedTasks[task.id] == true) AccentColor else Color.Transparent)
                             .padding(vertical = 8.dp, horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = task.text, style = SimpleText, color = Color.White)
+                        Column {
+                            Text(text = task.text, style = SimpleText, color = Color.White)
+//                            Text(text = projectTag, style = SimpleText, color = Color.Gray) // Отображение тега проекта
+                        }
                         if (selectedTasks[task.id] == true) {
                             Icon(
                                 painter = painterResource(R.drawable.tick),

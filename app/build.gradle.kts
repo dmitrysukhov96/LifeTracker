@@ -33,8 +33,8 @@ android {
 dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.joda.time)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.ui)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
     implementation (libs.coil.compose)
     implementation(libs.androidx.room.ktx)

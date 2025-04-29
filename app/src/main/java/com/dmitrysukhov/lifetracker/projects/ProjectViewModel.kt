@@ -4,6 +4,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitrysukhov.lifetracker.Project
+import com.dmitrysukhov.lifetracker.TodoItem
+import com.dmitrysukhov.lifetracker.todo.TodoDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -12,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProjectsViewModel @Inject constructor(
-    private val projectDao: ProjectDao
+    private val projectDao: ProjectDao,
+    private val todoDao: TodoDao
 ) : ViewModel() {
     var selectedProject: Project? = null
     private val _projects = mutableStateListOf<Project>()
@@ -24,6 +27,11 @@ class ProjectsViewModel @Inject constructor(
                 _projects.clear()
                 _projects.addAll(list)
             }
+        }
+        
+        // Subscribe to task changes to update project stats
+        viewModelScope.launch {
+            updateProjectsWithTaskStats(todoDao.getAllTasks())
         }
     }
 
@@ -55,5 +63,17 @@ class ProjectsViewModel @Inject constructor(
             }
             projectDao.update(project)
         }
+    }
+    
+    private fun updateProjectsWithTaskStats(tasks: List<TodoItem>) {
+        val updatedProjects = _projects.map { project ->
+            val projectTasks = tasks.filter { it.projectId == project.projectId }
+            project.copy(
+                totalTasks = projectTasks.size,
+                completedTasks = projectTasks.count { it.isDone }
+            )
+        }
+        _projects.clear()
+        _projects.addAll(updatedProjects)
     }
 }

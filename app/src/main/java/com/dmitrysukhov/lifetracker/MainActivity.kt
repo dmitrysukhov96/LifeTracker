@@ -109,6 +109,8 @@ import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
+import com.dmitrysukhov.lifetracker.turbo.TURBO_SCREEN
+import com.dmitrysukhov.lifetracker.turbo.TurboScreen
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -286,7 +288,9 @@ class MainActivity : ComponentActivity() {
                         ) {
 //                            SharedTransitionLayout {
                             Scaffold(
-                                floatingActionButton = { if (isRootScreen) ActuallyFloatingActionButton { } },
+                                floatingActionButton = { if (isRootScreen) ActuallyFloatingActionButton {
+                                    navController.navigate(TURBO_SCREEN)
+                                } },
                                 bottomBar = {
                                     if (isTodo) Row(
                                         Modifier
@@ -507,6 +511,12 @@ class MainActivity : ComponentActivity() {
                                             SettingsScreen(
                                                 navController = navController,
                                                 setTopBarState = setTopBarState
+                                            )
+                                        }
+                                        composable(TURBO_SCREEN) {
+                                            TurboScreen(
+                                                setTopBarState = setTopBarState,
+                                                navController = navController
                                             )
                                         }
                                     }
