@@ -51,8 +51,34 @@ class TodoViewModel @Inject constructor(
 
     private fun loadTasks() {
         viewModelScope.launch {
-            _todoList.value = todoDao.getAllTasks()
+            val tasks = todoDao.getAllTasks()
+            _todoList.value = sortTasks(tasks)
         }
+    }
+
+    private fun sortTasks(tasks: List<TodoItem>): List<TodoItem> {
+        val now = System.currentTimeMillis()
+        val today = now - (now % (24 * 60 * 60 * 1000))
+        val yesterday = today - (24 * 60 * 60 * 1000)
+        val tomorrow = today + (24 * 60 * 60 * 1000)
+
+        // Разделяем задачи на выполненные и невыполненные
+        val (done, notDone) = tasks.partition { it.isDone }
+
+        // Сортируем невыполненные задачи по временным категориям
+        val sortedNotDone = notDone.sortedWith(compareBy<TodoItem> { task ->
+            when {
+                task.dateTime == null -> 5 // Без даты в конце невыполненных
+                task.dateTime < yesterday -> 1 // Ранее
+                task.dateTime < today -> 2 // Вчера
+                task.dateTime < tomorrow -> 3 // Сегодня
+                task.dateTime < tomorrow + (24 * 60 * 60 * 1000) -> 4 // Завтра
+                else -> 5 // Позже
+            }
+        }.thenBy { it.dateTime ?: Long.MAX_VALUE })
+
+        // Объединяем отсортированные невыполненные задачи с выполненными
+        return sortedNotDone + done.sortedByDescending { it.dateTime }
     }
 
     fun addTask(

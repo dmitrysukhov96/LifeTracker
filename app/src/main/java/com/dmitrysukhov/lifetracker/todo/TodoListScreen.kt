@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -28,12 +27,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -70,6 +71,7 @@ fun TodoListScreen(
     var importText by remember { mutableStateOf("") }
     val todoList by viewModel.todoList.collectAsStateWithLifecycle()
     val projects by viewModel.projects.collectAsStateWithLifecycle()
+    val expandedCategories = remember { mutableStateMapOf<String, Boolean>() }
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState("LifeTracker") {
             IconButton(onClick = { showImportDialog = true }) {
@@ -93,64 +95,141 @@ fun TodoListScreen(
         Spacer(Modifier.height(16.dp))
         if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint) else
             LazyColumn(Modifier.padding(horizontal = 24.dp)) {
-                items(todoList) { todoItem ->
-                    TodoListItem(
-                        item = todoItem, projects = projects,
-                        onCheckedChange = { isChecked -> viewModel.updateTask(todoItem.copy(isDone = isChecked)) },
-                        isRunning = todoList.indexOf(todoItem) == 0, onClick = {
-                            viewModel.selectedTask = todoItem
-                            navController.navigate(NEW_TASK_SCREEN)
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                item { Spacer(modifier = Modifier.height(56.dp)) }
-            }
-    }
+                var currentCategory = ""
+                var isFirstUncompletedTask = true
 
-    if (showImportDialog) {
-        AlertDialog(
-            onDismissRequest = { showImportDialog = false },
-            title = { Text(text = stringResource(R.string.import_tasks), style = H1) },
-            text = {
-                Column {
-                    Text(text = stringResource(R.string.import_tasks_hint), style = SimpleText)
-                    Spacer(Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = importText,
-                        onValueChange = { importText = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp),
-                        maxLines = 10
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    importText.lines().forEach { line ->
-                        if (line.isNotBlank()) {
-                            viewModel.addTask(text = line.trim())
+                todoList.forEach { todoItem ->
+                    val category = when {
+                        todoItem.isDone -> {
+                            if (isFirstUncompletedTask) {
+                                isFirstUncompletedTask = false
+                                item {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Выполненные",
+                                        style = H1,
+                                        color = PineColor,
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                }
+                            }
+                            "done"
+                        }
+
+                        todoItem.dateTime == null -> "Без даты"
+                        todoItem.dateTime < System.currentTimeMillis() - 24 * 60 * 60 * 1000 -> "Ранее"
+                        todoItem.dateTime < System.currentTimeMillis() -> "Вчера"
+                        todoItem.dateTime < System.currentTimeMillis() + 24 * 60 * 60 * 1000 -> "Сегодня"
+                        todoItem.dateTime < System.currentTimeMillis() + 2 * 24 * 60 * 60 * 1000 -> "Завтра"
+                        else -> "Позже"
+                    }
+
+                    if (category != currentCategory && !todoItem.isDone) {
+                        item {
+                            if (currentCategory.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        expandedCategories[category] =
+                                            !(expandedCategories[category] ?: true)
+                                    }
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = category,
+                                    style = H1,
+                                    color = PineColor
+                                )
+                                Icon(
+                                    painter = painterResource(R.drawable.arrow_down),
+                                    contentDescription = null,
+                                    tint = PineColor,
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .rotate(
+                                            if (expandedCategories[category] ?: (category == "Сегодня")) 180f
+                                            else 0f
+                                        )
+                                )
+                            }
+                        }
+                        currentCategory = category
+                    }
+
+                    if (expandedCategories[category] ?: (category == "Сегодня")) {
+                        item {
+                            TodoListItem(
+                                item = todoItem,
+                                projects = projects,
+                                onCheckedChange = { isChecked ->
+                                    viewModel.updateTask(
+                                        todoItem.copy(
+                                            isDone = isChecked
+                                        )
+                                    )
+                                },
+                                isRunning = false,
+                                onClick = {
+                                    viewModel.selectedTask = todoItem
+                                    navController.navigate(NEW_TASK_SCREEN)
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
-                    showImportDialog = false
-                    importText = ""
-                }) {
-                    Text(
-                        text = stringResource(R.string.imp),
-                        style = SimpleText.copy(fontWeight = Bold)
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showImportDialog = false }) {
-                    Text(
-                        text = stringResource(R.string.cancel),
-                        style = SimpleText.copy(fontWeight = Bold)
-                    )
+                    item { Spacer(modifier = Modifier.height(32.dp)) }
                 }
             }
-        )
+
+        if (showImportDialog) {
+            AlertDialog(
+                onDismissRequest = { showImportDialog = false },
+                title = { Text(text = stringResource(R.string.import_tasks), style = H1) },
+                text = {
+                    Column {
+                        Text(text = stringResource(R.string.import_tasks_hint), style = SimpleText)
+                        Spacer(Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = importText,
+                            onValueChange = { importText = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp),
+                            maxLines = 10
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        importText.lines().forEach { line ->
+                            if (line.isNotBlank()) {
+                                viewModel.addTask(text = line.trim())
+                            }
+                        }
+                        showImportDialog = false
+                        importText = ""
+                    }) {
+                        Text(
+                            text = stringResource(R.string.imp),
+                            style = SimpleText.copy(fontWeight = Bold)
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showImportDialog = false }) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            style = SimpleText.copy(fontWeight = Bold)
+                        )
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -214,7 +293,8 @@ fun TodoListItem(
                                 )
                             }
                             Text(
-                                text = formatTime(animatedTime.value.toLong()), color = Color.Red,
+                                text = formatTime(animatedTime.value.toLong()),
+                                color = Color.Red,
                                 style = Small
                             )
 

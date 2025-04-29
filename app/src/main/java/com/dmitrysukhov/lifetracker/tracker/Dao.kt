@@ -18,7 +18,7 @@ interface EventDao {
     @Query("DELETE FROM events WHERE eventId = :eventId")
     suspend fun deleteEvent(eventId: Long)
 
-    @Query("SELECT * FROM events WHERE startTime >= :startTime AND startTime <= :endTime ORDER BY startTime ASC")
+    @Query("SELECT * FROM events WHERE (startTime <= :endTime AND (endTime >= :startTime OR endTime IS NULL)) ORDER BY startTime ASC")
     fun getEventsForPeriod(startTime: Long, endTime: Long): Flow<List<Event>>
 
     @Query("SELECT * FROM events ORDER BY startTime DESC LIMIT 1")

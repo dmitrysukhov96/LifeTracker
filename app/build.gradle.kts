@@ -36,6 +36,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.ui)
     implementation(libs.hilt.android)
+    implementation (libs.coil.compose)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.material3)

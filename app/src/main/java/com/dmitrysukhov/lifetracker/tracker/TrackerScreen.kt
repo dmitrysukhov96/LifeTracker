@@ -161,7 +161,7 @@ fun TimeTracker(trackerViewModel: TrackerViewModel, onStartQuickTask: () -> Unit
     val projects by trackerViewModel.projects.collectAsState()
     var timeElapsed by remember { mutableLongStateOf(0L) }
     val backgroundColor by animateColorAsState(
-        targetValue = if (lastEvent?.endTime == null) AccentColor else Color(0xFFC2EBD6),
+        targetValue = if (lastEvent!=null && lastEvent?.endTime == null) AccentColor else Color(0xFFC2EBD6),
         animationSpec = tween(durationMillis = 300)
     )
     LaunchedEffect(lastEvent) {
@@ -207,7 +207,7 @@ fun TimeTracker(trackerViewModel: TrackerViewModel, onStartQuickTask: () -> Unit
         }
 
         val timeText = when {
-            lastEvent == null -> "∞"
+            lastEvent == null -> "     ∞"
             lastEvent!!.endTime == null -> formatTimeElapsed(timeElapsed)
             else -> formatTimeElapsed(timeElapsed)
         }

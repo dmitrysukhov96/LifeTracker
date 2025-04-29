@@ -153,9 +153,17 @@ fun TrackerTimeline(
                     events.forEach { event ->
                         val startTime = DateTime(event.startTime)
                         val endTime = event.endTime?.let { DateTime(it) } ?: DateTime.now()
-                        val dayStart = startTime.withTime(0, 0, 0, 0)
-                        val startMinutes = ((startTime.millis - dayStart.millis) / 60000).toInt()
-                        val durationMinutes = Duration(startTime, endTime).standardMinutes
+                        val dayStart = DateTime(selectedDate.year, selectedDate.monthOfYear, selectedDate.dayOfMonth, 0, 0)
+                        
+                        // Проверяем пересечение с текущим днем
+                        if (endTime.isBefore(dayStart) || startTime.isAfter(dayStart.plusDays(1))) return@forEach
+                        
+                        // Корректируем время для событий, начавшихся в предыдущем дне
+                        val adjustedStart = if (startTime.isBefore(dayStart)) dayStart else startTime
+                        val adjustedEnd = if (endTime.isAfter(dayStart.plusDays(1))) dayStart.plusDays(1) else endTime
+                        
+                        val startMinutes = ((adjustedStart.millis - dayStart.millis) / 60000).toInt()
+                        val durationMinutes = Duration(adjustedStart, adjustedEnd).standardMinutes
                         val topPadding = (startMinutes * 4f / 3f).dp + 19.dp
                         val height = (durationMinutes * 4f / 3f).dp
                         val project = projects.find { it.projectId == event.projectId }
@@ -256,4 +264,4 @@ private fun formatDuration(minutes: Long): String {
     val remainingMinutes = minutes % 60
     return if (hours > 0) String.format(Locale.getDefault(), "%dh %dm", hours, remainingMinutes)
     else String.format(Locale.getDefault(), "%dm", remainingMinutes)
-} 
+}

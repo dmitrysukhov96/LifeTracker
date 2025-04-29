@@ -1,5 +1,6 @@
 package com.dmitrysukhov.lifetracker.projects
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,16 +28,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,6 +50,7 @@ fun ProjectsScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
     viewModel: ProjectsViewModel,
 ) {
+    val context = LocalContext.current
     val projects by remember { derivedStateOf { viewModel.projects } }
 
     LaunchedEffect(Unit) {
@@ -86,12 +91,13 @@ fun ProjectsScreen(
                     title = project.title,
                     progress = stringResource(
                         R.string.tasks_completed, project.completedTasks, project.totalTasks
-                    ), deadline = deadlineText, showImage = project == projects[0],
-                    gradient = generateGradient(Color(project.color)), onClick = {
+                    ),
+                    deadline = deadlineText, gradient = generateGradient(Color(project.color)),
+                    onClick = {
                         viewModel.selectedProject = project
                         navController.navigate(VIEW_PROJECT_SCREEN)
-                    })
-
+                    }, context = context, imagePath = project.imagePath
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item { Spacer(Modifier.height(64.dp)) }
@@ -102,7 +108,7 @@ fun ProjectsScreen(
 @Composable
 fun ProjectItem(
     title: String, progress: String, deadline: String, gradient: Brush, onClick: () -> Unit,
-    showImage: Boolean
+    context: Context, imagePath: String?
 ) {
     Box(
         modifier = Modifier
@@ -111,17 +117,30 @@ fun ProjectItem(
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))
             .then(
-                if (showImage) Modifier.background(Color.Black) else Modifier.background(
-                    gradient
-                )
+                if (imagePath != null) Modifier.background(Color.Black)
+                else Modifier.background(gradient)
             )
     ) {
-        if (showImage) Image(
-            painter = painterResource(R.drawable.egg), contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(0.9f), contentScale = ContentScale.Crop
-        )
+        if (!imagePath.isNullOrEmpty()) {
+            Image(
+                painter = rememberAsyncImagePainter(File(context.filesDir, imagePath)),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.9f),
+                contentScale = ContentScale.Crop
+            )
+        } else if (title.isNotEmpty()) {
+            // Fallback to using title as image name if imagePath is not available
+            Image(
+                painter = rememberAsyncImagePainter(File(context.filesDir, title)),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.9f),
+                contentScale = ContentScale.Crop
+            )
+        }
         Text(
             text = title, style = H2, color = Color.White,
             modifier = Modifier.padding(start = 20.dp, top = 8.dp)

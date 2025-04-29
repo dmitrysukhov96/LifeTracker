@@ -1,5 +1,8 @@
 package com.dmitrysukhov.lifetracker.projects
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -25,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.ColorPicker
@@ -43,10 +52,12 @@ import com.dmitrysukhov.lifetracker.common.ui.SubtitleWithIcon
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
+import com.dmitrysukhov.lifetracker.utils.ImageUtils
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import java.io.File
 
 @Composable
 fun NewProjectScreen(
@@ -57,6 +68,7 @@ fun NewProjectScreen(
     val project = viewModel.selectedProject
     var title by rememberSaveable { mutableStateOf(project?.title ?: "") }
     var descr by rememberSaveable { mutableStateOf(project?.description ?: "") }
+    var currentImagePath by rememberSaveable { mutableStateOf(project?.imagePath ?: "") }
     var selectedColorInt by rememberSaveable {
         mutableIntStateOf(
             project?.color ?: PineColor.toArgb()
@@ -87,10 +99,10 @@ fun NewProjectScreen(
                     IconButton(onClick = {
                         if (isEditMode && project != null) viewModel.updateProject(
                             project.copy(
-                                title = title, description = descr, color = selectedColorInt
+                                title = title, description = descr, color = selectedColorInt, imagePath = currentImagePath
                             )
                         ) else viewModel.addProject(
-                            Project(title = title, description = descr, color = selectedColorInt)
+                            Project(title = title, description = descr, color = selectedColorInt, imagePath = currentImagePath)
                         )
                         navController.navigateUp()
                     }) {
@@ -127,6 +139,76 @@ fun NewProjectScreen(
         Spacer(modifier = Modifier.height(8.dp))
         HorizontalDivider()
 
+        // Image selection
+        SubtitleWithIcon(
+            textRes = R.string.select_image,
+            iconRes = R.drawable.palette, //todo
+            iconColor = selectedColor
+        )
+        
+        val imagePickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent()
+        ) { uri ->
+            uri?.let {
+                val newPath = ImageUtils.saveImageToInternalStorage(context, it)
+                project?.imagePath?.let { oldPath ->
+                    ImageUtils.deleteImageFromInternalStorage(context, oldPath)
+                }
+                currentImagePath = newPath
+            }
+        }
+        
+        if (currentImagePath.isNotEmpty()) {
+            Box {
+                Image(
+                    painter = rememberAsyncImagePainter(File(context.filesDir, currentImagePath)),
+                    contentDescription = stringResource(R.string.selected_image),
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+                Row {
+                    IconButton(
+                        onClick = { imagePickerLauncher.launch("image/*") },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = stringResource(R.string.change_image),
+                            tint = selectedColor
+                        )
+                    }
+                    IconButton(
+                        onClick = { 
+                            project?.imagePath?.let { oldPath ->
+                                ImageUtils.deleteImageFromInternalStorage(context, oldPath)
+                            }
+                            currentImagePath = ""
+                        },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.delete),
+                            contentDescription = stringResource(R.string.delete_image),
+                            tint = selectedColor
+                        )
+                    }
+                }
+            }
+        } else {
+            IconButton(
+                onClick = { imagePickerLauncher.launch("image/*") },
+                modifier = Modifier.size(100.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.palette), //todo
+                    contentDescription = stringResource(R.string.select_image),
+                    tint = selectedColor
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
         BasicTextField(
             value = descr,
             onValueChange = { descr = it },

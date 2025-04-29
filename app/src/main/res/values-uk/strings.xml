@@ -96,8 +96,10 @@
     <string name="select_tasks_for_today">Оберіть справи, які плануєте зробити сьогодні</string>
     <string name="daily_planner">Щоденний планувальник</string>
     <string name="dashboard">Панель керування</string>
+    <string name="username">Ім\'я користувача:</string>
     <string name="good_morning">Доброго ранку</string>
     <string name="good_afternoon">Добрий день</string>
     <string name="good_evening">Добрий вечір</string>
     <string name="good_night">Доброї ночі</string>
+    <string name="settings">Налаштування</string>
 </resources>

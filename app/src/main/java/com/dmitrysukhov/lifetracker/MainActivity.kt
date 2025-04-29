@@ -3,6 +3,7 @@ package com.dmitrysukhov.lifetracker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -65,6 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -81,8 +83,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.dmitrysukhov.lifetracker.daily.DAILY_PLANNER_SCREEN
 import com.dmitrysukhov.lifetracker.daily.DailyPlannerScreen
+import com.dmitrysukhov.lifetracker.dashboard.DASHBOARD_SCREEN
+import com.dmitrysukhov.lifetracker.dashboard.DashboardScreen
 import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.HabitScreen
 import com.dmitrysukhov.lifetracker.habits.HabitsViewModel
@@ -95,6 +100,8 @@ import com.dmitrysukhov.lifetracker.projects.ProjectsScreen
 import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.projects.VIEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ViewProjectScreen
+import com.dmitrysukhov.lifetracker.settings.SETTINGS_SCREEN
+import com.dmitrysukhov.lifetracker.settings.SettingsScreen
 import com.dmitrysukhov.lifetracker.todo.NEW_TASK_SCREEN
 import com.dmitrysukhov.lifetracker.todo.NewTaskScreen
 import com.dmitrysukhov.lifetracker.todo.TODOLIST_SCREEN
@@ -102,8 +109,6 @@ import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
-import com.dmitrysukhov.lifetracker.dashboard.DASHBOARD_SCREEN
-import com.dmitrysukhov.lifetracker.dashboard.DashboardScreen
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -116,33 +121,28 @@ import com.dmitrysukhov.lifetracker.utils.WhitePine
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge() // Включаем edge-to-edge отображение
         setContent {
             val context = LocalContext.current
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = false
             var topBarState by remember { mutableStateOf(TopBarState(context.getString(R.string.app_name))) }
             LaunchedEffect(topBarState.color) {
-                systemUiController.setStatusBarColor(topBarState.color, darkIcons = useDarkIcons)
                 systemUiController.setNavigationBarColor(
-                    topBarState.color,
-                    darkIcons = useDarkIcons
+                    topBarState.color, darkIcons = useDarkIcons
                 )
             }
             MyApplicationTheme {
                 // Name dialog logic
                 val sharedPref = context.getSharedPreferences("user_prefs", MODE_PRIVATE)
                 var showNameDialog by rememberSaveable {
-                    mutableStateOf(
-                        !sharedPref.getBoolean(
-                            "dont_ask_name",
-                            false
-                        )
-                    )
+                    mutableStateOf(!sharedPref.getBoolean("dont_ask_name", false))
                 }
                 var userName by rememberSaveable { mutableStateOf("") }
                 if (showNameDialog) {
@@ -228,9 +228,12 @@ class MainActivity : ComponentActivity() {
                         painterResource(R.drawable.habits)
                     ),
                     Destination(
-                        stringResource(R.string.projects),
-                        PROJECTS_SCREEN,
+                        stringResource(R.string.projects), PROJECTS_SCREEN,
                         painterResource(R.drawable.projects)
+                    ),
+                    Destination(
+                        stringResource(R.string.settings), SETTINGS_SCREEN,
+                        painterResource(R.drawable.settings)
                     )
                 )
                 val isRootScreen = drawerMenuDestinations.any { it.route == currentDestination }
@@ -283,61 +286,8 @@ class MainActivity : ComponentActivity() {
                         ) {
 //                            SharedTransitionLayout {
                             Scaffold(
-                                modifier = Modifier,
                                 floatingActionButton = { if (isRootScreen) ActuallyFloatingActionButton { } },
-                                topBar = {
-                                    Box(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(
-                                                top = WindowInsets.systemBars
-                                                    .asPaddingValues()
-                                                    .calculateTopPadding()
-                                            )
-                                            .height(56.dp)
-                                    ) {
-                                        if (isRootScreen) {
-                                            IconButton(
-                                                onClick = { scope.launch { drawerState.open() } },
-                                                modifier = Modifier
-                                                    .padding(start = 10.dp)
-                                                    .align(Alignment.CenterStart)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Menu,
-                                                    contentDescription = stringResource(R.string.menu),
-                                                    tint = WhitePine
-                                                )
-                                            }
-                                        } else {
-                                            IconButton(
-                                                onClick = { navController.popBackStack() },
-                                                modifier = Modifier
-                                                    .padding(start = 10.dp)
-                                                    .align(Alignment.CenterStart)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                    contentDescription = stringResource(R.string.back),
-                                                    tint = WhitePine
-                                                )
-                                            }
-                                        }
-                                        Text(
-                                            topBarState.title, fontFamily = Montserrat,
-                                            fontSize = 20.sp, fontWeight = FontWeight.Bold,
-                                            color = WhitePine,
-                                            modifier = Modifier.align(Alignment.Center)
-                                        )
-                                        Row(
-                                            Modifier
-                                                .fillMaxSize()
-                                                .padding(horizontal = 28.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.End
-                                        ) { topBarState.topBarActions.invoke(this) }
-                                    }
-                                }, bottomBar = {
+                                bottomBar = {
                                     if (isTodo) Row(
                                         Modifier
                                             .background(BgColor)
@@ -408,12 +358,84 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             ) { padding ->
-                                Box(Modifier.fillMaxSize()) {
+                                Box(Modifier.fillMaxSize().background(topBarState.color)) {
+                                    //custom top bar
+                                    topBarState.imagePath?.let { imagePath ->
+                                        Image(
+                                            painter = rememberAsyncImagePainter(
+                                                File(context.filesDir, imagePath)
+                                            ),
+                                            contentDescription = null,
+                                            modifier = Modifier.fillMaxWidth().height((24+56+36).dp),
+                                            contentScale = ContentScale.FillWidth
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.Black.copy(alpha = 0.4f))
+                                        )
+                                    }
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                top = WindowInsets.systemBars
+                                                    .asPaddingValues()
+                                                    .calculateTopPadding()
+                                            )
+                                            .height(56.dp)
+                                    ) {
+                                        if (isRootScreen) {
+                                            IconButton(
+                                                onClick = { scope.launch { drawerState.open() } },
+                                                modifier = Modifier
+                                                    .padding(start = 10.dp)
+                                                    .align(Alignment.CenterStart)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Menu,
+                                                    contentDescription = stringResource(R.string.menu),
+                                                    tint = WhitePine
+                                                )
+                                            }
+                                        } else {
+                                            IconButton(
+                                                onClick = { navController.popBackStack() },
+                                                modifier = Modifier
+                                                    .padding(start = 10.dp)
+                                                    .align(Alignment.CenterStart)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                    contentDescription = stringResource(R.string.back),
+                                                    tint = WhitePine
+                                                )
+                                            }
+                                        }
+
+                                        Text(
+                                            topBarState.title,
+                                            fontFamily = Montserrat,
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = WhitePine,
+                                            modifier = Modifier.align(Alignment.Center)
+                                        )
+
+                                        Row(
+                                            Modifier
+                                                .fillMaxSize()
+                                                .padding(horizontal = 28.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.End
+                                        ) { topBarState.topBarActions.invoke(this) }
+                                    }
                                     NavHost(
                                         navController = navController,
                                         startDestination = DASHBOARD_SCREEN, modifier = Modifier
-                                            .background(topBarState.color)
-                                            .padding(padding)
+                                            .padding(top = WindowInsets.systemBars
+                                                .asPaddingValues()
+                                                .calculateTopPadding() + 56.dp)
                                             .clip(
                                                 RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)
                                             )
@@ -421,8 +443,7 @@ class MainActivity : ComponentActivity() {
                                         composable(DASHBOARD_SCREEN) {
                                             DashboardScreen(
                                                 setTopBarState,
-                                                navController,
-                                                userName = userName
+                                                navController
                                             )
                                         }
                                         composable(TODOLIST_SCREEN) {
@@ -480,6 +501,12 @@ class MainActivity : ComponentActivity() {
                                                 setTopBarState,
                                                 navController,
                                                 projectViewModel
+                                            )
+                                        }
+                                        composable(SETTINGS_SCREEN) {
+                                            SettingsScreen(
+                                                navController = navController,
+                                                setTopBarState = setTopBarState
                                             )
                                         }
                                     }

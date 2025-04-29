@@ -23,6 +23,7 @@ data class Project(
     val description: String = "",
     val color: Int,
     val photoUri: String? = null,
+    val imagePath: String? = null,
     val goal: String? = null,
     val deadlineMillis: Long? = null,
     val completedTasks: Int = 0,
