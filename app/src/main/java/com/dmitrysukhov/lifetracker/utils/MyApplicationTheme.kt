@@ -1,6 +1,5 @@
 package com.dmitrysukhov.lifetracker.utils
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -15,7 +14,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit
+    darkTheme: Boolean = isDarkTheme(), content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme)
         darkColorScheme(primary = PineColor, secondary = AccentColor, tertiary = BlackPine)

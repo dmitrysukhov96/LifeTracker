@@ -1,5 +1,6 @@
 package com.dmitrysukhov.lifetracker
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -126,10 +127,21 @@ import kotlinx.coroutines.launch
 import java.io.File
 import com.dmitrysukhov.lifetracker.about.ABOUT_DEVELOPER_SCREEN
 import com.dmitrysukhov.lifetracker.about.AboutDeveloperScreen
+import com.dmitrysukhov.lifetracker.notes.NEW_NOTE_SCREEN
+import com.dmitrysukhov.lifetracker.notes.NOTE_DETAIL_SCREEN
+import com.dmitrysukhov.lifetracker.notes.NOTES_SCREEN
+import com.dmitrysukhov.lifetracker.notes.NewNoteScreen
+import com.dmitrysukhov.lifetracker.notes.NoteDetailScreen
+import com.dmitrysukhov.lifetracker.notes.NotesListScreen
+import com.dmitrysukhov.lifetracker.notes.NoteViewModel
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply language settings
+        applyLanguageSettings()
+        
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Включаем edge-to-edge отображение
         setContent {
@@ -205,6 +217,7 @@ class MainActivity : ComponentActivity() {
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val projectViewModel: ProjectsViewModel = hiltViewModel()
                 val habitViewModel: HabitsViewModel = hiltViewModel()
+                val noteViewModel: NoteViewModel = hiltViewModel()
                 val navController = rememberNavController()
                 val scope = rememberCoroutineScope()
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -220,6 +233,11 @@ class MainActivity : ComponentActivity() {
                         stringResource(R.string.todo_list),
                         TODOLIST_SCREEN,
                         painterResource(R.drawable.spisok)
+                    ),
+                    Destination(
+                        stringResource(R.string.notes),
+                        NOTES_SCREEN,
+                        painterResource(R.drawable.projects)
                     ),
                     Destination(
                         stringResource(R.string.tracker),
@@ -292,11 +310,12 @@ class MainActivity : ComponentActivity() {
                                 .fillMaxSize()
                                 .background(topBarState.color)
                         ) {
-//                            SharedTransitionLayout {
                             Scaffold(
-                                floatingActionButton = { if (isRootScreen) ActuallyFloatingActionButton {
-                                    navController.navigate(TURBO_SCREEN)
-                                } },
+                                floatingActionButton = {
+                                    if (isRootScreen) ActuallyFloatingActionButton {
+                                        navController.navigate(TURBO_SCREEN)
+                                    }
+                                },
                                 bottomBar = {
                                     if (isTodo) Row(
                                         Modifier
@@ -368,9 +387,11 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             ) { padding ->
-                                Box(Modifier
-                                    .fillMaxSize()
-                                    .background(topBarState.color)) {
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(topBarState.color)
+                                ) {
                                     //custom top bar
                                     topBarState.imagePath?.let { imagePath ->
                                         Image(
@@ -458,13 +479,28 @@ class MainActivity : ComponentActivity() {
                                     ) {
                                         composable(DASHBOARD_SCREEN) {
                                             DashboardScreen(
-                                                setTopBarState,
-                                                navController
+                                                setTopBarState, navController, todoViewModel,
+                                                habitViewModel
                                             )
                                         }
                                         composable(TODOLIST_SCREEN) {
                                             TodoListScreen(
                                                 setTopBarState, navController, todoViewModel
+                                            )
+                                        }
+                                        composable(NOTES_SCREEN) {
+                                            NotesListScreen(
+                                                setTopBarState, navController, noteViewModel
+                                            )
+                                        }
+                                        composable(NOTE_DETAIL_SCREEN) {
+                                            NoteDetailScreen(
+                                                setTopBarState, navController, noteViewModel
+                                            )
+                                        }
+                                        composable(NEW_NOTE_SCREEN) {
+                                            NewNoteScreen(
+                                                setTopBarState, navController, noteViewModel
                                             )
                                         }
                                         composable(VIEW_PROJECT_SCREEN) {
@@ -519,12 +555,7 @@ class MainActivity : ComponentActivity() {
                                                 projectViewModel
                                             )
                                         }
-                                        composable(SETTINGS_SCREEN) {
-                                            SettingsScreen(
-                                                navController = navController,
-                                                setTopBarState = setTopBarState
-                                            )
-                                        }
+                                        composable(SETTINGS_SCREEN) { SettingsScreen(setTopBarState) }
                                         composable(TURBO_SCREEN) {
                                             TurboScreen(
                                                 setTopBarState = setTopBarState,
@@ -538,10 +569,27 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-//                        }
                     }
                 )
             }
+        }
+    }
+    
+    private fun applyLanguageSettings() {
+        val sharedPref = getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val languageCode = sharedPref.getString("language", null)
+        
+        if (languageCode != null) {
+            val locale = when (languageCode) {
+                "ru" -> Locale("ru")
+                "uk" -> Locale("uk")
+                "en" -> Locale("en")
+                else -> Locale.getDefault()
+            }
+            Locale.setDefault(locale)
+            val configuration = Configuration(resources.configuration)
+            configuration.setLocale(locale)
+            resources.updateConfiguration(configuration, resources.displayMetrics)
         }
     }
 }

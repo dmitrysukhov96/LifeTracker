@@ -2,6 +2,9 @@ package com.dmitrysukhov.lifetracker
 
 import android.content.Context
 import androidx.room.Room
+import com.dmitrysukhov.lifetracker.notes.NoteDao
+import com.dmitrysukhov.lifetracker.notes.NoteRepository
+import com.dmitrysukhov.lifetracker.notes.NoteRepositoryImpl
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
 import com.dmitrysukhov.lifetracker.projects.ProjectRepository
 import com.dmitrysukhov.lifetracker.projects.ProjectRepositoryImpl
@@ -53,6 +56,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideNoteDao(database: AppDatabase): NoteDao {
+        return database.noteDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideEventRepository(eventDao: EventDao): EventRepository {
         return EventRepository(eventDao)
     }
@@ -61,5 +70,11 @@ object AppModule {
     @Singleton
     fun provideProjectRepository(projectDao: ProjectDao): ProjectRepository {
         return ProjectRepositoryImpl(projectDao)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideNoteRepository(noteDao: NoteDao): NoteRepository {
+        return NoteRepositoryImpl(noteDao)
     }
 }

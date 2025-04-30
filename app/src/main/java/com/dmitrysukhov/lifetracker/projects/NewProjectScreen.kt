@@ -74,9 +74,7 @@ fun NewProjectScreen(
     var descr by rememberSaveable { mutableStateOf(project?.description ?: "") }
     var currentImagePath by rememberSaveable { mutableStateOf(project?.imagePath ?: "") }
     var selectedColorInt by rememberSaveable {
-        mutableIntStateOf(
-            project?.color ?: PineColor.toArgb()
-        )
+        mutableIntStateOf(project?.color ?: PineColor.toArgb())
     }
     var selectedColor = Color(selectedColorInt)
     var showDeleteConfirmation by remember { mutableStateOf(false) }
@@ -143,6 +141,27 @@ fun NewProjectScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+        BasicTextField(
+            value = descr,
+            onValueChange = { descr = it },
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = W700,
+                fontFamily = Montserrat,
+                color = InverseColor
+            ),
+            decorationBox = { innerTextField ->
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    if (descr.isEmpty()) Text(
+                        stringResource(R.string.description_hint),
+                        style = H2, color = selectedColor.copy(0.5f)
+                    )
+                    innerTextField()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         // Image selection
         SubtitleWithIcon(
@@ -150,7 +169,7 @@ fun NewProjectScreen(
             iconRes = R.drawable.palette, //todo
             iconColor = selectedColor
         )
-        
+
         val imagePickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
         ) { uri ->
@@ -162,7 +181,7 @@ fun NewProjectScreen(
                 currentImagePath = newPath
             }
         }
-        
+
         if (currentImagePath.isNotEmpty()) {
             Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
                 Image(
@@ -219,28 +238,6 @@ fun NewProjectScreen(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        BasicTextField(
-            value = descr,
-            onValueChange = { descr = it },
-            textStyle = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = W700,
-                fontFamily = Montserrat,
-                color = InverseColor
-            ),
-            decorationBox = { innerTextField ->
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    if (descr.isEmpty()) Text(
-                        stringResource(R.string.description_hint),
-                        style = H2, color = selectedColor.copy(0.5f)
-                    )
-                    innerTextField()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
         Column(Modifier.padding(top = 32.dp)) {
             SubtitleWithIcon(
                 textRes = R.string.select_color, iconRes = R.drawable.palette, iconColor = selectedColor

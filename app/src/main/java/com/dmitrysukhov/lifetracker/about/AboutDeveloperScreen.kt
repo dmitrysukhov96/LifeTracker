@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -66,9 +63,10 @@ fun AboutDeveloperScreen(setTopBarState: (TopBarState) -> Unit) {
             .fillMaxSize()
             .background(BgColor)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(Modifier.height(24.dp))
         Box(
             modifier = Modifier
                 .size(width = 220.dp, height = 180.dp)
@@ -163,37 +161,6 @@ fun AboutDeveloperScreen(setTopBarState: (TopBarState) -> Unit) {
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = {
-                val browserIntent = Intent(
-                    Intent.ACTION_VIEW, "https://ko-fi.com/coffeecodedevs".toUri()
-                )
-                try {
-                    startActivity(context, browserIntent, null)
-                } catch (_: Exception) {
-                }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFFDD00),
-                contentColor = Color(0xFF2C2C2C)
-            ),
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(56.dp),
-            shape = RoundedCornerShape(28.dp)
-        ) {
-            Image(
-                painter = painterResource(R.drawable.coffee_cup),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(
-                text = stringResource(R.string.buy_me_coffee),
-                style = SimpleText.copy(fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            )
-        }
         Spacer(modifier = Modifier.height(24.dp))
     }
 } 

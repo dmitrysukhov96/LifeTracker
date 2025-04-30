@@ -95,17 +95,24 @@
     <string name="create_habit_hint">Натисніть +, щоб створити звичку</string>
     <string name="select_tasks_for_today">Оберіть справи, які плануєте зробити сьогодні</string>
     <string name="daily_planner">Щоденний планувальник</string>
-    <string name="dashboard">Панель керування</string>
+    <string name="dashboard">Головна</string>
     <string name="username">Ім\'я користувача:</string>
     <string name="good_morning">Доброго ранку</string>
     <string name="good_afternoon">Добрий день</string>
     <string name="good_evening">Добрий вечір</string>
     <string name="good_night">Доброї ночі</string>
     <string name="settings">Налаштування</string>
-    <string name="select_image">Вибрати зображення</string>
+    <string name="select_image">Обрати зображення</string>
     <string name="selected_image">Вибране зображення</string>
     <string name="change_image">Змінити зображення</string>
     <string name="delete_image">Видалити зображення</string>
+    
+    <!-- Theme settings -->
+    <string name="theme">Тема</string>
+    <string name="theme_system">Системна</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="theme_restart_hint">Застосунок використає вибрану тему при наступному запуску.</string>
     
     <!-- Turbo Mode strings -->
     <string name="turbo_mode">Турбо режим</string>
@@ -147,10 +154,26 @@
     
     <!-- About Developer strings -->
     <string name="about_developer">Про розробника</string>
-    <string name="dev_description">👋 Мене звуть Діма, я — Android-розробник та автор додатку LifeTracker.</string>
+    <string name="dev_description">👋 Мене звати Дмитро, я — Android-розробник та автор додатку LifeTracker.</string>
     <string name="contact_email">coffeecodedevs@gmail.com</string>
     <string name="contact_social">\@coffeecodedevs</string>
     <string name="buy_me_coffee">Пригостіть мене кавою</string>
     <string name="dev_ideas">💡 Якщо у вас є ідеї для нових функцій, питання або проблеми — звертайтеся до мене!</string>
-    <string name="dev_end">✨ Пишіть — ваші пропозиції дуже важливі для мене!</string>
+    <string name="dev_end">✨ Пишіть — ваші пропозиції важливі для мене!</string>
+
+    <!-- Notes strings -->
+    <string name="notes">Нотатки</string>
+    <string name="note">Нотатка</string>
+    <string name="new_note">Нова нотатка</string>
+    <string name="edit_note">Редагувати нотатку</string>
+    <string name="note_title">Заголовок</string>
+    <string name="note_content">Зміст</string>
+    <string name="enter_note_title">Введіть заголовок нотатки</string>
+    <string name="enter_note_content">Введіть текст нотатки</string>
+    <string name="save_note">Зберегти нотатку</string>
+    <string name="delete_note">Видалити нотатку</string>
+    <string name="note_not_found">Нотатку не знайдено</string>
+    <string name="add_note">Додати нотатку</string>
+    <string name="no_notes_yet">Нотаток ще немає</string>
+    <string name="tap_plus_to_create_note">Натисніть + щоб створити нотатку</string>
 </resources>

@@ -2,8 +2,8 @@ package com.dmitrysukhov.lifetracker.todo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.Project
+import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

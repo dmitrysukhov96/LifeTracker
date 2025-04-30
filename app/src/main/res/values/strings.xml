@@ -109,6 +109,13 @@
     <string name="change_image">Change image</string>
     <string name="delete_image">Delete image</string>
     
+    <!-- Theme settings -->
+    <string name="theme">Theme</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_restart_hint">The app will use your theme preference next time it starts.</string>
+    
     <!-- Focus Mode strings -->
     <string name="focus_session">Focus Session</string>
     
@@ -155,4 +162,20 @@
     <string name="buy_me_coffee">Buy Me a Coffee</string>
     <string name="dev_ideas">💡 Got feature ideas, questions or issues? Feel free to reach out!</string>
     <string name="dev_end">✨ Feel free to ask anything — I really value your suggestions!</string>
+    
+    <!-- Notes strings -->
+    <string name="notes">Notes</string>
+    <string name="note">Note</string>
+    <string name="new_note">New Note</string>
+    <string name="edit_note">Edit Note</string>
+    <string name="note_title">Title</string>
+    <string name="note_content">Content</string>
+    <string name="enter_note_title">Enter title for your note</string>
+    <string name="enter_note_content">Enter your note content here</string>
+    <string name="save_note">Save Note</string>
+    <string name="delete_note">Delete Note</string>
+    <string name="note_not_found">Note not found</string>
+    <string name="add_note">Add Note</string>
+    <string name="no_notes_yet">No notes yet</string>
+    <string name="tap_plus_to_create_note">Tap + to create a new note</string>
 </resources>

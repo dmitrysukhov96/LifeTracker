@@ -82,7 +82,7 @@ fun NewTaskScreen(
         mutableStateOf(viewModel.selectedTask?.dateTime)
     }
     val context = LocalContext.current
-    val projects by viewModel.projects.collectAsState()
+    val projects by viewModel.projects.collectAsState(listOf())
 
     // Determine if we're editing an existing task
     val isEditing = viewModel.selectedTask != null

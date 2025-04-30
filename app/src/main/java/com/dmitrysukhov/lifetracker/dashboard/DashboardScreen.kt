@@ -22,21 +22,20 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.daily.DAILY_PLANNER_SCREEN
@@ -49,16 +48,15 @@ import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import com.dmitrysukhov.lifetracker.utils.isDarkTheme
 import java.util.Calendar
 
 const val DASHBOARD_SCREEN = "dashboard_screen"
 
 @Composable
 fun DashboardScreen(
-    setTopBarState: (TopBarState) -> Unit,
-    navController: NavHostController,
-    todoViewModel: TodoViewModel = hiltViewModel(),
-    habitsViewModel: HabitsViewModel = hiltViewModel()
+    setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
+    todoViewModel: TodoViewModel, habitsViewModel: HabitsViewModel
 ) {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val greeting = when {
@@ -68,10 +66,8 @@ fun DashboardScreen(
         else -> stringResource(R.string.good_evening)
     }
     val context = LocalContext.current
-
-    // Collect data from ViewModels
-    val tasks = todoViewModel.todoList.collectAsState().value
-    val habits = habitsViewModel.habits.collectAsState().value
+    val tasks = todoViewModel.todoList.collectAsStateWithLifecycle(listOf()).value
+    val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
     
     val completedTasks = tasks.count { it.isDone }
     val totalTasks = tasks.size
@@ -81,7 +77,7 @@ fun DashboardScreen(
         setTopBarState(
             TopBarState(context.getString(R.string.app_name)) {
                 IconButton({ navController.navigate(DAILY_PLANNER_SCREEN) }) {
-                    Icon(Icons.Default.DateRange, null)
+                    Icon(Icons.Default.DateRange, null, tint = Color.White)
                 }
             }
         )
@@ -92,17 +88,15 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(BgColor)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(24.dp)
     ) {
         val sharedPref = context.getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
         val userName = sharedPref.getString("user_name", "") ?: ""
 
         Text(
             text = greeting + if (userName.isNotBlank()) ", $userName!" else "!",
-            style = H1,
-            color = InverseColor
+            style = H1, color = InverseColor, modifier = Modifier.padding(start = 2.dp)
         )
-
         Spacer(modifier = Modifier.height(24.dp))
 
         // Today's Overview Card
@@ -183,22 +177,17 @@ fun DashboardScreen(
                 }
             }
         )
+        Spacer(Modifier.height(68.dp))
     }
 }
 
 @Composable
-fun StatCard(
-    title: String,
-    iconPainter: androidx.compose.ui.graphics.painter.Painter,
-    content: @Composable () -> Unit
-) {
+fun StatCard(title: String, iconPainter: Painter, content: @Composable () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp)),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors = CardDefaults.cardColors(containerColor = (Color.White.copy(if (isDarkTheme()) 0.05f else 1f)))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -229,7 +218,7 @@ fun StatCard(
 fun StatRowWithPainter(
     label: String,
     value: String,
-    iconPainter: androidx.compose.ui.graphics.painter.Painter
+    iconPainter: Painter
 ) {
     Row(
         modifier = Modifier
@@ -261,10 +250,7 @@ fun StatRowWithPainter(
 }
 
 @Composable
-fun HabitProgressRow(
-    habitName: String,
-    progress: Float
-) {
+fun HabitProgressRow(habitName: String, progress: Float) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -274,35 +260,26 @@ fun HabitProgressRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Text(text = habitName, style = SimpleText, color = InverseColor)
             Text(
-                text = habitName, 
-                style = SimpleText,
-                color = InverseColor
-            )
-            Text(
-                text = "${(progress * 100).toInt()}%",
+                text = "${(progress * 100).toInt()}%", color = PineColor,
                 style = SimpleText.copy(fontWeight = FontWeight.Bold),
-                color = PineColor
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
         LinearProgressIndicator(
         progress = { progress },
         modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp)),
+            .fillMaxWidth()
+            .height(4.dp)
+            .clip(RoundedCornerShape(2.dp)),
         color = PineColor,
         trackColor = PineColor.copy(alpha = 0.2f))
     }
 }
 
 @Composable
-fun ProjectStatusRow(
-    projectName: String,
-    progress: String,
-    color: Color
-) {
+fun ProjectStatusRow(projectName: String, progress: String, color: Color) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -310,11 +287,7 @@ fun ProjectStatusRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = projectName, 
-            style = SimpleText,
-            color = InverseColor
-        )
+        Text(text = projectName, style = SimpleText, color = InverseColor)
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
@@ -322,8 +295,7 @@ fun ProjectStatusRow(
                 .padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
             Text(
-                text = progress,
-                style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                text = progress, style = SimpleText.copy(fontWeight = FontWeight.Bold),
                 color = color
             )
         }
@@ -331,26 +303,14 @@ fun ProjectStatusRow(
 }
 
 @Composable
-fun InsightRow(
-    label: String,
-    value: String
-) {
+fun InsightRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = label, 
-            style = SimpleText,
-            color = InverseColor
-        )
-        Text(
-            text = value,
-            style = SimpleText.copy(fontWeight = FontWeight.Bold),
-            color = PineColor
-        )
+        Text(text = label, style = SimpleText, color = InverseColor)
+        Text(text = value, style = SimpleText.copy(fontWeight = FontWeight.Bold), color = PineColor)
     }
 }

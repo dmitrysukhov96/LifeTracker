@@ -2,7 +2,10 @@ package com.dmitrysukhov.lifetracker.utils
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import com.dmitrysukhov.lifetracker.settings.ThemeMode
 
 val Red = Color(0xFFFA3535)
 val DarkOrange = Color(0xFFFF582E)
@@ -33,4 +36,12 @@ val BgColor @Composable get() = if (isDarkTheme()) BlackPine else WhitePine
 val InverseColor @Composable get() = if (isDarkTheme()) WhitePine else BlackPine
 
 @Composable
-fun isDarkTheme() = isSystemInDarkTheme()
+fun isDarkTheme(): Boolean {
+    val themeMode by ThemeManager.themeMode.collectAsState()
+    
+    return when (themeMode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
+}
