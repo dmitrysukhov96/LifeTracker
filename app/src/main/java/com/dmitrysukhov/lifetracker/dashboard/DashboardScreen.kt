@@ -22,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +45,7 @@ import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
+import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
@@ -97,26 +99,27 @@ fun DashboardScreen(
 
         Text(
             text = greeting + if (userName.isNotBlank()) ", $userName!" else "!",
-            style = H1
+            style = H1,
+            color = InverseColor
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Today's Overview Card
         StatCard(
-            title = "Today's Overview",
+            title = stringResource(R.string.todays_overview),
             iconPainter = painterResource(R.drawable.plus),
             content = {
                 Column {
-                    StatRowWithPainter("Tasks Completed", "$completedTasks/$totalTasks", painterResource(R.drawable.plus))
-                    StatRowWithPainter("Habits Tracked", "$completedHabits/${habits.size}", painterResource(R.drawable.plus))
+                    StatRowWithPainter(stringResource(R.string.tasks_completed_row), "$completedTasks/$totalTasks", painterResource(R.drawable.plus))
+                    StatRowWithPainter(stringResource(R.string.habits_tracked), "$completedHabits/${habits.size}", painterResource(R.drawable.plus))
                     
                     // Get focus sessions count from shared preferences
                     val statsPref = context.getSharedPreferences("user_stats", android.content.Context.MODE_PRIVATE)
                     val focusSessionsCount = statsPref.getInt("focus_sessions_count", 0)
-                    StatRowWithPainter("Focus Sessions", "$focusSessionsCount", painterResource(R.drawable.plus))
+                    StatRowWithPainter(stringResource(R.string.focus_sessions), "$focusSessionsCount", painterResource(R.drawable.plus))
                     
-                    StatRowWithPainter("Focus Time", "2h 30m", painterResource(R.drawable.plus))
+                    StatRowWithPainter(stringResource(R.string.focus_time), "2h 30m", painterResource(R.drawable.plus))
                 }
             }
         )
@@ -125,13 +128,13 @@ fun DashboardScreen(
 
         // Weekly Progress Card
         StatCard(
-            title = "Weekly Progress",
+            title = stringResource(R.string.weekly_progress),
             iconPainter = painterResource(R.drawable.plus),
             content = {
                 Column {
-                    StatRowWithPainter("Tasks", "85%", painterResource(R.drawable.plus))
-                    StatRowWithPainter("Habits", "92%", painterResource(R.drawable.plus))
-                    StatRowWithPainter("Focus", "78%", painterResource(R.drawable.plus))
+                    StatRowWithPainter(stringResource(R.string.tasks), "85%", painterResource(R.drawable.plus))
+                    StatRowWithPainter(stringResource(R.string.habits), "92%", painterResource(R.drawable.plus))
+                    StatRowWithPainter(stringResource(R.string.focus), "78%", painterResource(R.drawable.plus))
                 }
             }
         )
@@ -140,7 +143,7 @@ fun DashboardScreen(
 
         // Top Habits Card
         StatCard(
-            title = "Top Habits",
+            title = stringResource(R.string.top_habits),
             iconPainter = painterResource(R.drawable.plus),
             content = {
                 Column {
@@ -155,13 +158,13 @@ fun DashboardScreen(
 
         // Project Status Card
         StatCard(
-            title = "Project Status",
+            title = stringResource(R.string.project_status),
             iconPainter = painterResource(R.drawable.plus),
             content = {
                 Column {
-                    ProjectStatusRow("Website Redesign", "75%", Color(0xFF4CAF50))
-                    ProjectStatusRow("Mobile App", "45%", Color(0xFF2196F3))
-                    ProjectStatusRow("Marketing", "30%", Color(0xFFFFC107))
+                    ProjectStatusRow(stringResource(R.string.website_redesign), "75%", Color(0xFF4CAF50))
+                    ProjectStatusRow(stringResource(R.string.mobile_app), "45%", Color(0xFF2196F3))
+                    ProjectStatusRow(stringResource(R.string.marketing), "30%", Color(0xFFFFC107))
                 }
             }
         )
@@ -170,13 +173,13 @@ fun DashboardScreen(
 
         // Productivity Insights Card
         StatCard(
-            title = "Productivity Insights",
+            title = stringResource(R.string.productivity_insights),
             iconPainter = painterResource(R.drawable.plus),
             content = {
                 Column {
-                    InsightRow("Most Productive Day", "Wednesday")
-                    InsightRow("Best Time", "9:00 AM - 11:00 AM")
-                    InsightRow("Focus Score", "8.5/10")
+                    InsightRow(stringResource(R.string.most_productive_day), stringResource(R.string.wednesday))
+                    InsightRow(stringResource(R.string.best_time), "9:00 AM - 11:00 AM")
+                    InsightRow(stringResource(R.string.focus_score), "8.5/10")
                 }
             }
         )
@@ -194,7 +197,7 @@ fun StatCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
@@ -212,7 +215,8 @@ fun StatCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
-                    style = H2.copy(fontWeight = FontWeight.Bold)
+                    style = H2.copy(fontWeight = FontWeight.Bold),
+                    color = InverseColor
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -242,7 +246,11 @@ fun StatRowWithPainter(
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = label, style = SimpleText)
+            Text(
+                text = label, 
+                style = SimpleText,
+                color = InverseColor
+            )
         }
         Text(
             text = value,
@@ -266,7 +274,11 @@ fun HabitProgressRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = habitName, style = SimpleText)
+            Text(
+                text = habitName, 
+                style = SimpleText,
+                color = InverseColor
+            )
             Text(
                 text = "${(progress * 100).toInt()}%",
                 style = SimpleText.copy(fontWeight = FontWeight.Bold),
@@ -298,7 +310,11 @@ fun ProjectStatusRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = projectName, style = SimpleText)
+        Text(
+            text = projectName, 
+            style = SimpleText,
+            color = InverseColor
+        )
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
@@ -326,7 +342,11 @@ fun InsightRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, style = SimpleText)
+        Text(
+            text = label, 
+            style = SimpleText,
+            color = InverseColor
+        )
         Text(
             text = value,
             style = SimpleText.copy(fontWeight = FontWeight.Bold),

@@ -129,4 +129,30 @@
     <string name="what_next">What\'s next?</string>
     <string name="go">GO!</string>
     <string name="task_added">Task added</string>
+
+    <!-- Dashboard strings -->
+    <string name="todays_overview">Today\'s Overview</string>
+    <string name="tasks_completed_row">Tasks Completed</string>
+    <string name="habits_tracked">Habits Tracked</string>
+    <string name="focus_sessions">Focus Sessions</string>
+    <string name="focus_time">Focus Time</string>
+    <string name="weekly_progress">Weekly Progress</string>
+    <string name="tasks">Tasks</string>
+    <string name="focus">Focus</string>
+    <string name="top_habits">Top Habits</string>
+    <string name="project_status">Project Status</string>
+    <string name="website_redesign">Website Redesign</string>
+    <string name="mobile_app">Mobile App</string>
+    <string name="marketing">Marketing</string>
+    <string name="productivity_insights">Productivity Insights</string>
+    <string name="most_productive_day">Most Productive Day</string>
+    <string name="best_time">Best Time</string>
+    <string name="focus_score">Focus Score</string>
+    <string name="about_developer">About Developer</string>
+    <string name="dev_description">👋 Hi, I\'m Dima, an Android Developer and creator of the LifeTracker app.</string>
+    <string name="contact_email">coffeecodedevs@gmail.com</string>
+    <string name="contact_social">\@coffeecodedevs</string>
+    <string name="buy_me_coffee">Buy Me a Coffee</string>
+    <string name="dev_ideas">💡 Got feature ideas, questions or issues? Feel free to reach out!</string>
+    <string name="dev_end">✨ Feel free to ask anything — I really value your suggestions!</string>
 </resources>

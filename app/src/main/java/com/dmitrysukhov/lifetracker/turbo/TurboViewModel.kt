@@ -16,17 +16,9 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-enum class TimerMode {
-    STOPWATCH,
-    COUNTDOWN
-}
+enum class TimerMode { STOPWATCH, COUNTDOWN }
 
-enum class TimerState {
-    IDLE,
-    RUNNING,
-    PAUSED,
-    COMPLETED
-}
+enum class TimerState { IDLE, RUNNING, PAUSED, COMPLETED }
 
 data class TurboSession(
     val selectedTask: TodoItem? = null,
@@ -41,8 +33,7 @@ data class TurboSession(
 
 @HiltViewModel
 class TurboViewModel @Inject constructor(
-    private val todoDao: TodoDao,
-    private val eventRepository: EventRepository
+    private val todoDao: TodoDao, private val eventRepository: EventRepository
 ) : ViewModel() {
 
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())

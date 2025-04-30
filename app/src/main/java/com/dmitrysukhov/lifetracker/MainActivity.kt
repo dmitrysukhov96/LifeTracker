@@ -124,6 +124,8 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
+import com.dmitrysukhov.lifetracker.about.ABOUT_DEVELOPER_SCREEN
+import com.dmitrysukhov.lifetracker.about.AboutDeveloperScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -236,6 +238,10 @@ class MainActivity : ComponentActivity() {
                     Destination(
                         stringResource(R.string.settings), SETTINGS_SCREEN,
                         painterResource(R.drawable.settings)
+                    ),
+                    Destination(
+                        stringResource(R.string.about_developer), ABOUT_DEVELOPER_SCREEN,
+                        painterResource(R.drawable.person)
                     )
                 )
                 val isRootScreen = drawerMenuDestinations.any { it.route == currentDestination }
@@ -362,7 +368,9 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             ) { padding ->
-                                Box(Modifier.fillMaxSize().background(topBarState.color)) {
+                                Box(Modifier
+                                    .fillMaxSize()
+                                    .background(topBarState.color)) {
                                     //custom top bar
                                     topBarState.imagePath?.let { imagePath ->
                                         Image(
@@ -370,7 +378,9 @@ class MainActivity : ComponentActivity() {
                                                 File(context.filesDir, imagePath)
                                             ),
                                             contentDescription = null,
-                                            modifier = Modifier.fillMaxWidth().height((24+56+36).dp),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height((24 + 56 + 36).dp),
                                             contentScale = ContentScale.FillWidth
                                         )
                                         Box(
@@ -437,9 +447,11 @@ class MainActivity : ComponentActivity() {
                                     NavHost(
                                         navController = navController,
                                         startDestination = DASHBOARD_SCREEN, modifier = Modifier
-                                            .padding(top = WindowInsets.systemBars
-                                                .asPaddingValues()
-                                                .calculateTopPadding() + 56.dp)
+                                            .padding(
+                                                top = WindowInsets.systemBars
+                                                    .asPaddingValues()
+                                                    .calculateTopPadding() + 56.dp
+                                            )
                                             .clip(
                                                 RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)
                                             )
@@ -518,6 +530,9 @@ class MainActivity : ComponentActivity() {
                                                 setTopBarState = setTopBarState,
                                                 navController = navController
                                             )
+                                        }
+                                        composable(ABOUT_DEVELOPER_SCREEN) {
+                                            AboutDeveloperScreen(setTopBarState)
                                         }
                                     }
                                 }

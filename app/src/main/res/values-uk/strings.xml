@@ -124,6 +124,33 @@
     <string name="what_next">Що робимо далі?</string>
     <string name="go">GO!</string>
     <string name="task_added">Завдання додано</string>
-    <string name="focus_mode">Режим фокусування</string>
     <string name="focus_session">Фокус-сесія</string>
+
+    <!-- Dashboard strings -->
+    <string name="todays_overview">Огляд дня</string>
+    <string name="tasks_completed_row">Виконано завдань</string>
+    <string name="habits_tracked">Відстежено звичок</string>
+    <string name="focus_sessions">Фокус-сесії</string>
+    <string name="focus_time">Час фокусування</string>
+    <string name="weekly_progress">Прогрес за тиждень</string>
+    <string name="tasks">Завдання</string>
+    <string name="focus">Фокус</string>
+    <string name="top_habits">Топ звичок</string>
+    <string name="project_status">Статус проєктів</string>
+    <string name="website_redesign">Редизайн сайту</string>
+    <string name="mobile_app">Мобільний застосунок</string>
+    <string name="marketing">Маркетинг</string>
+    <string name="productivity_insights">Insights продуктивності</string>
+    <string name="most_productive_day">Найпродуктивніший день</string>
+    <string name="best_time">Найкращий час</string>
+    <string name="focus_score">Оцінка фокусу</string>
+    
+    <!-- About Developer strings -->
+    <string name="about_developer">Про розробника</string>
+    <string name="dev_description">👋 Мене звуть Діма, я — Android-розробник та автор додатку LifeTracker.</string>
+    <string name="contact_email">coffeecodedevs@gmail.com</string>
+    <string name="contact_social">\@coffeecodedevs</string>
+    <string name="buy_me_coffee">Пригостіть мене кавою</string>
+    <string name="dev_ideas">💡 Якщо у вас є ідеї для нових функцій, питання або проблеми — звертайтеся до мене!</string>
+    <string name="dev_end">✨ Пишіть — ваші пропозиції дуже важливі для мене!</string>
 </resources>
