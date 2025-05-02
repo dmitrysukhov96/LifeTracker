@@ -176,4 +176,21 @@
     <string name="add_note">Добавить заметку</string>
     <string name="no_notes_yet">Заметок пока нет</string>
     <string name="tap_plus_to_create_note">Нажмите + чтобы создать заметку</string>
+    
+    <!-- TodoListScreen strings -->
+    <string name="completed_tasks">Выполненные</string>
+    <string name="no_date">Без даты</string>
+    <string name="earlier">Ранее</string>
+    <string name="yesterday">Вчера</string>
+    <string name="later">Позже</string>
+    <string name="done_category">done</string>
+    
+    <!-- Reminders strings -->
+    <string name="add_reminder">Добавить напоминание</string>
+    <string name="add_repeat">Добавить повторение</string>
+    <string name="add_time_to_task">Добавить время на задачу</string>
+
+    <!-- Placeholders -->
+    <string name="date_time_placeholder">Дата/время</string>
+    <string name="project_placeholder">Проект</string>
 </resources>

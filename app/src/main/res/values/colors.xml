@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pineColor">#FF34B979</color>
+    <color name="whitePine">#FFF1FCF5</color>
+    <color name="blackPine">#FF0A1711</color>
+    <color name="bgColor">@color/whitePine</color>
+    <color name="inverseColor">@color/blackPine</color>
+</resources> 

@@ -178,4 +178,21 @@
     <string name="add_note">Add Note</string>
     <string name="no_notes_yet">No notes yet</string>
     <string name="tap_plus_to_create_note">Tap + to create a new note</string>
+
+    <!-- TodoListScreen strings -->
+    <string name="completed_tasks">Completed</string>
+    <string name="no_date">No date</string>
+    <string name="earlier">Earlier</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="later">Later</string>
+    <string name="done_category">done</string>
+
+    <!-- Reminders strings -->
+    <string name="add_reminder">Add reminder</string>
+    <string name="add_repeat">Add repeat</string>
+    <string name="add_time_to_task">Add time to task</string>
+
+    <!-- Placeholders -->
+    <string name="date_time_placeholder">Date/time</string>
+    <string name="project_placeholder">Project</string>
 </resources>

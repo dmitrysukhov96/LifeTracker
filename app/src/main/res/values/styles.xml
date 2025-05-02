@@ -1,3 +1,64 @@
 <resources>
     <style name="AppTheme" parent="android:Theme.Material.NoActionBar"/>
+    
+    <!-- Custom Date and Time Picker styles -->
+    <style name="CustomDatePickerTheme" parent="android:Theme.Material.Dialog">
+        <item name="android:colorAccent">@color/pineColor</item>
+        <item name="android:colorControlActivated">@color/pineColor</item>
+        <item name="android:textColorPrimary">@color/inverseColor</item>
+        <item name="android:windowBackground">@color/bgColor</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DateTimeButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DateTimeButtonStyle</item>
+    </style>
+
+    <style name="CustomTimePickerTheme" parent="android:Theme.Material.Dialog">
+        <item name="android:colorAccent">@color/pineColor</item>
+        <item name="android:colorControlActivated">@color/pineColor</item>
+        <item name="android:textColorPrimary">@color/inverseColor</item>
+        <item name="android:windowBackground">@color/bgColor</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DateTimeButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DateTimeButtonStyle</item>
+    </style>
+
+    <style name="DateTimeButtonStyle" parent="android:Widget.Material.Button.Borderless">
+        <item name="android:textColor">@color/pineColor</item>
+    </style>
+    
+    <!-- Light theme pickers -->
+    <style name="CustomDatePickerLightTheme" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:colorAccent">@color/pineColor</item>
+        <item name="android:colorControlActivated">@color/pineColor</item>
+        <item name="android:textColorPrimary">@color/blackPine</item>
+        <item name="android:windowBackground">@color/whitePine</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DateTimeButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DateTimeButtonStyle</item>
+    </style>
+
+    <style name="CustomTimePickerLightTheme" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:colorAccent">@color/pineColor</item>
+        <item name="android:colorControlActivated">@color/pineColor</item>
+        <item name="android:textColorPrimary">@color/blackPine</item>
+        <item name="android:windowBackground">@color/whitePine</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DateTimeButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DateTimeButtonStyle</item>
+    </style>
+    
+    <!-- Dark theme pickers -->
+    <style name="CustomDatePickerDarkTheme" parent="android:Theme.Material.Dialog">
+        <item name="android:colorAccent">@color/pineColor</item>
+        <item name="android:colorControlActivated">@color/pineColor</item>
+        <item name="android:textColorPrimary">@color/whitePine</item>
+        <item name="android:windowBackground">@color/blackPine</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DateTimeButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DateTimeButtonStyle</item>
+    </style>
+
+    <style name="CustomTimePickerDarkTheme" parent="android:Theme.Material.Dialog">
+        <item name="android:colorAccent">@color/pineColor</item>
+        <item name="android:colorControlActivated">@color/pineColor</item>
+        <item name="android:textColorPrimary">@color/whitePine</item>
+        <item name="android:windowBackground">@color/blackPine</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DateTimeButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DateTimeButtonStyle</item>
+    </style>
 </resources>

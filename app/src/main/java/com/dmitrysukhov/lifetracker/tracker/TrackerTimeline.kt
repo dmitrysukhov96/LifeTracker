@@ -35,7 +35,6 @@ import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
-import com.dmitrysukhov.lifetracker.utils.TimelineColor
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.LocalDate
@@ -144,7 +143,7 @@ fun TrackerTimeline(
                                     .height(halfHourHeight),
                                 contentAlignment = Alignment.CenterStart
                             ) {
-                                HorizontalDivider(thickness = 1.dp, color = TimelineColor)
+                                HorizontalDivider(thickness = 1.dp, color = PineColor.copy(0.5f))
                             }
                         }
                     }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
@@ -67,13 +69,67 @@ fun TodoListScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
     viewModel: TodoViewModel
 ) {
+    val context = LocalContext.current
     var showImportDialog by remember { mutableStateOf(false) }
     var importText by remember { mutableStateOf("") }
     val todoList by viewModel.todoList.collectAsStateWithLifecycle()
     val projects by viewModel.projects.collectAsStateWithLifecycle()
     val expandedCategories = remember { mutableStateMapOf<String, Boolean>() }
+
+    // Get localized category names
+    val completedCategory = stringResource(R.string.completed_tasks)
+    val noDateCategory = stringResource(R.string.no_date)
+    val earlierCategory = stringResource(R.string.earlier)
+    val yesterdayCategory = stringResource(R.string.yesterday)
+    val todayCategory = stringResource(R.string.today)
+    val tomorrowCategory = stringResource(R.string.tomorrow)
+    val laterCategory = stringResource(R.string.later)
+    val doneCategory = stringResource(R.string.done_category)
+
+    // Categorize items first
+    val categorizedTasks = remember(todoList, completedCategory, noDateCategory, 
+        earlierCategory, yesterdayCategory, todayCategory, tomorrowCategory, laterCategory) {
+        val result = mutableMapOf<String, MutableList<TodoItem>>()
+        val now = System.currentTimeMillis()
+        
+        // Sort tasks into categories
+        todoList.forEach { task ->
+            val category = when {
+                task.isDone -> completedCategory
+                task.dateTime == null -> noDateCategory
+                task.dateTime < now - 24 * 60 * 60 * 1000 -> earlierCategory
+                task.dateTime < now -> yesterdayCategory
+                task.dateTime < now + 24 * 60 * 60 * 1000 -> todayCategory
+                task.dateTime < now + 2 * 24 * 60 * 60 * 1000 -> tomorrowCategory
+                else -> laterCategory
+            }
+            
+            if (!result.containsKey(category)) {
+                result[category] = mutableListOf()
+            }
+            result[category]?.add(task)
+        }
+        
+        // Define custom order for categories
+        val categoryOrder = listOf(
+            todayCategory, tomorrowCategory, yesterdayCategory, 
+            earlierCategory, laterCategory, noDateCategory, completedCategory
+        )
+        
+        // Return sorted map by custom order
+        LinkedHashMap<String, List<TodoItem>>().apply {
+            categoryOrder.forEach { category ->
+                result[category]?.let { tasks ->
+                    if (tasks.isNotEmpty()) {
+                        this[category] = tasks
+                    }
+                }
+            }
+        }
+    }
+    
     LaunchedEffect(Unit) {
-        setTopBarState(TopBarState("LifeTracker") {
+        setTopBarState(TopBarState(context.getString(R.string.todo_list)) {
             IconButton(onClick = { showImportDialog = true }) {
                 Icon(
                     painterResource(R.drawable.import_icon),
@@ -87,54 +143,27 @@ fun TodoListScreen(
             }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
         })
     }
+    
     Column(
         modifier = Modifier
             .background(BgColor)
             .fillMaxSize()
     ) {
         Spacer(Modifier.height(16.dp))
-        if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint) else
+        
+        if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint)
+        else {
             LazyColumn(Modifier.padding(horizontal = 24.dp)) {
-                var currentCategory = ""
-                var isFirstUncompletedTask = true
-
-                todoList.forEach { todoItem ->
-                    val category = when {
-                        todoItem.isDone -> {
-                            if (isFirstUncompletedTask) {
-                                isFirstUncompletedTask = false
-                                item {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Выполненные",
-                                        style = H1,
-                                        color = PineColor,
-                                        modifier = Modifier.padding(vertical = 4.dp)
-                                    )
-                                }
-                            }
-                            "done"
-                        }
-
-                        todoItem.dateTime == null -> "Без даты"
-                        todoItem.dateTime < System.currentTimeMillis() - 24 * 60 * 60 * 1000 -> "Ранее"
-                        todoItem.dateTime < System.currentTimeMillis() -> "Вчера"
-                        todoItem.dateTime < System.currentTimeMillis() + 24 * 60 * 60 * 1000 -> "Сегодня"
-                        todoItem.dateTime < System.currentTimeMillis() + 2 * 24 * 60 * 60 * 1000 -> "Завтра"
-                        else -> "Позже"
-                    }
-
-                    if (category != currentCategory && !todoItem.isDone) {
-                        item {
-                            if (currentCategory.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                            }
+                for ((category, tasks) in categorizedTasks) {
+                    // Category header
+                    item {
+                        if (category != completedCategory) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
                                         expandedCategories[category] =
-                                            !(expandedCategories[category] ?: true)
+                                            !(expandedCategories[category] ?: (category == todayCategory))
                                     }
                                     .padding(vertical = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -152,25 +181,33 @@ fun TodoListScreen(
                                     modifier = Modifier
                                         .size(16.dp)
                                         .rotate(
-                                            if (expandedCategories[category] ?: (category == "Сегодня")) 180f
+                                            if (expandedCategories[category] ?: (category == todayCategory)) 180f
                                             else 0f
                                         )
                                 )
                             }
+                        } else {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = completedCategory,
+                                style = H1,
+                                color = PineColor,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
                         }
-                        currentCategory = category
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
-
-                    if (expandedCategories[category] ?: (category == "Сегодня")) {
-                        item {
+                    
+                    // Show tasks if category expanded or it's "Today" or "Completed"
+                    val isExpanded = expandedCategories[category] ?: (category == todayCategory) || category == completedCategory
+                    if (isExpanded) {
+                        items(tasks) { todoItem ->
                             TodoListItem(
                                 item = todoItem,
                                 projects = projects,
                                 onCheckedChange = { isChecked ->
                                     viewModel.updateTask(
-                                        todoItem.copy(
-                                            isDone = isChecked
-                                        )
+                                        todoItem.copy(isDone = isChecked)
                                     )
                                 },
                                 isRunning = false,
@@ -182,9 +219,19 @@ fun TodoListScreen(
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
-                    item { Spacer(modifier = Modifier.height(32.dp)) }
+                    
+                    // Spacer between categories
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+                
+                // Bottom padding
+                item { 
+                    Spacer(modifier = Modifier.height(32.dp)) 
                 }
             }
+        }
 
         if (showImportDialog) {
             AlertDialog(

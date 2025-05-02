@@ -85,16 +85,19 @@ class TodoViewModel @Inject constructor(
         text: String,
         description: String = "",
         projectId: Long? = null,
-        deadline: Long? = null
+        deadline: Long? = null,
+        reminderTime: Long? = null,
+        repeatInterval: String? = null,
+        durationMinutes: Int? = null
     ) {
         val newTask = TodoItem(
             text = text,
             description = description,
             projectId = projectId,
             dateTime = (deadline ?: System.currentTimeMillis()) + 24 * 60 * 60 * 1000L, // default: tomorrow
-            reminderTime = null,
-            repeatInterval = null,
-            durationMinutes = null,
+            reminderTime = reminderTime,
+            repeatInterval = repeatInterval,
+            durationMinutes = durationMinutes,
             isDone = false
         )
 
