@@ -29,7 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -75,10 +75,8 @@ fun NewTaskScreen(
     var expanded by rememberSaveable { mutableStateOf(false) }
     var deadline by rememberSaveable { mutableStateOf(viewModel.selectedTask?.dateTime) }
     var showDurationPicker by rememberSaveable { mutableStateOf(false) }
-    var durationMinutes by rememberSaveable {
-        mutableIntStateOf(
-            viewModel.selectedTask?.durationMinutes ?: 0
-        )
+    var estimatedDurationMs by rememberSaveable {
+        mutableLongStateOf(viewModel.selectedTask?.estimatedDurationMs ?: 0L)
     }
     var repeatInterval by rememberSaveable { mutableStateOf(viewModel.selectedTask?.repeatInterval) }
     var showRepeatOptions by rememberSaveable { mutableStateOf(false) }
@@ -120,17 +118,16 @@ fun NewTaskScreen(
                                             task.copy(
                                                 text = title, description = description,
                                                 projectId = selectedProjectId, dateTime = deadline,
-                                                reminderTime = deadline,
                                                 repeatInterval = repeatInterval,
-                                                durationMinutes = if (durationMinutes > 0) durationMinutes else null
+                                                estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
                                             )
                                         )
                                     }
                                 } else viewModel.addTask(
                                     text = title, description = description,
                                     projectId = selectedProjectId, deadline = deadline,
-                                    reminderTime = deadline, repeatInterval = repeatInterval,
-                                    durationMinutes = if (durationMinutes > 0) durationMinutes else null
+                                    repeatInterval = repeatInterval,
+                                    estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
                                 )
                                 Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
                                 navController.navigateUp()
@@ -299,7 +296,6 @@ fun NewTaskScreen(
                         navController.navigate(NEW_PROJECT_SCREEN)
                     }
                 )
-                HorizontalDivider()
                 DropdownMenuItem(
                     text = {
                         Row(
@@ -357,8 +353,7 @@ fun NewTaskScreen(
                 }
             }
         }
-
-        HorizontalDivider()
+        HorizontalDivider(thickness = 0.5.dp, color = PineColor.copy(0.5f))
         TaskOption(text = stringResource(R.string.add_repeat), iconRes = R.drawable.repeat) {
             showRepeatOptions = !showRepeatOptions
             if (showRepeatOptions && repeatInterval == null) {
@@ -377,8 +372,11 @@ fun NewTaskScreen(
             )
         }
         TaskOption(
-            text = if (durationMinutes > 0) String.format(
-                Locale.getDefault(), "%02d:%02d:00", durationMinutes / 60, durationMinutes % 60
+            text = if (estimatedDurationMs > 0) String.format(
+                Locale.getDefault(),
+                "%02d:%02d:00",
+                estimatedDurationMs / 60,
+                estimatedDurationMs % 60
             ) else stringResource(R.string.add_time_to_task),
             iconRes = R.drawable.time
         ) {
@@ -387,17 +385,15 @@ fun NewTaskScreen(
 
         if (showDurationPicker) {
             TimeInputDialog(
-                initialHours = durationMinutes / 60,
-                initialMinutes = durationMinutes % 60,
+                initialHours = estimatedDurationMs / 60L,
+                initialMinutes = estimatedDurationMs % 60L,
                 onDismiss = { showDurationPicker = false },
                 onTimeSet = { hours, minutes ->
-                    durationMinutes = hours * 60 + minutes
+                    estimatedDurationMs = hours * 60L + minutes
                     showDurationPicker = false
                 }
             )
         }
-
-        HorizontalDivider()
     }
 }
 
@@ -466,18 +462,14 @@ fun RepeatSection(
 }
 
 @Composable
-fun TaskOption(
-    text: String,
-    iconRes: Int,
-    textColor: Color = InverseColor,
-    onClick: () -> Unit
-) {
+fun TaskOption(text: String, iconRes: Int, textColor: Color = InverseColor, onClick: () -> Unit) {
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 8.dp)
-                .clickable { onClick() },
+                .padding(top = 8.dp)
+                .clickable { onClick() }
+                .padding(top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

@@ -196,9 +196,15 @@
     <string name="project_placeholder">Project</string>
 
     <!-- Task reminders -->
-    <string name="task_reminder">Напоминание о задаче</string>
-    <string name="reminder_channel_name">Напоминания о задачах</string>
-    <string name="reminder_channel_description">Уведомления о запланированных задачах</string>
+    <string name="task_reminder">Task Reminder</string>
+    <string name="reminder_channel_name">Task Reminders</string>
+    <string name="reminder_channel_description">Notifications for scheduled tasks</string>
     <string name="notification_enabled">Notification enabled</string>
     <string name="notification_disabled">Notification disabled</string>
+    <string name="task_reminders">Task Reminders</string>
+    <string name="task_reminders_desc">Notifications for scheduled tasks</string>
+    
+    <!-- Date formatting strings -->
+    <string name="yesterday_at">Yesterday at %s</string>
+    <string name="tomorrow_at">Tomorrow at %s</string>
 </resources>

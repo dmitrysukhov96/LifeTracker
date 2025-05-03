@@ -29,7 +29,8 @@ object AppModule {
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
             context.applicationContext, AppDatabase::class.java, "lifetracker_database"
-        ).build()
+        )
+        .build()
     }
 
     @Provides

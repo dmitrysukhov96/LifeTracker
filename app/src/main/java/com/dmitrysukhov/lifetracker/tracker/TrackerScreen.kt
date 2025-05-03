@@ -1,9 +1,6 @@
 package com.dmitrysukhov.lifetracker.tracker
 
 import android.widget.Toast
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -37,23 +33,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -62,11 +54,9 @@ import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
-import com.dmitrysukhov.lifetracker.common.ui.ProjectTag
+import com.dmitrysukhov.lifetracker.common.ui.TimeTracker
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
-import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
-import com.dmitrysukhov.lifetracker.utils.BlackPine
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
@@ -75,14 +65,12 @@ import kotlinx.coroutines.delay
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
-import java.util.Locale
 
 @Composable
 fun TrackerScreen(
     setTopBarState: (TopBarState) -> Unit, trackerViewModel: TrackerViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
-    //todo plus minus days
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
     val events by trackerViewModel.getEventsForDate(selectedDate).collectAsState(emptyList())
@@ -91,12 +79,18 @@ fun TrackerScreen(
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
     var isTrackerStart by remember { mutableStateOf(false) }
     val title = stringResource(R.string.tracker)
+    val lastEvent = trackerViewModel.lastEvent.collectAsState().value
+    
     LaunchedEffect(Unit) {
         while (true) {
             delay(60000); refreshTrigger += 1
         }
     }
-    LaunchedEffect(refreshTrigger, selectedDate) { trackerViewModel.refreshEvents() }
+    
+    LaunchedEffect(refreshTrigger, selectedDate) { 
+        trackerViewModel.refreshEvents() 
+    }
+    
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState(title) {
             IconButton(onClick = {
@@ -117,135 +111,61 @@ fun TrackerScreen(
             .background(BgColor)
     ) {
         TimeTracker(
-            trackerViewModel = trackerViewModel, onStartQuickTask = {
-                selectedEvent = null
-                isTrackerStart = true
-                showTaskDialog = true
+            lastEvent = lastEvent,
+            projects = projects,
+            onActionClick = {
+                if (lastEvent == null || lastEvent.endTime != null) {
+                    selectedEvent = null
+                    isTrackerStart = true
+                    showTaskDialog = true
+                } else {
+                    trackerViewModel.stopEvent()
+                }
             }
         )
+        
         Spacer(Modifier.height(16.dp))
+        
         TrackerTimeline(
-            events = events, selectedDate = selectedDate, onDateSelected = { selectedDate = it },
-            projects = projects, onEventClick = { event ->
+            events = events, 
+            selectedDate = selectedDate, 
+            onDateSelected = { selectedDate = it },
+            projects = projects, 
+            onEventClick = { event ->
                 selectedEvent = event
                 isTrackerStart = false
                 showTaskDialog = true
-            }, modifier = Modifier
+            }, 
+            modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 16.dp)
         )
     }
+    
     if (showTaskDialog) {
         EventDialog(
-            event = selectedEvent, projects = projects, onDismiss = {
+            event = selectedEvent, 
+            projects = projects, 
+            onDismiss = {
                 showTaskDialog = false
                 selectedEvent = null
-            }, onSave = { event ->
+            }, 
+            onSave = { event ->
                 if (event.eventId == 0L) trackerViewModel.insertEvent(event)
                 else trackerViewModel.updateEvent(event)
                 showTaskDialog = false
                 selectedEvent = null
-            }, onDelete = { event ->
+            }, 
+            onDelete = { event ->
                 trackerViewModel.deleteEvent(event.eventId)
                 showTaskDialog = false
                 selectedEvent = null
-            }, trackerStart = isTrackerStart, navController = navController
+            }, 
+            trackerStart = isTrackerStart, 
+            navController = navController
         )
     }
-}
-
-@Composable
-fun TimeTracker(trackerViewModel: TrackerViewModel, onStartQuickTask: () -> Unit) {
-    val lastEvent by trackerViewModel.lastEvent.collectAsState()
-    val projects by trackerViewModel.projects.collectAsState()
-    var timeElapsed by remember { mutableLongStateOf(0L) }
-    val backgroundColor by animateColorAsState(
-        targetValue = if (lastEvent!=null && lastEvent?.endTime == null) AccentColor else Color(0xFFC2EBD6),
-        animationSpec = tween(durationMillis = 300)
-    )
-    LaunchedEffect(lastEvent) {
-        while (true) {
-            timeElapsed = when {
-                lastEvent == null -> 0L
-                lastEvent?.endTime == null -> (System.currentTimeMillis() - (lastEvent?.startTime
-                    ?: 0)) / 1000
-
-                else -> (System.currentTimeMillis() - lastEvent?.endTime!!) / 1000
-            }
-            delay(1000)
-        }
-    }
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(12.dp)
-            .height(64.dp)
-            .clip(RoundedCornerShape(100.dp))
-            .background(backgroundColor)
-            .padding(horizontal = 20.dp)
-            .clickable { onStartQuickTask() }, verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                when {
-                    lastEvent == null -> stringResource(R.string.no_task)
-                    lastEvent!!.endTime == null -> lastEvent!!.name
-                        ?: stringResource(R.string.no_task)
-
-                    else -> stringResource(R.string.no_task)
-                }, color = BlackPine, fontWeight = Bold, fontFamily = Montserrat, fontSize = 14.sp,
-                maxLines = 1, overflow = TextOverflow.Ellipsis
-            )
-            if (lastEvent?.endTime == null && lastEvent != null) {
-                lastEvent?.projectId?.let { projectId ->
-                    projects.find { it.projectId == projectId }?.let { project ->
-                        ProjectTag(text = project.title, color = Color(project.color))
-                    }
-                }
-            }
-        }
-
-        val timeText = when {
-            lastEvent == null -> "     ∞"
-            lastEvent!!.endTime == null -> formatTimeElapsed(timeElapsed)
-            else -> formatTimeElapsed(timeElapsed)
-        }
-
-        Text(
-            timeText, color = BlackPine, fontWeight = Bold, fontFamily = Montserrat,
-            fontSize = 20.sp, modifier = Modifier
-                .width(130.dp)
-                .padding(horizontal = 12.dp)
-        )
-        Row {
-            Box(
-                modifier = Modifier
-                    .clickable {
-                        if (lastEvent == null || lastEvent?.endTime != null) onStartQuickTask()
-                        else trackerViewModel.stopEvent()
-                    }
-                    .clip(CircleShape)
-                    .background(PineColor)
-                    .size(45.dp)
-            ) {
-                Image(
-                    painter = painterResource(if (lastEvent?.endTime == null && lastEvent != null) R.drawable.stop else R.drawable.play),
-                    contentDescription = null, contentScale = ContentScale.FillBounds,
-                    modifier = Modifier
-                        .size(21.dp)
-                        .align(Alignment.Center)
-                )
-            }
-        }
-    }
-}
-
-fun formatTimeElapsed(seconds: Long): String {
-    val hrs = seconds / 3600
-    val mins = (seconds % 3600) / 60
-    val secs = seconds % 60
-    return String.format(Locale.getDefault(), "%02d:%02d:%02d", hrs, mins, secs)
 }
 
 @Composable

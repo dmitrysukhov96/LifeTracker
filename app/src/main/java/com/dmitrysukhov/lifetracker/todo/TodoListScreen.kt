@@ -1,5 +1,6 @@
 package com.dmitrysukhov.lifetracker.todo
 
+import android.content.Context
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -28,6 +29,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,33 +45,37 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
-import com.dmitrysukhov.lifetracker.common.ui.ProjectTag
+import com.dmitrysukhov.lifetracker.common.ui.TimeTracker
+import com.dmitrysukhov.lifetracker.tracker.TrackerViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
-import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.dmitrysukhov.lifetracker.common.ui.ProjectTag as UIProjectTag
 
 const val TODOLIST_SCREEN = "Todo List"
 
 @Composable
 fun TodoListScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
-    viewModel: TodoViewModel
+    viewModel: TodoViewModel, trackerViewModel: TrackerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     var showImportDialog by remember { mutableStateOf(false) }
@@ -76,6 +83,16 @@ fun TodoListScreen(
     val todoList by viewModel.todoList.collectAsStateWithLifecycle()
     val projects by viewModel.projects.collectAsStateWithLifecycle()
     val expandedCategories = remember { mutableStateMapOf<String, Boolean>() }
+    val lastEvent by trackerViewModel.lastEvent.collectAsStateWithLifecycle()
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    // Refresh timer every second
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1000)
+            refreshTrigger++
+        }
+    }
 
     // Get localized category names
     val completedCategory = stringResource(R.string.completed_tasks)
@@ -85,6 +102,13 @@ fun TodoListScreen(
     val todayCategory = stringResource(R.string.today)
     val tomorrowCategory = stringResource(R.string.tomorrow)
     val laterCategory = stringResource(R.string.later)
+
+    // Track active task based on event name
+    val activeTask = remember(todoList, lastEvent) {
+        if (lastEvent != null && lastEvent?.endTime == null) {
+            todoList.find { it.text == lastEvent?.name && it.estimatedDurationMs != null && it.estimatedDurationMs > 0 }
+        } else null
+    }
 
     // Categorize items first
     val categorizedTasks = remember(
@@ -100,7 +124,6 @@ fun TodoListScreen(
         }.timeInMillis
         val yesterdayStart = todayStart - (24 * 60 * 60 * 1000)
         val tomorrowStart = todayStart + (24 * 60 * 60 * 1000)
-        val dayAfterTomorrowStart = tomorrowStart + (24 * 60 * 60 * 1000)
         todoList.forEach { task ->
             val category = when {
                 task.isDone -> completedCategory
@@ -108,7 +131,7 @@ fun TodoListScreen(
                 task.dateTime < yesterdayStart -> earlierCategory
                 task.dateTime < todayStart -> yesterdayCategory
                 task.dateTime < tomorrowStart -> todayCategory
-                task.dateTime < dayAfterTomorrowStart -> tomorrowCategory
+                task.dateTime < tomorrowStart + (24 * 60 * 60 * 1000) -> tomorrowCategory
                 else -> laterCategory
             }
 
@@ -157,13 +180,21 @@ fun TodoListScreen(
             .background(BgColor)
             .fillMaxSize()
     ) {
-        Spacer(Modifier.height(16.dp))
+        if (activeTask != null && lastEvent?.endTime == null) {
+            TimeTracker(
+                lastEvent = lastEvent,
+                projects = projects,
+                onActionClick = {
+                    viewModel.stopTracking()
+                }
+            )
+            Spacer(Modifier.height(16.dp))
+        }
 
         if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint)
         else {
-            LazyColumn(Modifier.padding(horizontal = 24.dp)) {
+            LazyColumn(Modifier.padding(24.dp)) {
                 for ((category, tasks) in categorizedTasks) {
-                    // Category header
                     item {
                         if (category != completedCategory) {
                             Row(
@@ -198,7 +229,6 @@ fun TodoListScreen(
                                 )
                             }
                         } else {
-                            // Make Completed category collapsible too
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -231,11 +261,19 @@ fun TodoListScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                     }
 
-                    // Show tasks if category expanded or it's "Today"
                     val isExpanded =
                         expandedCategories[category] ?: (category == todayCategory || category == noDateCategory)
                     if (isExpanded) {
                         items(tasks) { todoItem ->
+                            val isRunning =
+                                todoItem.text == lastEvent?.name && lastEvent?.endTime == null
+                            var remainingDuration: Long by remember(
+                                todoItem.id,
+                                todoItem.estimatedDurationMs
+                            ) {
+                                mutableLongStateOf(todoItem.estimatedDurationMs ?: 0)
+                            }
+
                             TodoListItem(
                                 item = todoItem,
                                 projects = projects,
@@ -253,25 +291,34 @@ fun TodoListScreen(
                                         todoItem.copy(isDone = isChecked)
                                     )
                                 },
-                                isRunning = false,
+                                isRunning = isRunning,
                                 onClick = {
                                     viewModel.selectedTask = todoItem
                                     navController.navigate(NEW_TASK_SCREEN)
+                                },
+                                onDurationClick = { currentRemainingMs ->
+                                    if (todoItem.estimatedDurationMs != null && todoItem.estimatedDurationMs > 0) {
+                                        if (isRunning) {
+                                            val remainingMs = currentRemainingMs * 1000L
+                                            val updatedTask =
+                                                todoItem.copy(estimatedDurationMs = remainingMs)
+                                            viewModel.stopTrackingWithTask(updatedTask)
+                                        } else {
+                                            viewModel.startTracking(todoItem)
+                                        }
+                                    }
+                                },
+                                onRemainingSecondsChanged = { seconds ->
+                                    remainingDuration = seconds.toLong() * 1000L
                                 }
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
-
-                    // Spacer between categories
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
                 }
-
-                // Bottom padding
                 item {
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(124.dp))
                 }
             }
         }
@@ -325,14 +372,11 @@ fun TodoListScreen(
 
 @Composable
 fun TodoListItem(
-    item: TodoItem, 
-    projects: List<Project>, 
-    category: String,
-    categoryNames: Map<String, String>,
-    onCheckedChange: (Boolean) -> Unit,
-    isRunning: Boolean, 
-    onClick: () -> Unit
+    item: TodoItem, projects: List<Project>, category: String, categoryNames: Map<String, String>,
+    onCheckedChange: (Boolean) -> Unit, isRunning: Boolean, onClick: () -> Unit,
+    onDurationClick: (Int) -> Unit, onRemainingSecondsChanged: (Int) -> Unit
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -349,23 +393,33 @@ fun TodoListItem(
         Spacer(modifier = Modifier.width(8.dp))
         Column(Modifier.weight(1f)) {
             Text(
-                text = item.text,
+                text = item.text, maxLines = 2, overflow = TextOverflow.Ellipsis,
                 textDecoration = if (item.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                style = H2,
+                style = SimpleText,
                 color = if (item.isDone) PineColor else InverseColor,
             )
-            item.durationMinutes?.let { duration -> DurationBadge(duration, isRunning) }
+            item.estimatedDurationMs?.let { duration ->
+                Spacer(modifier = Modifier.height(8.dp))
+                DurationBadge(
+                    duration = duration,
+                    isRunning = isRunning,
+                    onClick = { remainingSeconds -> onDurationClick(remainingSeconds) },
+                    onRemainingSecondsChanged = onRemainingSecondsChanged,
+                    isEnabled = !item.isDone && (duration > 0 || isRunning)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Column(horizontalAlignment = Alignment.End) {
+            Spacer(Modifier.height(2.dp))
             item.projectId?.let { projectId ->
                 val project = projects.find { it.projectId == projectId }
                 project?.let {
-                    ProjectTag(text = it.title, color = Color(it.color))
+                    UIProjectTag(text = it.title, color = Color(project.color))
                     Spacer(Modifier.height(8.dp))
                 }
             }
-            item.reminderTime?.let { time ->
+            item.dateTime?.let { time ->
                 Row {
                     val startOfDay = getStartOfDay(time)
                     val animatedTime = remember { Animatable(startOfDay.toFloat()) }
@@ -377,16 +431,14 @@ fun TodoListItem(
                     }
                     if (animatedTime.value >= time.toFloat() - 10) time
                     else animatedTime.value.toLong()
-                    
-                    // Format the time string based on category
-                    val timeString = formatTimeBasedOnCategory(time, category, categoryNames)
-                    
-                    // Determine text color based on task status and time
+
+                    val timeString =
+                        formatTimeBasedOnCategory(time, category, categoryNames, context)
                     val now = System.currentTimeMillis()
                     val textColor = when {
-                        item.isDone -> PineColor // Completed tasks always PineColor
-                        time < now -> Color.Red // Overdue tasks in red
-                        else -> PineColor // Future tasks in PineColor
+                        item.isDone -> PineColor
+                        time < now -> Color.Red
+                        else -> PineColor
                     }
                     
                     Text(
@@ -420,23 +472,26 @@ fun TodoListItem(
 }
 
 // Format time string based on category
-fun formatTimeBasedOnCategory(time: Long, category: String, categoryNames: Map<String, String>): String {
+fun formatTimeBasedOnCategory(
+    time: Long,
+    category: String,
+    categoryNames: Map<String, String>,
+    context: Context
+): String {
     val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
     val dateTimeFormatter = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
     
     return when (category) {
         categoryNames["today"] -> timeFormatter.format(Date(time)) // Just time for today
-        categoryNames["yesterday"] -> "Вчера в ${timeFormatter.format(Date(time))}" // Yesterday at HH:mm
-        categoryNames["tomorrow"] -> "Завтра в ${timeFormatter.format(Date(time))}" // Tomorrow at HH:mm
+        categoryNames["yesterday"] -> {
+            context.getString(R.string.yesterday_at, timeFormatter.format(Date(time)))
+        }
+
+        categoryNames["tomorrow"] -> {
+            context.getString(R.string.tomorrow_at, timeFormatter.format(Date(time)))
+        }
         else -> dateTimeFormatter.format(Date(time)) // Full date and time for other categories
     }
-}
-
-fun formatDuration(seconds: Int): String {
-    val hrs = seconds / 3600
-    val mins = (seconds % 3600) / 60
-    val secs = seconds % 60
-    return String.format(Locale.getDefault(), "%02d:%02d:%02d", hrs, mins, secs)
 }
 
 fun getStartOfDay(currentTime: Long): Long {
@@ -450,34 +505,105 @@ fun getStartOfDay(currentTime: Long): Long {
 }
 
 @Composable
-fun DurationBadge(duration: Int, isRunning: Boolean) {
-    val animatedDuration = remember { Animatable(0f) }
-    LaunchedEffect(duration) {
-        animatedDuration.animateTo(
-            targetValue = duration.toFloat(),
-            animationSpec = tween(durationMillis = 1000) // 1 секунда
-        )
+fun DurationBadge(
+    duration: Long,
+    isRunning: Boolean,
+    onClick: (Int) -> Unit,
+    onRemainingSecondsChanged: (Int) -> Unit,
+    isEnabled: Boolean
+) {
+    val durationSeconds = (duration / 1000).toInt()
+    var remainingSeconds by remember(
+        durationSeconds,
+        isRunning
+    ) { mutableIntStateOf(durationSeconds) }
+    var isCountingDown by remember(isRunning) { mutableStateOf(isRunning) }
+
+    LaunchedEffect(remainingSeconds) {
+        if (isCountingDown) {
+            onRemainingSecondsChanged(remainingSeconds)
+        }
     }
-    val backgroundColor = if (isRunning) PineColor else BgColor
-    val contentColor = if (isRunning) Color.White else PineColor
+
+    LaunchedEffect(isRunning) {
+        isCountingDown = isRunning
+        if (!isRunning) {
+            remainingSeconds = durationSeconds
+        }
+    }
+
+    LaunchedEffect(isCountingDown) {
+        if (isCountingDown) {
+            val startTimeMs = System.currentTimeMillis()
+
+            while (isCountingDown) {
+                val elapsedTimeMs = System.currentTimeMillis() - startTimeMs
+                val elapsedSeconds = (elapsedTimeMs / 1000).toInt()
+                val newRemainingSeconds = (durationSeconds - elapsedSeconds).coerceAtLeast(0)
+
+                if (newRemainingSeconds != remainingSeconds) {
+                    remainingSeconds = newRemainingSeconds
+                }
+
+                delay(1000)
+
+                if (remainingSeconds <= 0) {
+                    isCountingDown = false
+                    break
+                }
+            }
+        }
+    }
+
+    val effectivelyEnabled = isEnabled || isCountingDown
+
+    val backgroundColor = when {
+        !effectivelyEnabled -> Color.Gray
+        isCountingDown -> PineColor
+        else -> BgColor
+    }
+
+    val contentColor = when {
+        !effectivelyEnabled -> Color.DarkGray
+        isCountingDown -> Color.White
+        else -> PineColor
+    }
+    
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,
         modifier = Modifier
             .height(18.dp)
             .clip(CircleShape)
-            .border(1.dp, PineColor, CircleShape)
+            .border(1.dp, if (effectivelyEnabled) PineColor else Color.Gray, CircleShape)
             .background(backgroundColor)
             .padding(horizontal = 6.dp)
+            .clickable(enabled = effectivelyEnabled) {
+                onClick(remainingSeconds)
+                if (isCountingDown && !isRunning) {
+                    isCountingDown = false
+                }
+            }
     ) {
         Icon(
-            painter = painterResource(if (isRunning) R.drawable.stop else R.drawable.play),
-            contentDescription = null, tint = contentColor, modifier = Modifier.size(8.dp)
+            painter = painterResource(if (isCountingDown) R.drawable.stop else R.drawable.play),
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(8.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
+        val timeText = formatDuration(if (isCountingDown) remainingSeconds else durationSeconds)
         Text(
-            text = formatDuration(animatedDuration.value.toInt()),
-            color = contentColor, style = Small
+            text = timeText,
+            color = contentColor,
+            style = Small
         )
     }
+}
+
+fun formatDuration(seconds: Int): String {
+    val hrs = seconds / 3600
+    val mins = (seconds % 3600) / 60
+    val secs = seconds % 60
+    return String.format(Locale.getDefault(), "%02d:%02d:%02d", hrs, mins, secs)
 }

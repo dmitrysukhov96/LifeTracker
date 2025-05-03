@@ -96,9 +96,9 @@ fun ViewProjectScreen(
             }
             Spacer(Modifier.width(20.dp))
         }
-        TodoItem(
-            0, "Купить удлинитель, порошок", "", null,
-            System.currentTimeMillis(), 2345, "", 456, false
+        TodoItem( //todo real tasks that belong to this project
+            0, "", "", null,
+            System.currentTimeMillis(), "", 456, false
         )
         Spacer(Modifier.height(28.dp))
         HorizontalDivider(color = projectColor.copy(alpha = 0.5f))

@@ -26,10 +26,10 @@ import com.dmitrysukhov.lifetracker.R
 
 @Composable
 fun TimeInputDialog(
-    initialHours: Int = 0,
-    initialMinutes: Int = 0,
+    initialHours: Long = 0,
+    initialMinutes: Long = 0,
     onDismiss: () -> Unit,
-    onTimeSet: (hours: Int, minutes: Int) -> Unit
+    onTimeSet: (hours: Long, minutes: Long) -> Unit
 ) {
     var hoursText by remember { mutableStateOf(initialHours.toString()) }
     var minutesText by remember { mutableStateOf(initialMinutes.toString()) }
@@ -41,17 +41,13 @@ fun TimeInputDialog(
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Поле для часов
                     OutlinedTimeField(
                         value = hoursText,
                         onValueChange = { hoursText = it },
                         label = stringResource(R.string.hours),
                         modifier = Modifier.weight(1f)
                     )
-                    
                     Text(":", fontSize = 20.sp, modifier = Modifier.padding(horizontal = 8.dp))
-                    
-                    // Поле для минут
                     OutlinedTimeField(
                         value = minutesText,
                         onValueChange = { minutesText = it },
@@ -73,29 +69,20 @@ fun TimeInputDialog(
         confirmButton = {
             TextButton(onClick = {
                 try {
-                    // Парсим введенные значения
-                    val hours = hoursText.toIntOrNull() ?: 0
-                    val minutes = minutesText.toIntOrNull() ?: 0
-                    
-                    // Проверяем валидность
+                    val hours = hoursText.toLongOrNull() ?: 0
+                    val minutes = minutesText.toLongOrNull() ?: 0
                     if (minutes >= 60) {
                         errorMessage = "Минуты должны быть меньше 60"
                         return@TextButton
                     }
-                    
-                    // Устанавливаем время
                     onTimeSet(hours, minutes)
                 } catch (_: Exception) {
                     errorMessage = "Неверный формат времени"
                 }
-            }) {
-                Text(stringResource(R.string.ok))
-            }
+            }) { Text(stringResource(R.string.ok)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }
@@ -110,7 +97,6 @@ fun OutlinedTimeField(
     OutlinedTextField(
         value = value,
         onValueChange = { newValue ->
-            // Разрешаем только цифры
             if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
                 onValueChange(newValue)
             }

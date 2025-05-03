@@ -10,9 +10,8 @@ data class TodoItem(
     val description: String? = null,
     val projectId: Long? = null,
     val dateTime: Long? = null,
-    val reminderTime: Long? = null,
     val repeatInterval: String? = null,
-    val durationMinutes: Int? = null,
+    val estimatedDurationMs: Long? = null,
     val isDone: Boolean = false
 )
 

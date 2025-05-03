@@ -6,9 +6,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
+import com.dmitrysukhov.lifetracker.tracker.EventRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,7 @@ import java.util.Calendar
 @HiltViewModel
 class TodoViewModel @Inject constructor(
     private val todoDao: TodoDao,
+    private val eventRepository: EventRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     var selectedTask: TodoItem? = null
@@ -31,15 +34,22 @@ class TodoViewModel @Inject constructor(
     private val _projects = MutableStateFlow<List<Project>>(emptyList())
     val projects: StateFlow<List<Project>> = _projects.asStateFlow()
     
+    private val _currentlyTrackedTask = MutableStateFlow<TodoItem?>(null)
+
+    private val _lastEvent = MutableStateFlow<Event?>(null)
+
     @Inject
     lateinit var projectsDao: ProjectDao
 
     init {
         loadTasks()
         viewModelScope.launch {
-            // Defer projects loading to ensure projectsDao is injected
             kotlinx.coroutines.delay(100)
             loadProjects()
+            
+            eventRepository.getLastEvent().collect { event ->
+                _lastEvent.value = event
+            }
         }
     }
 
@@ -50,7 +60,6 @@ class TodoViewModel @Inject constructor(
                     _projects.value = list
                 }
             } catch (e: Exception) {
-                // Handle case when projectsDao is not yet initialized
                 e.printStackTrace()
             }
         }
@@ -59,7 +68,8 @@ class TodoViewModel @Inject constructor(
     private fun loadTasks() {
         viewModelScope.launch {
             val tasks = todoDao.getAllTasks()
-            _todoList.value = sortTasks(tasks)
+            val sortedTasks = sortTasks(tasks)
+            _todoList.value = sortedTasks
         }
     }
 
@@ -78,15 +88,53 @@ class TodoViewModel @Inject constructor(
         val (done, notDone) = tasks.partition { it.isDone }
         val sortedNotDone = notDone.sortedWith(compareBy<TodoItem> { task ->
             when {
-                task.dateTime == null -> 5 // Без даты
-                task.dateTime < yesterdayStart -> 1 // Ранее
-                task.dateTime < todayStart -> 2 // Вчера (задачи из вчерашнего дня)
-                task.dateTime < tomorrowStart -> 3 // Сегодня (задачи из текущего дня)
-                task.dateTime < tomorrowStart + (24 * 60 * 60 * 1000) -> 4 // Завтра
-                else -> 6 // Позже
+                task.dateTime == null -> 5
+                task.dateTime < yesterdayStart -> 1
+                task.dateTime < todayStart -> 2
+                task.dateTime < tomorrowStart -> 3
+                task.dateTime < tomorrowStart + (24 * 60 * 60 * 1000) -> 4
+                else -> 6
             }
         }.thenBy { it.dateTime ?: Long.MAX_VALUE })
         return sortedNotDone + done.sortedByDescending { it.dateTime }
+    }
+
+    fun startTracking(task: TodoItem) {
+        if (task.estimatedDurationMs == null || task.estimatedDurationMs <= 0) return
+        
+        stopExistingTracking()
+        
+        val now = System.currentTimeMillis()
+        val newEvent = Event(
+            eventId = 0L,
+            projectId = task.projectId,
+            name = task.text,
+            startTime = now,
+            endTime = null
+        )
+        
+        _currentlyTrackedTask.value = task
+        
+        viewModelScope.launch {
+            eventRepository.insertEvent(newEvent)
+            loadTasks()
+        }
+    }
+    
+    private fun stopExistingTracking() {
+        val existingEvent = _lastEvent.value
+        if (existingEvent != null && existingEvent.endTime == null) {
+            val updatedEvent = existingEvent.copy(endTime = System.currentTimeMillis())
+            viewModelScope.launch {
+                eventRepository.updateEvent(updatedEvent)
+            }
+        }
+        
+        _currentlyTrackedTask.value = null
+    }
+    
+    fun stopTracking() {
+        stopExistingTracking()
     }
 
     fun addTask(
@@ -94,18 +142,16 @@ class TodoViewModel @Inject constructor(
         description: String = "",
         projectId: Long? = null,
         deadline: Long? = null,
-        reminderTime: Long? = null,
         repeatInterval: String? = null,
-        durationMinutes: Int? = null
+        estimatedDurationMs: Long? = null
     ) {
         val newTask = TodoItem(
             text = text,
             description = description,
             projectId = projectId,
             dateTime = deadline,
-            reminderTime = reminderTime,
             repeatInterval = repeatInterval,
-            durationMinutes = durationMinutes,
+            estimatedDurationMs = estimatedDurationMs,
             isDone = false
         )
 
@@ -113,8 +159,7 @@ class TodoViewModel @Inject constructor(
             val id = todoDao.insertTask(newTask)
             loadTasks()
             
-            // Установка напоминания
-            reminderTime?.let {
+            deadline?.let {
                 scheduleNotification(id, text, it)
             }
         }
@@ -125,70 +170,66 @@ class TodoViewModel @Inject constructor(
             todoDao.updateTask(item)
             loadTasks()
             
-            // Обновляем напоминание
-            item.reminderTime?.let {
-                // Сначала удаляем старое напоминание
+            if (_currentlyTrackedTask.value?.id == item.id) {
+                _currentlyTrackedTask.value = item
+            }
+            
+            item.dateTime?.let {
                 cancelNotification(item.id)
-                // Затем устанавливаем новое
                 scheduleNotification(item.id, item.text, it)
             } ?: run {
-                // Если напоминания нет, удаляем существующее (если было)
                 cancelNotification(item.id)
             }
         }
     }
 
     fun deleteTask(item: TodoItem) {
+        if (_currentlyTrackedTask.value?.id == item.id) {
+            stopTracking()
+        }
+        
         viewModelScope.launch {
             todoDao.deleteTask(item)
             loadTasks()
             
-            // Удаляем напоминание
             cancelNotification(item.id)
         }
     }
     
-    // Метод для установки напоминания через AlarmManager
-    private fun scheduleNotification(taskId: Long, taskTitle: String, reminderTime: Long) {
-        // Set seconds to 0 for the reminder time
+    private fun scheduleNotification(taskId: Long, taskTitle: String, notificationTime: Long) {
         val calendar = Calendar.getInstance().apply {
-            timeInMillis = reminderTime
+            timeInMillis = notificationTime
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
-        val adjustedReminderTime = calendar.timeInMillis
+        val adjustedNotificationTime = calendar.timeInMillis
         
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         
-        // Создаем Intent для нашего BroadcastReceiver
         val intent = Intent(context, TodoReminderReceiver::class.java).apply {
             putExtra(TodoReminderReceiver.EXTRA_TASK_ID, taskId)
             putExtra(TodoReminderReceiver.EXTRA_TASK_TITLE, taskTitle)
         }
         
-        // Уникальный запрос для каждой задачи, чтобы мы могли управлять ими индивидуально
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            taskId.toInt(),  // используем ID задачи как requestCode
+            taskId.toInt(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
-        // Устанавливаем точное время срабатывания будильника
-        if (adjustedReminderTime > System.currentTimeMillis()) {
+        if (adjustedNotificationTime > System.currentTimeMillis()) {
             try {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
-                    adjustedReminderTime,
+                    adjustedNotificationTime,
                     pendingIntent
                 )
             } catch (_: Exception) {
-                // Failed to schedule alarm
             }
         }
     }
     
-    // Метод для отмены напоминания
     private fun cancelNotification(taskId: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, TodoReminderReceiver::class.java)
@@ -202,6 +243,24 @@ class TodoViewModel @Inject constructor(
         pendingIntent?.let {
             alarmManager.cancel(it)
             it.cancel()
+        }
+    }
+
+    fun stopTrackingWithTask(updatedTask: TodoItem) {
+        val existingEvent = _lastEvent.value
+        if (existingEvent != null && existingEvent.endTime == null) {
+            val updatedEvent = existingEvent.copy(endTime = System.currentTimeMillis())
+            viewModelScope.launch {
+                eventRepository.updateEvent(updatedEvent)
+            }
+        }
+        
+        _currentlyTrackedTask.value = null
+        
+        viewModelScope.launch {
+            todoDao.updateTask(updatedTask)
+            loadTasks()
+            println("Updated task ${updatedTask.id} with explicit duration: ${updatedTask.estimatedDurationMs}ms")
         }
     }
 }
