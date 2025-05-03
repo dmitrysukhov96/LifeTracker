@@ -17,13 +17,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -52,22 +50,19 @@ fun ProjectsScreen(
 ) {
     val context = LocalContext.current
     val projects by remember { derivedStateOf { viewModel.projects } }
-
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState("Projects") {
-                IconButton(onClick = {
-                    viewModel.selectedProject = null
-                    navController.navigate(NEW_PROJECT_SCREEN)
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.plus),
-                        contentDescription = null, tint = Color.White
-                    )
-                }
+    setTopBarState(
+        TopBarState(stringResource(R.string.projects)) {
+            IconButton(onClick = {
+                viewModel.selectedProject = null
+                navController.navigate(NEW_PROJECT_SCREEN)
+            }) {
+                Icon(
+                    painter = painterResource(R.drawable.plus),
+                    contentDescription = null, tint = Color.White
+                )
             }
-        )
-    }
+        }
+    )
     Column(
         modifier = Modifier
             .background(BgColor)
@@ -116,31 +111,24 @@ fun ProjectItem(
             .fillMaxWidth()
             .height(80.dp)
             .clip(RoundedCornerShape(16.dp))
-            .then(
-                if (imagePath != null) Modifier.background(Color.Black)
-                else Modifier.background(gradient)
-            )
+            .background(gradient)
     ) {
         if (!imagePath.isNullOrEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+            )
+
             Image(
                 painter = rememberAsyncImagePainter(File(context.filesDir, imagePath)),
                 contentDescription = null,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.9f),
-                contentScale = ContentScale.Crop
-            )
-        } else if (title.isNotEmpty()) {
-            // Fallback to using title as image name if imagePath is not available
-            Image(
-                painter = rememberAsyncImagePainter(File(context.filesDir, title)),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.9f),
+                    .fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
         }
+
         Text(
             text = title, style = H2, color = Color.White,
             modifier = Modifier.padding(start = 20.dp, top = 8.dp)

@@ -1,6 +1,9 @@
 package com.dmitrysukhov.lifetracker
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -84,6 +87,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import coil.compose.rememberAsyncImagePainter
 import com.dmitrysukhov.lifetracker.daily.DAILY_PLANNER_SCREEN
 import com.dmitrysukhov.lifetracker.daily.DailyPlannerScreen
@@ -138,12 +143,17 @@ import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    
+    companion object {
+        private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 100
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply language settings
         applyLanguageSettings()
-        
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Включаем edge-to-edge отображение
+        enableEdgeToEdge()
+        requestNotificationPermission()
+        
         setContent {
             val context = LocalContext.current
             val systemUiController = rememberSystemUiController()
@@ -590,6 +600,22 @@ class MainActivity : ComponentActivity() {
             val configuration = Configuration(resources.configuration)
             configuration.setLocale(locale)
             resources.updateConfiguration(configuration, resources.displayMetrics)
+        }
+    }
+    
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    NOTIFICATION_PERMISSION_REQUEST_CODE
+                )
+            }
         }
     }
 }

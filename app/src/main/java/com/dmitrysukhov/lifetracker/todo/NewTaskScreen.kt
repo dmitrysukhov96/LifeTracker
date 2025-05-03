@@ -1,5 +1,6 @@
 package com.dmitrysukhov.lifetracker.todo
 
+import android.view.ContextThemeWrapper
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,9 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,10 +43,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
-import androidx.compose.ui.text.font.FontWeight.Companion.W700
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.view.ContextThemeWrapper
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
@@ -77,17 +74,14 @@ fun NewTaskScreen(
     var selectedProjectId by rememberSaveable { mutableStateOf(viewModel.selectedTask?.projectId) }
     var expanded by rememberSaveable { mutableStateOf(false) }
     var deadline by rememberSaveable { mutableStateOf(viewModel.selectedTask?.dateTime) }
-    var reminderTime by rememberSaveable { mutableStateOf(viewModel.selectedTask?.reminderTime) }
-    var showReminderOptions by rememberSaveable { mutableStateOf(false) }
-    val reminderTimes = remember { mutableStateListOf<Long>() }
-    var repeatInterval by rememberSaveable { mutableStateOf(viewModel.selectedTask?.repeatInterval) }
-    var showRepeatOptions by rememberSaveable { mutableStateOf(false) }
+    var showDurationPicker by rememberSaveable { mutableStateOf(false) }
     var durationMinutes by rememberSaveable {
         mutableIntStateOf(
             viewModel.selectedTask?.durationMinutes ?: 0
         )
     }
-    var showDurationPicker by rememberSaveable { mutableStateOf(false) }
+    var repeatInterval by rememberSaveable { mutableStateOf(viewModel.selectedTask?.repeatInterval) }
+    var showRepeatOptions by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val projects by viewModel.projects.collectAsState(listOf())
     val isEditing = viewModel.selectedTask != null
@@ -95,14 +89,6 @@ fun NewTaskScreen(
         if (isEditing) stringResource(R.string.edit_task) else stringResource(R.string.new_task)
     val saveToastText =
         if (isEditing) stringResource(R.string.update_task_toast) else stringResource(R.string.save_task_toast)
-    LaunchedEffect(viewModel.selectedTask?.reminderTime) {
-        viewModel.selectedTask?.reminderTime?.let {
-            if (reminderTimes.isEmpty()) {
-                reminderTimes.add(it)
-                showReminderOptions = true
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
         setTopBarState(
@@ -134,21 +120,18 @@ fun NewTaskScreen(
                                             task.copy(
                                                 text = title, description = description,
                                                 projectId = selectedProjectId, dateTime = deadline,
-                                                reminderTime = if (reminderTimes.isNotEmpty()) reminderTimes.first() else null,
+                                                reminderTime = deadline,
                                                 repeatInterval = repeatInterval,
                                                 durationMinutes = if (durationMinutes > 0) durationMinutes else null
                                             )
                                         )
                                     }
-                                } else {
-                                    viewModel.addTask(
-                                        text = title, description = description,
-                                        projectId = selectedProjectId, deadline = deadline,
-                                        reminderTime = if (reminderTimes.isNotEmpty()) reminderTimes.first() else null,
-                                        repeatInterval = repeatInterval,
-                                        durationMinutes = if (durationMinutes > 0) durationMinutes else null
-                                    )
-                                }
+                                } else viewModel.addTask(
+                                    text = title, description = description,
+                                    projectId = selectedProjectId, deadline = deadline,
+                                    reminderTime = deadline, repeatInterval = repeatInterval,
+                                    durationMinutes = if (durationMinutes > 0) durationMinutes else null
+                                )
                                 Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
                                 navController.navigateUp()
                             }) {
@@ -174,8 +157,8 @@ fun NewTaskScreen(
             textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (title.isEmpty()) Text(
-                        stringResource(R.string.title_hint), fontSize = 18.sp, fontWeight = W700,
-                        fontFamily = Montserrat, color = PineColor.copy(0.5f)
+                        stringResource(R.string.title_hint),
+                        style = H1.copy(color = PineColor.copy(0.5f))
                     )
                     innerTextField()
                 }
@@ -222,6 +205,8 @@ fun NewTaskScreen(
                         { _, hourOfDay, minute ->
                             calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
                             calendar.set(Calendar.MINUTE, minute)
+                            calendar.set(Calendar.SECOND, 0)
+                            calendar.set(Calendar.MILLISECOND, 0)
                             deadline = calendar.timeInMillis
                         },
                         calendar.get(Calendar.HOUR_OF_DAY),
@@ -374,43 +359,6 @@ fun NewTaskScreen(
         }
 
         HorizontalDivider()
-        TaskOption(text = stringResource(R.string.add_reminder), iconRes = R.drawable.bell) {
-            showReminderOptions = !showReminderOptions
-            if (showReminderOptions && reminderTimes.isEmpty()) {
-                reminderTimes.add(System.currentTimeMillis())
-            }
-        }
-
-        if (showReminderOptions) {
-            ReminderSection(
-                reminderTimes = reminderTimes,
-                onAddReminder = {
-                    // Open time picker to add new reminder
-                    val calendar = Calendar.getInstance()
-                    val timePickerDialog = android.app.TimePickerDialog(
-                        ContextThemeWrapper(context, theme),
-                        { _, hourOfDay, minute ->
-                            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                            calendar.set(Calendar.MINUTE, minute)
-                            calendar.set(Calendar.SECOND, 0)
-                            calendar.set(Calendar.MILLISECOND, 0)
-
-                            // Add new reminder time
-                            reminderTimes.add(calendar.timeInMillis)
-                        },
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        true
-                    )
-                    timePickerDialog.show()
-                },
-                onRemoveReminder = { index ->
-                    if (index < reminderTimes.size) {
-                        reminderTimes.removeAt(index)
-                    }
-                }
-            )
-        }
         TaskOption(text = stringResource(R.string.add_repeat), iconRes = R.drawable.repeat) {
             showRepeatOptions = !showRepeatOptions
             if (showRepeatOptions && repeatInterval == null) {
@@ -425,10 +373,6 @@ fun NewTaskScreen(
                     val days = repeatInterval?.toCharArray() ?: CharArray(7) { '0' }
                     days[day] = if (selected) '1' else '0'
                     repeatInterval = String(days)
-                },
-                onTimeSelected = { time ->
-                    // When user selects a time for repeating
-                    // For simplicity, we're only updating the repeating days here
                 }
             )
         }
@@ -438,89 +382,29 @@ fun NewTaskScreen(
             ) else stringResource(R.string.add_time_to_task),
             iconRes = R.drawable.time
         ) {
-            val hours = durationMinutes / 60
-            val minutes = durationMinutes % 60
-            val timePickerDialog = android.app.TimePickerDialog(
-                ContextThemeWrapper(context, theme),
-                { _, hourOfDay, minute ->
-                    durationMinutes = hourOfDay * 60 + minute
-                },
-                hours,
-                minutes,
-                true
-            )
-            timePickerDialog.show()
+            showDurationPicker = true
         }
-        HorizontalDivider()
-    }
-}
 
-@Composable
-fun ReminderSection(
-    reminderTimes: List<Long>, onAddReminder: () -> Unit, onRemoveReminder: (Int) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // Display existing reminders
-        reminderTimes.forEachIndexed { index, time ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 48.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ReminderChip(
-                    text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(time)),
-                    onRemove = { onRemoveReminder(index) }
-                )
-
-                // Add button for more reminders
-                if (index == reminderTimes.size - 1) {
-                    IconButton(onClick = onAddReminder) {
-                        Icon(
-                            painter = painterResource(R.drawable.plus),
-                            contentDescription = null,
-                            tint = PineColor,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+        if (showDurationPicker) {
+            TimeInputDialog(
+                initialHours = durationMinutes / 60,
+                initialMinutes = durationMinutes % 60,
+                onDismiss = { showDurationPicker = false },
+                onTimeSet = { hours, minutes ->
+                    durationMinutes = hours * 60 + minutes
+                    showDurationPicker = false
                 }
-            }
+            )
         }
-    }
-}
 
-@Composable
-fun ReminderChip(text: String, onRemove: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50.dp))
-            .background(Color(0xFFE5FBE5))
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = text,
-            color = Color.Black,
-            fontSize = 14.sp
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            painter = painterResource(R.drawable.cross),
-            contentDescription = null,
-            tint = Color.Black,
-            modifier = Modifier
-                .size(16.dp)
-                .clickable { onRemove() }
-        )
+        HorizontalDivider()
     }
 }
 
 @Composable
 fun RepeatSection(
     repeatInterval: String,
-    onDaySelected: (Int, Boolean) -> Unit,
-    onTimeSelected: (Long) -> Unit
+    onDaySelected: (Int, Boolean) -> Unit
 ) {
     val daysOfWeek = listOf("П", "В", "С", "Ч", "П", "С", "В")
     val selectedDays = repeatInterval.mapIndexed { index, c -> index to (c == '1') }.toMap()
@@ -582,7 +466,12 @@ fun RepeatSection(
 }
 
 @Composable
-fun TaskOption(text: String, iconRes: Int, textColor: Color = InverseColor, onClick: () -> Unit) {
+fun TaskOption(
+    text: String,
+    iconRes: Int,
+    textColor: Color = InverseColor,
+    onClick: () -> Unit
+) {
     Column {
         Row(
             modifier = Modifier
@@ -594,7 +483,9 @@ fun TaskOption(text: String, iconRes: Int, textColor: Color = InverseColor, onCl
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    painter = painterResource(iconRes), contentDescription = null, tint = PineColor,
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    tint = PineColor,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(Modifier.width(8.dp))
@@ -613,8 +504,10 @@ fun getDatePickerTheme(): Int {
     else R.style.CustomDatePickerLightTheme
 }
 
-@Composable
-fun getTimePickerTheme(): Int {
-    return if (isDarkTheme()) R.style.CustomTimePickerDarkTheme
-    else R.style.CustomTimePickerLightTheme
-}
+//@Composable
+//fun getTimePickerTheme(): Int {
+//    return if (isDarkTheme()) R.style.CustomTimePickerDarkTheme
+//    else R.style.CustomTimePickerLightTheme
+//}
+
+// TimeInputDialog and OutlinedTimeField moved to separate file

@@ -13,7 +13,7 @@ interface TodoDao {
     suspend fun getAllTasks(): List<TodoItem>
 
     @Insert
-    suspend fun insertTask(task: TodoItem)
+    suspend fun insertTask(task: TodoItem): Long
 
     @Update
     suspend fun updateTask(task: TodoItem)

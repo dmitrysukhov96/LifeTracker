@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,24 +39,22 @@ fun ViewProjectScreen(
 ) {
     val project = viewModel.selectedProject
     val projectColor = project?.let { Color(it.color) } ?: Color(0xFF669DE5)
-    
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = project?.title ?: "", 
-                color = projectColor,
-                imagePath = project?.imagePath,
-                topBarActions = {
-                    IconButton(onClick = { 
-                        // Keep the selected project and navigate to edit screen
-                        navController.navigate(NEW_PROJECT_SCREEN)
-                    }) {
-                        Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White)
-                    }
+
+    setTopBarState(
+        TopBarState(
+            title = project?.title ?: "",
+            color = projectColor,
+            imagePath = if (project?.imagePath.isNullOrEmpty()) null else project?.imagePath,
+            topBarActions = {
+                IconButton(onClick = {
+                    // Keep the selected project and navigate to edit screen
+                    navController.navigate(NEW_PROJECT_SCREEN)
+                }) {
+                    Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White)
                 }
-            )
+            }
         )
-    }
+    )
 
     Column(
         modifier = Modifier

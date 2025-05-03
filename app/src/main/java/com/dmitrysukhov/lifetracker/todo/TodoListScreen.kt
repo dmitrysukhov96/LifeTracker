@@ -52,6 +52,7 @@ import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
 import com.dmitrysukhov.lifetracker.common.ui.ProjectTag
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
+import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
@@ -84,38 +85,45 @@ fun TodoListScreen(
     val todayCategory = stringResource(R.string.today)
     val tomorrowCategory = stringResource(R.string.tomorrow)
     val laterCategory = stringResource(R.string.later)
-    val doneCategory = stringResource(R.string.done_category)
 
     // Categorize items first
-    val categorizedTasks = remember(todoList, completedCategory, noDateCategory, 
-        earlierCategory, yesterdayCategory, todayCategory, tomorrowCategory, laterCategory) {
+    val categorizedTasks = remember(
+        todoList, completedCategory, noDateCategory,
+        earlierCategory, yesterdayCategory, todayCategory, tomorrowCategory, laterCategory
+    ) {
         val result = mutableMapOf<String, MutableList<TodoItem>>()
-        val now = System.currentTimeMillis()
-        
-        // Sort tasks into categories
+        val todayStart = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val yesterdayStart = todayStart - (24 * 60 * 60 * 1000)
+        val tomorrowStart = todayStart + (24 * 60 * 60 * 1000)
+        val dayAfterTomorrowStart = tomorrowStart + (24 * 60 * 60 * 1000)
         todoList.forEach { task ->
             val category = when {
                 task.isDone -> completedCategory
                 task.dateTime == null -> noDateCategory
-                task.dateTime < now - 24 * 60 * 60 * 1000 -> earlierCategory
-                task.dateTime < now -> yesterdayCategory
-                task.dateTime < now + 24 * 60 * 60 * 1000 -> todayCategory
-                task.dateTime < now + 2 * 24 * 60 * 60 * 1000 -> tomorrowCategory
+                task.dateTime < yesterdayStart -> earlierCategory
+                task.dateTime < todayStart -> yesterdayCategory
+                task.dateTime < tomorrowStart -> todayCategory
+                task.dateTime < dayAfterTomorrowStart -> tomorrowCategory
                 else -> laterCategory
             }
-            
+
             if (!result.containsKey(category)) {
                 result[category] = mutableListOf()
             }
             result[category]?.add(task)
         }
-        
+
         // Define custom order for categories
         val categoryOrder = listOf(
-            todayCategory, tomorrowCategory, yesterdayCategory, 
-            earlierCategory, laterCategory, noDateCategory, completedCategory
+            earlierCategory, yesterdayCategory, todayCategory, 
+            noDateCategory, tomorrowCategory, laterCategory, completedCategory
         )
-        
+
         // Return sorted map by custom order
         LinkedHashMap<String, List<TodoItem>>().apply {
             categoryOrder.forEach { category ->
@@ -127,7 +135,7 @@ fun TodoListScreen(
             }
         }
     }
-    
+
     LaunchedEffect(Unit) {
         setTopBarState(TopBarState(context.getString(R.string.todo_list)) {
             IconButton(onClick = { showImportDialog = true }) {
@@ -143,14 +151,14 @@ fun TodoListScreen(
             }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
         })
     }
-    
+
     Column(
         modifier = Modifier
             .background(BgColor)
             .fillMaxSize()
     ) {
         Spacer(Modifier.height(16.dp))
-        
+
         if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint)
         else {
             LazyColumn(Modifier.padding(horizontal = 24.dp)) {
@@ -163,7 +171,8 @@ fun TodoListScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         expandedCategories[category] =
-                                            !(expandedCategories[category] ?: (category == todayCategory))
+                                            !(expandedCategories[category]
+                                                ?: (category == todayCategory))
                                     }
                                     .padding(vertical = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -181,30 +190,64 @@ fun TodoListScreen(
                                     modifier = Modifier
                                         .size(16.dp)
                                         .rotate(
-                                            if (expandedCategories[category] ?: (category == todayCategory)) 180f
+                                            if (expandedCategories[category]
+                                                    ?: (category == todayCategory)
+                                            ) 180f
                                             else 0f
                                         )
                                 )
                             }
                         } else {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = completedCategory,
-                                style = H1,
-                                color = PineColor,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                            // Make Completed category collapsible too
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        expandedCategories[completedCategory] =
+                                            expandedCategories[completedCategory] != true
+                                    }
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = completedCategory,
+                                    style = H1,
+                                    color = PineColor
+                                )
+                                Icon(
+                                    painter = painterResource(R.drawable.arrow_down),
+                                    contentDescription = null,
+                                    tint = PineColor,
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .rotate(
+                                            if (expandedCategories[completedCategory] == true) 180f
+                                            else 0f
+                                        )
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                     }
-                    
-                    // Show tasks if category expanded or it's "Today" or "Completed"
-                    val isExpanded = expandedCategories[category] ?: (category == todayCategory) || category == completedCategory
+
+                    // Show tasks if category expanded or it's "Today"
+                    val isExpanded =
+                        expandedCategories[category] ?: (category == todayCategory || category == noDateCategory)
                     if (isExpanded) {
                         items(tasks) { todoItem ->
                             TodoListItem(
                                 item = todoItem,
                                 projects = projects,
+                                category = category,
+                                categoryNames = mapOf(
+                                    "today" to todayCategory,
+                                    "yesterday" to yesterdayCategory,
+                                    "tomorrow" to tomorrowCategory,
+                                    "earlier" to earlierCategory,
+                                    "later" to laterCategory,
+                                    "completed" to completedCategory
+                                ),
                                 onCheckedChange = { isChecked ->
                                     viewModel.updateTask(
                                         todoItem.copy(isDone = isChecked)
@@ -219,16 +262,16 @@ fun TodoListScreen(
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
-                    
+
                     // Spacer between categories
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
-                
+
                 // Bottom padding
-                item { 
-                    Spacer(modifier = Modifier.height(32.dp)) 
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
@@ -280,11 +323,15 @@ fun TodoListScreen(
     }
 }
 
-
 @Composable
 fun TodoListItem(
-    item: TodoItem, projects: List<Project>, onCheckedChange: (Boolean) -> Unit,
-    isRunning: Boolean, onClick: () -> Unit
+    item: TodoItem, 
+    projects: List<Project>, 
+    category: String,
+    categoryNames: Map<String, String>,
+    onCheckedChange: (Boolean) -> Unit,
+    isRunning: Boolean, 
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -300,72 +347,88 @@ fun TodoListItem(
                 .size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = item.text,
-                    textDecoration = if (item.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                    style = SimpleText,
-                    color = if (item.isDone) PineColor else InverseColor,
-                    modifier = Modifier.weight(1f)
-                )
-                item.projectId?.let { projectId ->
-                    val project = projects.find { it.projectId == projectId }
-                    project?.let {
-                        ProjectTag(text = it.title, color = Color(it.color))
-                    }
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = item.text,
+                textDecoration = if (item.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                style = H2,
+                color = if (item.isDone) PineColor else InverseColor,
+            )
+            item.durationMinutes?.let { duration -> DurationBadge(duration, isRunning) }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Column(horizontalAlignment = Alignment.End) {
+            item.projectId?.let { projectId ->
+                val project = projects.find { it.projectId == projectId }
+                project?.let {
+                    ProjectTag(text = it.title, color = Color(it.color))
+                    Spacer(Modifier.height(8.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                item.durationMinutes?.let { duration -> DurationBadge(duration, isRunning) }
-                if (item.reminderTime != null || item.repeatInterval != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        item.reminderTime?.let { time ->
-                            val startOfDay = getStartOfDay(time)
-                            val animatedTime = remember { Animatable(startOfDay.toFloat()) }
-                            LaunchedEffect(time) {
-                                animatedTime.animateTo(
-                                    targetValue = time.toFloat(),
-                                    animationSpec = tween(durationMillis = 1000)
-                                )
-                            }
-                            Text(
-                                text = formatTime(animatedTime.value.toLong()),
-                                color = Color.Red,
-                                style = Small
-                            )
-
-                            Icon(
-                                painter = painterResource(R.drawable.bell),
-                                contentDescription = null, tint = Color.Red, modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .size(14.dp)
-                            )
-                        }
-                        item.repeatInterval?.let {
-                            Icon(
-                                painter = painterResource(R.drawable.repeat),
-                                contentDescription = null,
-                                tint = PineColor,
-                                modifier = Modifier
-                                    .padding(start = 8.dp)
-                                    .size(14.dp)
-                            )
-                        }
+            item.reminderTime?.let { time ->
+                Row {
+                    val startOfDay = getStartOfDay(time)
+                    val animatedTime = remember { Animatable(startOfDay.toFloat()) }
+                    LaunchedEffect(time) {
+                        animatedTime.animateTo(
+                            targetValue = time.toFloat(),
+                            animationSpec = tween(durationMillis = 1000)
+                        )
+                    }
+                    if (animatedTime.value >= time.toFloat() - 10) time
+                    else animatedTime.value.toLong()
+                    
+                    // Format the time string based on category
+                    val timeString = formatTimeBasedOnCategory(time, category, categoryNames)
+                    
+                    // Determine text color based on task status and time
+                    val now = System.currentTimeMillis()
+                    val textColor = when {
+                        item.isDone -> PineColor // Completed tasks always PineColor
+                        time < now -> Color.Red // Overdue tasks in red
+                        else -> PineColor // Future tasks in PineColor
+                    }
+                    
+                    Text(
+                        text = timeString, 
+                        color = textColor,
+                        style = Small
+                    )
+                    
+                    Icon(
+                        painter = painterResource(R.drawable.bell),
+                        contentDescription = null, 
+                        tint = textColor, 
+                        modifier = Modifier
+                            .padding(start = 4.dp)
+                            .size(14.dp)
+                    )
+                    item.repeatInterval?.let {
+                        Icon(
+                            painter = painterResource(R.drawable.repeat),
+                            contentDescription = null,
+                            tint = PineColor,
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .size(14.dp)
+                        )
                     }
                 }
             }
         }
+    }
+}
+
+// Format time string based on category
+fun formatTimeBasedOnCategory(time: Long, category: String, categoryNames: Map<String, String>): String {
+    val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val dateTimeFormatter = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+    
+    return when (category) {
+        categoryNames["today"] -> timeFormatter.format(Date(time)) // Just time for today
+        categoryNames["yesterday"] -> "Вчера в ${timeFormatter.format(Date(time))}" // Yesterday at HH:mm
+        categoryNames["tomorrow"] -> "Завтра в ${timeFormatter.format(Date(time))}" // Tomorrow at HH:mm
+        else -> dateTimeFormatter.format(Date(time)) // Full date and time for other categories
     }
 }
 
@@ -374,11 +437,6 @@ fun formatDuration(seconds: Int): String {
     val mins = (seconds % 3600) / 60
     val secs = seconds % 60
     return String.format(Locale.getDefault(), "%02d:%02d:%02d", hrs, mins, secs)
-}
-
-fun formatTime(timestamp: Long): String {
-    val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
-    return formatter.format(Date(timestamp))
 }
 
 fun getStartOfDay(currentTime: Long): Long {
