@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.font.FontWeight.Companion.Medium
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dmitrysukhov.lifetracker.utils.Blue
 import com.dmitrysukhov.lifetracker.utils.BlueViolet
@@ -235,9 +237,10 @@ fun SubtitleWithIcon(textRes: Int, iconRes: Int, iconColor: Color) {
 fun ProjectTag(text: String, color: Color) {
     Box(
         Modifier
+            .widthIn(max = 114.dp)
             .background(color, shape = RoundedCornerShape(52))
             .padding(horizontal = 8.dp, vertical = 2.dp)
-    ) { Text(text = text, color = Color.White, style = Small) }
+    ) { Text(text = text, color = Color.White, style = Small, maxLines = 1, overflow = TextOverflow.Ellipsis) }
 }
 
 @Composable

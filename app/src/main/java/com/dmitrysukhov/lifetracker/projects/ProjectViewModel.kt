@@ -7,6 +7,9 @@ import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.todo.TodoDao
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
@@ -20,6 +23,9 @@ class ProjectsViewModel @Inject constructor(
     var selectedProject: Project? = null
     private val _projects = mutableStateListOf<Project>()
     val projects: List<Project> get() = _projects
+    
+    private val _lastCreatedProjectId = MutableStateFlow<Long?>(null)
+    val lastCreatedProjectId: StateFlow<Long?> = _lastCreatedProjectId.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -37,11 +43,12 @@ class ProjectsViewModel @Inject constructor(
 
     fun addProject(project: Project) {
         viewModelScope.launch {
-            project.imagePath?.let { path ->
-                projectDao.insert(project.copy(imagePath = path))
-            } ?: run {
+            val newId = if (project.imagePath != null) {
+                projectDao.insert(project.copy(imagePath = project.imagePath))
+            } else {
                 projectDao.insert(project)
             }
+            _lastCreatedProjectId.value = newId
         }
     }
     
@@ -75,5 +82,9 @@ class ProjectsViewModel @Inject constructor(
         }
         _projects.clear()
         _projects.addAll(updatedProjects)
+    }
+    
+    fun clearLastCreatedProjectId() {
+        _lastCreatedProjectId.value = null
     }
 }

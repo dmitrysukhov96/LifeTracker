@@ -26,7 +26,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -78,17 +77,17 @@ fun NewProjectScreen(
     }
     var selectedColor = Color(selectedColorInt)
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    val isEditMode = project != null
-    LaunchedEffect(selectedColor) {
+
+//    LaunchedEffect(selectedColor) {
         setTopBarState(
             TopBarState(
-                title = if (isEditMode) context.getString(R.string.edit_project) else context.getString(
+                title = if (project != null) context.getString(R.string.edit_project) else context.getString(
                     R.string.new_project
                 ), color = selectedColor,
                 imagePath = currentImagePath
             ) {
                 Row {
-                    if (isEditMode) {
+                    if (project != null) {
                         IconButton(onClick = {
                             showDeleteConfirmation = true
                         }) {
@@ -100,7 +99,7 @@ fun NewProjectScreen(
                         }
                     }
                     IconButton(onClick = {
-                        if (isEditMode && project != null) viewModel.updateProject(
+                        if (project != null) viewModel.updateProject(
                             project.copy(
                                 title = title, description = descr, color = selectedColorInt, imagePath = currentImagePath
                             )
@@ -116,7 +115,7 @@ fun NewProjectScreen(
                     }
                 }
             })
-    }
+//    }
 
     Column(
         modifier = Modifier
@@ -126,7 +125,7 @@ fun NewProjectScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
         BasicTextField(
-            value = title, onValueChange = { title = it },
+            value = title, onValueChange = { if (it.length <= 90) title = it },
             textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (title.isEmpty())
@@ -137,7 +136,7 @@ fun NewProjectScreen(
                         )
                     innerTextField()
                 }
-            }, modifier = Modifier.fillMaxWidth()
+            }, modifier = Modifier.fillMaxWidth(), maxLines = 1
         )
         Spacer(modifier = Modifier.height(8.dp))
         HorizontalDivider()
@@ -183,15 +182,21 @@ fun NewProjectScreen(
         }
 
         if (currentImagePath.isNotEmpty()) {
-            Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)) {
                 Image(
                     painter = rememberAsyncImagePainter(File(context.filesDir, currentImagePath)),
                     contentDescription = stringResource(R.string.selected_image),
-                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
                 )
                 Row(
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(8.dp)
                 ) {
                     IconButton(
                         onClick = { imagePickerLauncher.launch("image/*") },

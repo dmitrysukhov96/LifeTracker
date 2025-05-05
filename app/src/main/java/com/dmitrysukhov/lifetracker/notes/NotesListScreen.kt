@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.dmitrysukhov.lifetracker.Note
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.PineColor
@@ -73,24 +74,8 @@ fun NotesListScreen(
             .background(BgColor)
     ) {
         if (notes.isEmpty()) {
-            // Empty state
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.no_notes_yet),
-                    style = H2,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.tap_plus_to_create_note),
-                    style = SimpleText,
-                    color = Color.Gray
-                )
-            }
+            // Empty state using EmptyPlaceholder component
+            EmptyPlaceholder(R.string.no_notes_yet, R.string.tap_plus_to_create_note)
         } else {
             // Notes list
             LazyColumn(

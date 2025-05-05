@@ -1,5 +1,7 @@
 <resources>
-    <style name="AppTheme" parent="android:Theme.Material.NoActionBar"/>
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bgColor</item>
+    </style>
     
     <!-- Custom Date and Time Picker styles -->
     <style name="CustomDatePickerTheme" parent="android:Theme.Material.Dialog">

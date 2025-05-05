@@ -11,13 +11,8 @@ import java.util.Locale
 class LifeTrackerApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        
         val sharedPref = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        
-        // Initialize theme from saved preferences
         initializeTheme(sharedPref)
-        
-        // Initialize language from saved preferences
         initializeLanguage(sharedPref)
     }
     
@@ -35,7 +30,6 @@ class LifeTrackerApp : Application() {
     
     private fun initializeLanguage(sharedPref: android.content.SharedPreferences) {
         val languageCode = sharedPref.getString("language", null)
-        
         if (languageCode != null) {
             val locale = when (languageCode) {
                 "ru" -> Locale("ru")
@@ -43,7 +37,6 @@ class LifeTrackerApp : Application() {
                 "en" -> Locale("en")
                 else -> Locale.getDefault()
             }
-            
             Locale.setDefault(locale)
             val configuration = Configuration(resources.configuration)
             configuration.setLocale(locale)

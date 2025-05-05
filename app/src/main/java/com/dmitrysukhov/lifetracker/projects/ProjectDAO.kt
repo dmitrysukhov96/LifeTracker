@@ -14,7 +14,7 @@ interface ProjectDao {
     fun getAllProjects(): Flow<List<Project>>
 
     @Insert
-    suspend fun insert(project: Project)
+    suspend fun insert(project: Project): Long
 
     @Update
     suspend fun update(project: Project)

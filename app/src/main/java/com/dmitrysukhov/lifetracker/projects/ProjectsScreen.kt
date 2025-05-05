@@ -29,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -123,15 +124,14 @@ fun ProjectItem(
             Image(
                 painter = rememberAsyncImagePainter(File(context.filesDir, imagePath)),
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
         }
 
         Text(
-            text = title, style = H2, color = Color.White,
-            modifier = Modifier.padding(start = 20.dp, top = 8.dp)
+            text = title, style = H2, color = Color.White, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(start = 20.dp, top = 8.dp, end = 20.dp), maxLines = 2
         )
         Text(
             text = progress,

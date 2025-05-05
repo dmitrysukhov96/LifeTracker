@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
+import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -65,7 +66,7 @@ import java.util.Locale
 @Composable
 fun NewTaskScreen(
     setTopBarState: (TopBarState) -> Unit, viewModel: TodoViewModel,
-    navController: NavHostController
+    navController: NavHostController, projectsViewModel: ProjectsViewModel
 ) {
     var title by rememberSaveable { mutableStateOf(viewModel.selectedTask?.text ?: "") }
     var description by rememberSaveable {
@@ -87,6 +88,17 @@ fun NewTaskScreen(
         if (isEditing) stringResource(R.string.edit_task) else stringResource(R.string.new_task)
     val saveToastText =
         if (isEditing) stringResource(R.string.update_task_toast) else stringResource(R.string.save_task_toast)
+    
+    // Observe lastCreatedProjectId
+    val lastProjectId by projectsViewModel.lastCreatedProjectId.collectAsState(null)
+    
+    // When last created project ID changes, update selected project
+    LaunchedEffect(lastProjectId) {
+        lastProjectId?.let {
+            selectedProjectId = it
+            projectsViewModel.clearLastCreatedProjectId()
+        }
+    }
 
     LaunchedEffect(Unit) {
         setTopBarState(
@@ -222,15 +234,13 @@ fun NewTaskScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp, bottom = 8.dp)
-                .clickable { expanded = true },
-            verticalAlignment = Alignment.CenterVertically,
+                .clickable { expanded = true }, verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.proekt),
-                    contentDescription = null,
-                    tint = PineColor
+                    contentDescription = null, tint = PineColor
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 selectedProjectId?.let { id ->

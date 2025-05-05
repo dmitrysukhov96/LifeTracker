@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -63,6 +64,7 @@ import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -75,7 +77,8 @@ const val TODOLIST_SCREEN = "Todo List"
 @Composable
 fun TodoListScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
-    viewModel: TodoViewModel, trackerViewModel: TrackerViewModel = hiltViewModel()
+    viewModel: TodoViewModel, trackerViewModel: TrackerViewModel = hiltViewModel(),
+    projectsViewModel: ProjectsViewModel
 ) {
     val context = LocalContext.current
     var showImportDialog by remember { mutableStateOf(false) }
@@ -140,14 +143,10 @@ fun TodoListScreen(
             }
             result[category]?.add(task)
         }
-
-        // Define custom order for categories
         val categoryOrder = listOf(
             earlierCategory, yesterdayCategory, todayCategory, 
             noDateCategory, tomorrowCategory, laterCategory, completedCategory
         )
-
-        // Return sorted map by custom order
         LinkedHashMap<String, List<TodoItem>>().apply {
             categoryOrder.forEach { category ->
                 result[category]?.let { tasks ->
@@ -170,6 +169,7 @@ fun TodoListScreen(
             }
             IconButton({
                 viewModel.selectedTask = null
+                projectsViewModel.clearLastCreatedProjectId()
                 navController.navigate(NEW_TASK_SCREEN)
             }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
         })
@@ -182,17 +182,13 @@ fun TodoListScreen(
     ) {
         if (activeTask != null && lastEvent?.endTime == null) {
             TimeTracker(
-                lastEvent = lastEvent,
-                projects = projects,
-                onActionClick = {
-                    viewModel.stopTracking()
-                }
+                lastEvent = lastEvent, projects = projects,
+                onActionClick = { viewModel.stopTracking() }
             )
             Spacer(Modifier.height(16.dp))
         }
 
-        if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint)
-        else {
+        if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint) else {
             LazyColumn(Modifier.padding(24.dp)) {
                 for ((category, tasks) in categorizedTasks) {
                     item {
@@ -209,22 +205,15 @@ fun TodoListScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = category,
-                                    style = H1,
-                                    color = PineColor
-                                )
+                                Text(text = category, style = H1, color = PineColor)
                                 Icon(
                                     painter = painterResource(R.drawable.arrow_down),
-                                    contentDescription = null,
-                                    tint = PineColor,
-                                    modifier = Modifier
+                                    contentDescription = null, tint = PineColor, modifier = Modifier
                                         .size(16.dp)
                                         .rotate(
                                             if (expandedCategories[category]
                                                     ?: (category == todayCategory)
-                                            ) 180f
-                                            else 0f
+                                            ) 180f else 0f
                                         )
                                 )
                             }
@@ -377,12 +366,11 @@ fun TodoListItem(
     onDurationClick: (Int) -> Unit, onRemainingSecondsChanged: (Int) -> Unit
 ) {
     val context = LocalContext.current
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.Top
+            .padding(vertical = 8.dp)
     ) {
         Image(
             painter = painterResource(if (item.isDone) R.drawable.checked else R.drawable.not_checked),
@@ -390,13 +378,11 @@ fun TodoListItem(
                 .clickable { onCheckedChange(!item.isDone) }
                 .size(20.dp)
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.padding(start = 28.dp, end = 120.dp)) {
             Text(
                 text = item.text, maxLines = 2, overflow = TextOverflow.Ellipsis,
                 textDecoration = if (item.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                style = SimpleText,
-                color = if (item.isDone) PineColor else InverseColor,
+                style = SimpleText, color = if (item.isDone) PineColor else InverseColor
             )
             item.estimatedDurationMs?.let { duration ->
                 Spacer(modifier = Modifier.height(8.dp))
@@ -409,8 +395,7 @@ fun TodoListItem(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Column(horizontalAlignment = Alignment.End) {
+        Column(Modifier.align(Alignment.CenterEnd) , horizontalAlignment = Alignment.End) {
             Spacer(Modifier.height(2.dp))
             item.projectId?.let { projectId ->
                 val project = projects.find { it.projectId == projectId }

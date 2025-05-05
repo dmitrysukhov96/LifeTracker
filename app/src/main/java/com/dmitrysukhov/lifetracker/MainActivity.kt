@@ -1,11 +1,10 @@
 package com.dmitrysukhov.lifetracker
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.LinearEasing
@@ -79,17 +78,20 @@ import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import coil.compose.rememberAsyncImagePainter
+import com.dmitrysukhov.lifetracker.about.ABOUT_DEVELOPER_SCREEN
+import com.dmitrysukhov.lifetracker.about.AboutDeveloperScreen
 import com.dmitrysukhov.lifetracker.daily.DAILY_PLANNER_SCREEN
 import com.dmitrysukhov.lifetracker.daily.DailyPlannerScreen
 import com.dmitrysukhov.lifetracker.dashboard.DASHBOARD_SCREEN
@@ -99,6 +101,13 @@ import com.dmitrysukhov.lifetracker.habits.HabitScreen
 import com.dmitrysukhov.lifetracker.habits.HabitsViewModel
 import com.dmitrysukhov.lifetracker.habits.NEW_HABIT_SCREEN
 import com.dmitrysukhov.lifetracker.habits.NewHabitScreen
+import com.dmitrysukhov.lifetracker.notes.NEW_NOTE_SCREEN
+import com.dmitrysukhov.lifetracker.notes.NOTES_SCREEN
+import com.dmitrysukhov.lifetracker.notes.NOTE_DETAIL_SCREEN
+import com.dmitrysukhov.lifetracker.notes.NewNoteScreen
+import com.dmitrysukhov.lifetracker.notes.NoteDetailScreen
+import com.dmitrysukhov.lifetracker.notes.NoteViewModel
+import com.dmitrysukhov.lifetracker.notes.NotesListScreen
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.NewProjectScreen
 import com.dmitrysukhov.lifetracker.projects.PROJECTS_SCREEN
@@ -121,6 +130,8 @@ import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
+import com.dmitrysukhov.lifetracker.utils.LocaleBaseActivity
+import com.dmitrysukhov.lifetracker.utils.LocaleHelper
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
 import com.dmitrysukhov.lifetracker.utils.SimpleText
@@ -130,30 +141,32 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.io.File
-import com.dmitrysukhov.lifetracker.about.ABOUT_DEVELOPER_SCREEN
-import com.dmitrysukhov.lifetracker.about.AboutDeveloperScreen
-import com.dmitrysukhov.lifetracker.notes.NEW_NOTE_SCREEN
-import com.dmitrysukhov.lifetracker.notes.NOTE_DETAIL_SCREEN
-import com.dmitrysukhov.lifetracker.notes.NOTES_SCREEN
-import com.dmitrysukhov.lifetracker.notes.NewNoteScreen
-import com.dmitrysukhov.lifetracker.notes.NoteDetailScreen
-import com.dmitrysukhov.lifetracker.notes.NotesListScreen
-import com.dmitrysukhov.lifetracker.notes.NoteViewModel
-import java.util.Locale
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-    
+class MainActivity : LocaleBaseActivity() {
+
     companion object {
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 100
     }
-    
+
+    override fun attachBaseContext(newBase: Context) {
+        val sharedPref = newBase.getSharedPreferences("user_prefs", MODE_PRIVATE)
+        val languageCode = sharedPref.getString("language", null)
+
+        if (languageCode != null) {
+            val context = LocaleHelper.applyLanguage(newBase, languageCode)
+            super.attachBaseContext(context)
+        } else {
+            super.attachBaseContext(newBase)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         applyLanguageSettings()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestNotificationPermission()
-        
+
         setContent {
             val context = LocalContext.current
             val systemUiController = rememberSystemUiController()
@@ -182,19 +195,15 @@ class MainActivity : ComponentActivity() {
                         },
                         text = {
                             OutlinedTextField(
-                                value = userName,
-                                onValueChange = { userName = it },
+                                value = userName, onValueChange = { userName = it },
                                 placeholder = {
                                     Text(
                                         text = stringResource(R.string.dialog_ask_name),
                                         style = SimpleText
                                     )
-                                },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
+                                }, singleLine = true, modifier = Modifier.fillMaxWidth()
                             )
-                        },
-                        confirmButton = {
+                        }, confirmButton = {
                             Button(
                                 onClick = {
                                     sharedPref.edit {
@@ -202,8 +211,7 @@ class MainActivity : ComponentActivity() {
                                             .putBoolean("dont_ask_name", true)
                                     }
                                     showNameDialog = false
-                                },
-                                enabled = userName.isNotBlank()
+                                }, enabled = userName.isNotBlank()
                             ) {
                                 Text(text = stringResource(R.string.ok), style = SimpleText)
                             }
@@ -235,28 +243,23 @@ class MainActivity : ComponentActivity() {
                 val currentDestination = navBackStackEntry?.destination?.route ?: ""
                 val drawerMenuDestinations = listOf(
                     Destination(
-                        stringResource(R.string.dashboard),
-                        DASHBOARD_SCREEN,
+                        stringResource(R.string.dashboard), DASHBOARD_SCREEN,
                         painterResource(R.drawable.spisok)
                     ),
                     Destination(
-                        stringResource(R.string.todo_list),
-                        TODOLIST_SCREEN,
+                        stringResource(R.string.todo_list), TODOLIST_SCREEN,
                         painterResource(R.drawable.spisok)
                     ),
                     Destination(
-                        stringResource(R.string.notes),
-                        NOTES_SCREEN,
+                        stringResource(R.string.notes), NOTES_SCREEN,
                         painterResource(R.drawable.projects)
                     ),
                     Destination(
-                        stringResource(R.string.tracker),
-                        TRACKER_SCREEN,
+                        stringResource(R.string.tracker), TRACKER_SCREEN,
                         painterResource(R.drawable.tracker)
                     ),
                     Destination(
-                        stringResource(R.string.habits),
-                        HABIT_SCREEN,
+                        stringResource(R.string.habits), HABIT_SCREEN,
                         painterResource(R.drawable.habits)
                     ),
                     Destination(
@@ -459,9 +462,9 @@ class MainActivity : ComponentActivity() {
                                         }
 
                                         Text(
-                                            topBarState.title,
+                                            topBarState.title, overflow = TextOverflow.Ellipsis,
                                             fontFamily = Montserrat,
-                                            fontSize = 20.sp,
+                                            fontSize = 20.sp, maxLines = 1,
                                             fontWeight = FontWeight.Bold,
                                             color = WhitePine,
                                             modifier = Modifier.align(Alignment.Center)
@@ -495,7 +498,8 @@ class MainActivity : ComponentActivity() {
                                         }
                                         composable(TODOLIST_SCREEN) {
                                             TodoListScreen(
-                                                setTopBarState, navController, todoViewModel
+                                                setTopBarState, navController, todoViewModel,
+                                                projectsViewModel = projectViewModel
                                             )
                                         }
                                         composable(NOTES_SCREEN) {
@@ -553,16 +557,13 @@ class MainActivity : ComponentActivity() {
                                         }
                                         composable(NEW_TASK_SCREEN) {
                                             NewTaskScreen(
-                                                setTopBarState,
-                                                todoViewModel,
-                                                navController
+                                                setTopBarState, todoViewModel, navController,
+                                                projectViewModel
                                             )
                                         }
                                         composable(NEW_PROJECT_SCREEN) {
                                             NewProjectScreen(
-                                                setTopBarState,
-                                                navController,
-                                                projectViewModel
+                                                setTopBarState, navController, projectViewModel
                                             )
                                         }
                                         composable(SETTINGS_SCREEN) { SettingsScreen(setTopBarState) }
@@ -584,38 +585,22 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    
+
     private fun applyLanguageSettings() {
         val sharedPref = getSharedPreferences("user_prefs", MODE_PRIVATE)
         val languageCode = sharedPref.getString("language", null)
-        
-        if (languageCode != null) {
-            val locale = when (languageCode) {
-                "ru" -> Locale("ru")
-                "uk" -> Locale("uk")
-                "en" -> Locale("en")
-                else -> Locale.getDefault()
-            }
-            Locale.setDefault(locale)
-            val configuration = Configuration(resources.configuration)
-            configuration.setLocale(locale)
-            resources.updateConfiguration(configuration, resources.displayMetrics)
-        }
+        if (languageCode != null) LocaleHelper.applyLanguage(this, languageCode)
     }
-    
+
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
+                    this, Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    NOTIFICATION_PERMISSION_REQUEST_CODE
-                )
-            }
+            ) ActivityCompat.requestPermissions(
+                this, arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                NOTIFICATION_PERMISSION_REQUEST_CODE
+            )
         }
     }
 }

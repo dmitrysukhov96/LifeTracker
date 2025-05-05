@@ -1,6 +1,8 @@
 package com.dmitrysukhov.lifetracker.settings
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,11 +54,8 @@ import java.util.Locale
 
 const val SETTINGS_SCREEN = "settings_screen"
 
-// Define theme options
 enum class ThemeMode(val stringRes: Int) {
-    SYSTEM(R.string.theme_system),
-    LIGHT(R.string.theme_light),
-    DARK(R.string.theme_dark)
+    SYSTEM(R.string.theme_system), LIGHT(R.string.theme_light), DARK(R.string.theme_dark)
 }
 
 @Composable
@@ -78,10 +77,7 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
         mutableStateOf(savedTheme)
     }
 
-
-    // Function to apply theme changes
     fun applyTheme(theme: ThemeMode) {
-        // Update theme in ThemeManager to propagate changes throughout the app
         when (theme) {
             ThemeMode.LIGHT -> ThemeManager.setThemeMode(ThemeMode.LIGHT)
             ThemeMode.DARK -> ThemeManager.setThemeMode(ThemeMode.DARK)
@@ -95,17 +91,15 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
             "uk" -> Locale("uk")
             else -> Locale("en")
         }
-
-        // Установка локали для всего приложения
         Locale.setDefault(locale)
-
-        // Обновление конфигурации для текущих ресурсов
         val configuration = Configuration(context.resources.configuration)
         configuration.setLocale(locale)
         context.resources.updateConfiguration(configuration, context.resources.displayMetrics)
-
-        // Обновление состояния верхней панели с локализованной строкой
         setTopBarState(TopBarState(context.getString(R.string.settings)))
+        (context as? Activity)?.let {
+            it.finish()
+            it.startActivity(it.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+        }
     }
 
     LaunchedEffect(selectedLanguage) {
@@ -118,7 +112,6 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
             .background(BgColor)
             .padding(24.dp)
     ) {
-        // Username section
         Text(
             text = stringResource(R.string.username),
             color = InverseColor,
@@ -157,8 +150,6 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(24.dp))
-
-        // Theme selection
         Text(
             text = stringResource(R.string.theme),
             color = InverseColor,
@@ -230,8 +221,6 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
                                     putString("theme_mode", theme.name)
                                 }
                                 themeExpanded = false
-
-                                // Apply theme immediately
                                 applyTheme(theme)
                             } else {
                                 themeExpanded = false
