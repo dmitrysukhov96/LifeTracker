@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -104,7 +105,7 @@ fun NewHabitScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
         BasicTextField(
-            value = title,
+            value = title, cursorBrush = SolidColor(PineColor),
             onValueChange = { title = it },
             textStyle = H1.copy(color = InverseColor),
             decorationBox = { innerTextField ->

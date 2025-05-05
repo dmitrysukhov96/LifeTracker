@@ -92,8 +92,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.dmitrysukhov.lifetracker.about.ABOUT_DEVELOPER_SCREEN
 import com.dmitrysukhov.lifetracker.about.AboutDeveloperScreen
-import com.dmitrysukhov.lifetracker.daily.DAILY_PLANNER_SCREEN
-import com.dmitrysukhov.lifetracker.daily.DailyPlannerScreen
 import com.dmitrysukhov.lifetracker.dashboard.DASHBOARD_SCREEN
 import com.dmitrysukhov.lifetracker.dashboard.DashboardScreen
 import com.dmitrysukhov.lifetracker.habits.HABIT_SCREEN
@@ -124,6 +122,7 @@ import com.dmitrysukhov.lifetracker.todo.TodoListScreen
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.TRACKER_SCREEN
 import com.dmitrysukhov.lifetracker.tracker.TrackerScreen
+import com.dmitrysukhov.lifetracker.tracker.TrackerViewModel
 import com.dmitrysukhov.lifetracker.turbo.TURBO_SCREEN
 import com.dmitrysukhov.lifetracker.turbo.TurboScreen
 import com.dmitrysukhov.lifetracker.utils.BgColor
@@ -233,6 +232,7 @@ class MainActivity : LocaleBaseActivity() {
                 }
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
                 val todoViewModel: TodoViewModel = hiltViewModel()
+                val trackerViewModel: TrackerViewModel = hiltViewModel()
                 val projectViewModel: ProjectsViewModel = hiltViewModel()
                 val habitViewModel: HabitsViewModel = hiltViewModel()
                 val noteViewModel: NoteViewModel = hiltViewModel()
@@ -493,7 +493,7 @@ class MainActivity : LocaleBaseActivity() {
                                         composable(DASHBOARD_SCREEN) {
                                             DashboardScreen(
                                                 setTopBarState, navController, todoViewModel,
-                                                habitViewModel
+                                                habitViewModel, trackerViewModel
                                             )
                                         }
                                         composable(TODOLIST_SCREEN) {
@@ -526,20 +526,12 @@ class MainActivity : LocaleBaseActivity() {
                                         }
                                         composable(TRACKER_SCREEN) {
                                             TrackerScreen(
-                                                setTopBarState,
-                                                navController = navController
+                                                setTopBarState, trackerViewModel, navController
                                             )
                                         }
                                         composable(HABIT_SCREEN) {
                                             HabitScreen(
-                                                setTopBarState,
-                                                navController, habitViewModel
-                                            )
-                                        }
-                                        composable(DAILY_PLANNER_SCREEN) {
-                                            DailyPlannerScreen(
-                                                setTopBarState,
-                                                navController
+                                                setTopBarState, navController, habitViewModel
                                             )
                                         }
                                         composable(NEW_HABIT_SCREEN) {

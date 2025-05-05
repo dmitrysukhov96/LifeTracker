@@ -19,25 +19,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.utils.Montserrat
 
 @Composable
 fun TimeInputDialog(
-    initialHours: Long = 0,
-    initialMinutes: Long = 0,
-    onDismiss: () -> Unit,
+    initialHours: Long = 0, initialMinutes: Long = 0, onDismiss: () -> Unit,
     onTimeSet: (hours: Long, minutes: Long) -> Unit
 ) {
-    var hoursText by remember { mutableStateOf(initialHours.toString()) }
-    var minutesText by remember { mutableStateOf(initialMinutes.toString()) }
+    var hoursText by remember { mutableStateOf(if (initialHours == 0L) "" else initialHours.toString()) }
+    var minutesText by remember { mutableStateOf(if (initialMinutes == 0L) "" else initialMinutes.toString()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.time_for_task)) },
+        title = { Text(stringResource(R.string.time_for_task), fontFamily = Montserrat, fontWeight = FontWeight.Bold) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -47,7 +46,7 @@ fun TimeInputDialog(
                         label = stringResource(R.string.hours),
                         modifier = Modifier.weight(1f)
                     )
-                    Text(":", fontSize = 20.sp, modifier = Modifier.padding(horizontal = 8.dp))
+                    Text(":", fontSize = 20.sp, modifier = Modifier.padding(horizontal = 8.dp), fontFamily = Montserrat)
                     OutlinedTimeField(
                         value = minutesText,
                         onValueChange = { minutesText = it },
@@ -55,12 +54,12 @@ fun TimeInputDialog(
                         modifier = Modifier.weight(1f)
                     )
                 }
-                
                 errorMessage?.let {
                     Text(
                         text = it,
                         color = Color.Red,
                         style = MaterialTheme.typography.bodySmall,
+                        fontFamily = Montserrat,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
@@ -79,10 +78,10 @@ fun TimeInputDialog(
                 } catch (_: Exception) {
                     errorMessage = "Неверный формат времени"
                 }
-            }) { Text(stringResource(R.string.ok)) }
+            }) { Text(stringResource(R.string.ok), fontFamily = Montserrat) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), fontFamily = Montserrat) }
         }
     )
 }
@@ -101,7 +100,7 @@ fun OutlinedTimeField(
                 onValueChange(newValue)
             }
         },
-        label = { Text(label) },
+        label = { Text(label, fontFamily = Montserrat) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number

@@ -16,9 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -35,7 +36,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W500
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -80,7 +81,6 @@ fun NewTaskScreen(
         mutableLongStateOf(viewModel.selectedTask?.estimatedDurationMs ?: 0L)
     }
     var repeatInterval by rememberSaveable { mutableStateOf(viewModel.selectedTask?.repeatInterval) }
-    var showRepeatOptions by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
     val projects by viewModel.projects.collectAsState(listOf())
     val isEditing = viewModel.selectedTask != null
@@ -88,18 +88,13 @@ fun NewTaskScreen(
         if (isEditing) stringResource(R.string.edit_task) else stringResource(R.string.new_task)
     val saveToastText =
         if (isEditing) stringResource(R.string.update_task_toast) else stringResource(R.string.save_task_toast)
-    
-    // Observe lastCreatedProjectId
     val lastProjectId by projectsViewModel.lastCreatedProjectId.collectAsState(null)
-    
-    // When last created project ID changes, update selected project
     LaunchedEffect(lastProjectId) {
         lastProjectId?.let {
             selectedProjectId = it
             projectsViewModel.clearLastCreatedProjectId()
         }
     }
-
     LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState(
@@ -139,7 +134,7 @@ fun NewTaskScreen(
                                     text = title, description = description,
                                     projectId = selectedProjectId, deadline = deadline,
                                     repeatInterval = repeatInterval,
-                                    estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
+                                    estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs * 60_000 else null
                                 )
                                 Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
                                 navController.navigateUp()
@@ -176,10 +171,9 @@ fun NewTaskScreen(
         Spacer(Modifier.height(4.dp))
         HorizontalDivider(color = PineColor.copy(0.5f), thickness = 0.5.dp)
         BasicTextField(
-            value = description, onValueChange = { description = it },
-            textStyle = SimpleText.copy(color = InverseColor),
-            cursorBrush = SolidColor(PineColor), maxLines = 5,
-            decorationBox = { innerTextField ->
+            value = description, onValueChange = { if (it.length <= 1000) description = it },
+            textStyle = SimpleText.copy(color = InverseColor), cursorBrush = SolidColor(PineColor),
+            maxLines = 5, decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (description.isEmpty()) Text(
                         stringResource(R.string.description_hint), style = SimpleText,
@@ -196,40 +190,41 @@ fun NewTaskScreen(
                 SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date(it))
             } ?: stringResource(R.string.date_time_placeholder),
             iconRes = R.drawable.data,
-            textColor = if (deadline == null) PineColor.copy(0.5f) else InverseColor
-        ) {
-            val calendar = Calendar.getInstance()
-            deadline?.let {
-                calendar.timeInMillis = it
-            }
+            textColor = if (deadline == null) PineColor.copy(0.5f) else InverseColor,
+            onClick = {
+                val calendar = Calendar.getInstance()
+                deadline?.let {
+                    calendar.timeInMillis = it
+                }
 
-            val datePicker = android.app.DatePickerDialog(
-                ContextThemeWrapper(context, theme),
-                { _, year, month, day ->
-                    calendar.set(year, month, day)
-
-                    // Show time picker after date is selected
-                    val timePickerDialog = android.app.TimePickerDialog(
-                        ContextThemeWrapper(context, theme),
-                        { _, hourOfDay, minute ->
-                            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                            calendar.set(Calendar.MINUTE, minute)
-                            calendar.set(Calendar.SECOND, 0)
-                            calendar.set(Calendar.MILLISECOND, 0)
-                            deadline = calendar.timeInMillis
-                        },
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        true
-                    )
-                    timePickerDialog.show()
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            )
-            datePicker.show()
-        }
+                val datePicker = android.app.DatePickerDialog(
+                    ContextThemeWrapper(context, theme),
+                    { _, year, month, day ->
+                        calendar.set(year, month, day)
+                        val timePickerDialog = android.app.TimePickerDialog(
+                            ContextThemeWrapper(context, theme),
+                            { _, hourOfDay, minute ->
+                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                                calendar.set(Calendar.MINUTE, minute)
+                                calendar.set(Calendar.SECOND, 0)
+                                calendar.set(Calendar.MILLISECOND, 0)
+                                deadline = calendar.timeInMillis
+                            },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            true
+                        )
+                        timePickerDialog.show()
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                )
+                datePicker.show()
+            },
+            showClear = deadline != null,
+            onClear = { deadline = null }
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -262,21 +257,20 @@ fun NewTaskScreen(
                         projects.find { it.projectId == id }?.title
                             ?: stringResource(R.string.select_project)
                     } ?: stringResource(R.string.project_placeholder),
-                    style = H2,
+                    style = H2, maxLines = 2, overflow = TextOverflow.Ellipsis,
                     color = if (selectedProjectId == null) PineColor.copy(0.5f) else InverseColor
                 )
             }
             Icon(
-                painter = painterResource(id = R.drawable.arrow_down),
-                contentDescription = null,
-                tint = PineColor,
-                modifier = Modifier.rotate(if (expanded) 180f else 0f)
+                painter = painterResource(R.drawable.arrow_down), contentDescription = null,
+                tint = PineColor, modifier = Modifier
+                    .padding(end = 8.dp)
+                    .rotate(if (expanded) 180f else 0f)
             )
         }
         if (expanded) Box(modifier = Modifier.fillMaxWidth()) {
             DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
+                expanded = expanded, onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .background(BgColor)
                     .padding(horizontal = 8.dp)
@@ -352,7 +346,8 @@ fun NewTaskScreen(
                                 )
                                 Text(
                                     project.title, fontFamily = Montserrat, fontSize = 16.sp,
-                                    fontWeight = W500, color = InverseColor
+                                    fontWeight = W500, color = InverseColor, maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }, onClick = {
@@ -364,115 +359,32 @@ fun NewTaskScreen(
             }
         }
         HorizontalDivider(thickness = 0.5.dp, color = PineColor.copy(0.5f))
-        TaskOption(text = stringResource(R.string.add_repeat), iconRes = R.drawable.repeat) {
-            showRepeatOptions = !showRepeatOptions
-            if (showRepeatOptions && repeatInterval == null) {
-                repeatInterval = "0000000"
-            }
-        }
-
-        if (showRepeatOptions) {
-            RepeatSection(
-                repeatInterval = repeatInterval ?: "0000000",
-                onDaySelected = { day, selected ->
-                    val days = repeatInterval?.toCharArray() ?: CharArray(7) { '0' }
-                    days[day] = if (selected) '1' else '0'
-                    repeatInterval = String(days)
-                }
-            )
-        }
         TaskOption(
             text = if (estimatedDurationMs > 0) String.format(
-                Locale.getDefault(),
-                "%02d:%02d:00",
-                estimatedDurationMs / 60,
-                estimatedDurationMs % 60
-            ) else stringResource(R.string.add_time_to_task),
-            iconRes = R.drawable.time
-        ) {
-            showDurationPicker = true
-        }
-
-        if (showDurationPicker) {
-            TimeInputDialog(
-                initialHours = estimatedDurationMs / 60L,
-                initialMinutes = estimatedDurationMs % 60L,
-                onDismiss = { showDurationPicker = false },
-                onTimeSet = { hours, minutes ->
-                    estimatedDurationMs = hours * 60L + minutes
-                    showDurationPicker = false
-                }
-            )
-        }
+                Locale.getDefault(), "%02d:%02d:00", estimatedDurationMs / (60 * 60 * 1000),
+                (estimatedDurationMs % (60 * 60 * 1000)) / (60 * 1000)
+            ) else stringResource(R.string.add_time_to_task), iconRes = R.drawable.time,
+            onClick = { showDurationPicker = true }, showClear = estimatedDurationMs > 0,
+            onClear = { estimatedDurationMs = 0L }
+        )
+        if (showDurationPicker) TimeInputDialog(
+            initialHours = if (estimatedDurationMs > 0) estimatedDurationMs / (60 * 60 * 1000) else 0,
+            initialMinutes = if (estimatedDurationMs > 0) (estimatedDurationMs % (60 * 60 * 1000)) / (60 * 1000) else 0,
+            onDismiss = { showDurationPicker = false },
+            onTimeSet = { hours, minutes ->
+                estimatedDurationMs =
+                    if (hours == 0L && minutes == 0L) 0L else hours * 60L * 60L * 1000L + minutes * 60L * 1000L
+                showDurationPicker = false
+            }
+        )
     }
 }
 
 @Composable
-fun RepeatSection(
-    repeatInterval: String,
-    onDaySelected: (Int, Boolean) -> Unit
+fun TaskOption(
+    text: String, iconRes: Int, textColor: Color = InverseColor, onClick: () -> Unit,
+    showClear: Boolean = false, onClear: (() -> Unit)? = null
 ) {
-    val daysOfWeek = listOf("П", "В", "С", "Ч", "П", "С", "В")
-    val selectedDays = repeatInterval.mapIndexed { index, c -> index to (c == '1') }.toMap()
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            daysOfWeek.forEachIndexed { index, day ->
-                val isSelected = selectedDays[index] == true
-
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(if (isSelected) PineColor else Color.Transparent)
-                        .border(1.dp, PineColor, CircleShape)
-                        .clickable { onDaySelected(index, !isSelected) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = day,
-                        color = if (isSelected) Color.White else PineColor,
-                        fontSize = 14.sp,
-                        fontWeight = W500
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Optional: Time selection for repeat
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xFFE5FBE5))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "12:30",
-                    color = Color.Black,
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun TaskOption(text: String, iconRes: Int, textColor: Color = InverseColor, onClick: () -> Unit) {
     Column {
         Row(
             modifier = Modifier
@@ -492,6 +404,17 @@ fun TaskOption(text: String, iconRes: Int, textColor: Color = InverseColor, onCl
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(text = text, style = H2, color = textColor)
+                if (showClear && onClear != null) {
+                    Spacer(Modifier.width(12.dp))
+                    IconButton(onClick = { onClear() }, modifier = Modifier.size(16.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Clear",
+                            tint = InverseColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
             }
         }
         HorizontalDivider(thickness = 0.5.dp, color = PineColor.copy(0.5f))
@@ -505,11 +428,3 @@ fun getDatePickerTheme(): Int {
     return if (isDarkTheme()) R.style.CustomDatePickerDarkTheme
     else R.style.CustomDatePickerLightTheme
 }
-
-//@Composable
-//fun getTimePickerTheme(): Int {
-//    return if (isDarkTheme()) R.style.CustomTimePickerDarkTheme
-//    else R.style.CustomTimePickerLightTheme
-//}
-
-// TimeInputDialog and OutlinedTimeField moved to separate file

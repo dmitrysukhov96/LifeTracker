@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -77,8 +79,7 @@ fun NewProjectScreen(
     }
     var selectedColor = Color(selectedColorInt)
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-
-//    LaunchedEffect(selectedColor) {
+    LaunchedEffect(Unit) {
         setTopBarState(
             TopBarState(
                 title = if (project != null) context.getString(R.string.edit_project) else context.getString(
@@ -101,10 +102,18 @@ fun NewProjectScreen(
                     IconButton(onClick = {
                         if (project != null) viewModel.updateProject(
                             project.copy(
-                                title = title, description = descr, color = selectedColorInt, imagePath = currentImagePath
+                                title = title,
+                                description = descr,
+                                color = selectedColorInt,
+                                imagePath = currentImagePath
                             )
                         ) else viewModel.addProject(
-                            Project(title = title, description = descr, color = selectedColorInt, imagePath = currentImagePath)
+                            Project(
+                                title = title,
+                                description = descr,
+                                color = selectedColorInt,
+                                imagePath = currentImagePath
+                            )
                         )
                         navController.navigateUp()
                     }) {
@@ -115,34 +124,33 @@ fun NewProjectScreen(
                     }
                 }
             })
-//    }
-
+    }
     Column(
-        modifier = Modifier
+        Modifier
             .background(BgColor)
             .fillMaxSize()
             .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
         BasicTextField(
             value = title, onValueChange = { if (it.length <= 90) title = it },
             textStyle = H1.copy(color = InverseColor), decorationBox = { innerTextField ->
-                Box(modifier = Modifier.fillMaxWidth()) {
+                Box(Modifier.fillMaxWidth()) {
                     if (title.isEmpty())
                         Text(
-                            stringResource(R.string.project_title),
-                            style = H1,
+                            stringResource(R.string.project_title), style = H1,
                             color = selectedColor.copy(0.5f)
                         )
                     innerTextField()
                 }
-            }, modifier = Modifier.fillMaxWidth(), maxLines = 1
+            }, modifier = Modifier.fillMaxWidth(), maxLines = 1,
+            cursorBrush = SolidColor(selectedColor)
         )
         Spacer(modifier = Modifier.height(8.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
         BasicTextField(
-            value = descr,
+            value = descr, cursorBrush = SolidColor(selectedColor),
             onValueChange = { descr = it },
             textStyle = TextStyle(
                 fontSize = 16.sp,
@@ -182,9 +190,11 @@ fun NewProjectScreen(
         }
 
         if (currentImagePath.isNotEmpty()) {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
                 Image(
                     painter = rememberAsyncImagePainter(File(context.filesDir, currentImagePath)),
                     contentDescription = stringResource(R.string.selected_image),
@@ -245,7 +255,9 @@ fun NewProjectScreen(
         }
         Column(Modifier.padding(top = 32.dp)) {
             SubtitleWithIcon(
-                textRes = R.string.select_color, iconRes = R.drawable.palette, iconColor = selectedColor
+                textRes = R.string.select_color,
+                iconRes = R.drawable.palette,
+                iconColor = selectedColor
             )
             ColorPicker(
                 selectedColorInt = selectedColorInt,

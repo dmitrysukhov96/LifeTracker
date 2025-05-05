@@ -49,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
@@ -68,7 +67,7 @@ import org.joda.time.format.DateTimeFormat
 
 @Composable
 fun TrackerScreen(
-    setTopBarState: (TopBarState) -> Unit, trackerViewModel: TrackerViewModel = hiltViewModel(),
+    setTopBarState: (TopBarState) -> Unit, trackerViewModel: TrackerViewModel,
     navController: NavHostController
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
@@ -118,9 +117,7 @@ fun TrackerScreen(
                     selectedEvent = null
                     isTrackerStart = true
                     showTaskDialog = true
-                } else {
-                    trackerViewModel.stopEvent()
-                }
+                } else trackerViewModel.stopEvent()
             }
         )
         

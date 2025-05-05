@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -101,11 +102,9 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
             it.startActivity(it.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
     }
-
     LaunchedEffect(selectedLanguage) {
         setTopBarState(TopBarState(context.getString(R.string.settings)))
     }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,52 +113,38 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
     ) {
         Text(
             text = stringResource(R.string.username),
-            color = InverseColor,
-            style = SimpleText,
+            color = InverseColor, style = SimpleText,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
         Row(verticalAlignment = Alignment.CenterVertically) {
             BasicTextField(
-                value = editedUserName,
-                onValueChange = { editedUserName = it },
-                textStyle = H1.copy(color = InverseColor),
+                value = editedUserName, cursorBrush = SolidColor(PineColor),
+                onValueChange = { editedUserName = it }, textStyle = H1.copy(color = InverseColor),
                 modifier = Modifier.weight(1f)
             )
-
             if (editedUserName != currentUserName && editedUserName.isNotBlank()) {
                 IconButton(
-                    modifier = Modifier.size(20.dp),
-                    onClick = {
-                        sharedPref.edit {
-                            putString("user_name", editedUserName.trim())
-                        }
+                    modifier = Modifier.size(20.dp), onClick = {
+                        sharedPref.edit { putString("user_name", editedUserName.trim()) }
                         currentUserName = editedUserName
                     }
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.tick),
-                        contentDescription = null,
-                        tint = PineColor,
-                        modifier = Modifier.size(20.dp)
+                        painter = painterResource(R.drawable.tick), contentDescription = null,
+                        tint = PineColor, modifier = Modifier.size(20.dp)
                     )
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
         HorizontalDivider()
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
         Text(
-            text = stringResource(R.string.theme),
-            color = InverseColor,
-            style = SimpleText,
+            text = stringResource(R.string.theme), color = InverseColor, style = SimpleText,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
         Box(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
+            Row(modifier = Modifier
                     .clickable { themeExpanded = true }
                     .fillMaxWidth()
                     .height(48.dp)
@@ -178,19 +163,12 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
                         ThemeMode.LIGHT.name -> stringResource(ThemeMode.LIGHT.stringRes)
                         ThemeMode.DARK.name -> stringResource(ThemeMode.DARK.stringRes)
                         else -> stringResource(ThemeMode.SYSTEM.stringRes)
-                    },
-                    fontFamily = Montserrat,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = InverseColor,
-                    modifier = Modifier.weight(1f)
+                    }, fontFamily = Montserrat, fontSize = 16.sp, fontWeight = FontWeight.Medium,
+                    color = InverseColor, modifier = Modifier.weight(1f)
                 )
-
                 Icon(
-                    painterResource(R.drawable.arrow_down),
-                    contentDescription = null,
-                    tint = PineColor,
-                    modifier = Modifier
+                    painterResource(R.drawable.arrow_down), contentDescription = null,
+                    tint = PineColor, modifier = Modifier
                         .padding(top = 1.dp)
                         .rotate(if (themeExpanded) 180f else 0f)
                 )

@@ -15,16 +15,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,10 +38,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.R
-import com.dmitrysukhov.lifetracker.daily.DAILY_PLANNER_SCREEN
+import com.dmitrysukhov.lifetracker.common.ui.TimeTracker
 import com.dmitrysukhov.lifetracker.habits.HabitsViewModel
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
+import com.dmitrysukhov.lifetracker.tracker.EventDialog
+import com.dmitrysukhov.lifetracker.tracker.TrackerViewModel
+import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -49,14 +54,17 @@ import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.isDarkTheme
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 const val DASHBOARD_SCREEN = "dashboard_screen"
 
 @Composable
 fun DashboardScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
-    todoViewModel: TodoViewModel, habitsViewModel: HabitsViewModel
+    todoViewModel: TodoViewModel, habitsViewModel: HabitsViewModel, trackerViewModel: TrackerViewModel
 ) {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val greeting = when {
@@ -65,76 +73,122 @@ fun DashboardScreen(
         hour < 17 -> stringResource(R.string.good_afternoon)
         else -> stringResource(R.string.good_evening)
     }
+        //todo add greeting
     val context = LocalContext.current
     val tasks = todoViewModel.todoList.collectAsStateWithLifecycle(listOf()).value
     val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
-    
-    val completedTasks = tasks.count { it.isDone }
-    val totalTasks = tasks.size
-    val completedHabits = habits.size // TODO: implement real habit completion tracking
-
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(context.getString(R.string.app_name)) {
-                IconButton({ navController.navigate(DAILY_PLANNER_SCREEN) }) {
-                    Icon(Icons.Default.DateRange, null, tint = Color.White)
-                }
-            }
+    val projects = todoViewModel.projects.collectAsStateWithLifecycle().value
+    val lastEvent = trackerViewModel.lastEvent.collectAsStateWithLifecycle().value
+    var selectedEvent by remember { mutableStateOf<Event?>(null) }
+    var isTrackerStart by remember { mutableStateOf(false) }
+    var showTaskDialog by remember { mutableStateOf(false) }
+    if (showTaskDialog) {
+        EventDialog(
+            event = selectedEvent,
+            projects = projects,
+            onDismiss = {
+                showTaskDialog = false
+                selectedEvent = null
+            },
+            onSave = { event ->
+                if (event.eventId == 0L) trackerViewModel.insertEvent(event)
+                else trackerViewModel.updateEvent(event)
+                showTaskDialog = false
+                selectedEvent = null
+            },
+            onDelete = { event ->
+                trackerViewModel.deleteEvent(event.eventId)
+                showTaskDialog = false
+                selectedEvent = null
+            },
+            trackerStart = isTrackerStart,
+            navController = navController
         )
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BgColor)
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp)
-    ) {
-        val sharedPref = context.getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
-        val userName = sharedPref.getString("user_name", "") ?: ""
-
-        Text(
-            text = greeting + if (userName.isNotBlank()) ", $userName!" else "!",
-            style = H1, color = InverseColor, modifier = Modifier.padding(start = 2.dp)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).background(BgColor)) {
+        TimeTracker(
+            lastEvent = lastEvent, projects = projects, onActionClick = {
+                if (lastEvent == null || lastEvent.endTime != null) {
+                    selectedEvent = null
+                    isTrackerStart = true
+                    showTaskDialog = true
+                } else trackerViewModel.stopEvent()
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
         )
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Today's Overview Card
-        StatCard(
-            title = stringResource(R.string.todays_overview),
-            iconPainter = painterResource(R.drawable.plus),
-            content = {
-                Column {
-                    StatRowWithPainter(stringResource(R.string.tasks_completed_row), "$completedTasks/$totalTasks", painterResource(R.drawable.plus))
-                    StatRowWithPainter(stringResource(R.string.habits_tracked), "$completedHabits/${habits.size}", painterResource(R.drawable.plus))
-                    
-                    // Get focus sessions count from shared preferences
-                    val statsPref = context.getSharedPreferences("user_stats", android.content.Context.MODE_PRIVATE)
-                    val focusSessionsCount = statsPref.getInt("focus_sessions_count", 0)
-                    StatRowWithPainter(stringResource(R.string.focus_sessions), "$focusSessionsCount", painterResource(R.drawable.plus))
-                    
-                    StatRowWithPainter(stringResource(R.string.focus_time), "2h 30m", painterResource(R.drawable.plus))
+        Spacer(modifier = Modifier.height(8.dp))
+        val todayStart = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val tomorrowStart = todayStart + 24 * 60 * 60 * 1000
+        val todayTasks = tasks.filter { it.dateTime != null && it.dateTime >= todayStart && it.dateTime < tomorrowStart }
+        Card(
+            Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
+            elevation = CardDefaults.cardElevation(4.dp),
+            shape = RoundedCornerShape(16.dp), colors = cardColors(containerColor = PineColor.copy(0.2f))
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text(text = stringResource(R.string.today) + " Tasks", style = H1)
+                if (todayTasks.isEmpty()) {
+                    Text(text = "No tasks for today", style = SimpleText)
+                } else {
+                    todayTasks.forEach { task ->
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = " - "+task.text, style = SimpleText, modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
                 }
             }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Weekly Progress Card
-        StatCard(
-            title = stringResource(R.string.weekly_progress),
-            iconPainter = painterResource(R.drawable.plus),
-            content = {
-                Column {
-                    StatRowWithPainter(stringResource(R.string.tasks), "85%", painterResource(R.drawable.plus))
-                    StatRowWithPainter(stringResource(R.string.habits), "92%", painterResource(R.drawable.plus))
-                    StatRowWithPainter(stringResource(R.string.focus), "78%", painterResource(R.drawable.plus))
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        // Tasks Block
+        val completedTasks = tasks.count { it.isDone }
+        val totalTasks = tasks.size
+        val now = System.currentTimeMillis()
+        val monthStart = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val weekStart = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val todayCompleted = tasks.count { it.isDone && it.completeDate != null && it.completeDate >= todayStart && it.completeDate < tomorrowStart }
+        val weekCompleted = tasks.count { it.isDone && it.completeDate != null && it.completeDate >= weekStart }
+        val monthCompleted = tasks.count { it.isDone && it.completeDate != null && it.completeDate >= monthStart }
+        // Record day
+        val completedByDay = tasks.filter { it.isDone && it.completeDate != null }
+            .groupBy { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it.completeDate!!)) }
+            .mapValues { it.value.size }
+        val recordDay = completedByDay.maxByOrNull { it.value }
+        Card(
+            Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
+            elevation = CardDefaults.cardElevation(4.dp),
+            shape = RoundedCornerShape(16.dp), colors = cardColors(containerColor = PineColor.copy(0.2f))
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text(text = "Tasks", style = H1)
+                Text(text = "$completedTasks/$totalTasks completed", style = SimpleText)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "This month completed: $monthCompleted", style = SimpleText)
+                Text(text = "This week completed: $weekCompleted", style = SimpleText)
+                Text(text = "Today completed: $todayCompleted", style = SimpleText)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (recordDay != null) {
+                    Text(text = "Record day: ${recordDay.key} - ${recordDay.value} tasks completed!", style = SimpleText, color = AccentColor)
                 }
             }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        }
+        Spacer(modifier = Modifier.height(12.dp))
         // Top Habits Card
         StatCard(
             title = stringResource(R.string.top_habits),
@@ -186,8 +240,9 @@ fun StatCard(title: String, iconPainter: Painter, content: @Composable () -> Uni
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 24.dp)
             .clip(RoundedCornerShape(16.dp)),
-        colors = CardDefaults.cardColors(containerColor = (Color.White.copy(if (isDarkTheme()) 0.05f else 1f)))
+        colors = cardColors(containerColor = (Color.White.copy(if (isDarkTheme()) 0.05f else 1f)))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

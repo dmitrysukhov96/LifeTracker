@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
@@ -276,9 +277,13 @@ fun TodoListScreen(
                                     "completed" to completedCategory
                                 ),
                                 onCheckedChange = { isChecked ->
-                                    viewModel.updateTask(
-                                        todoItem.copy(isDone = isChecked)
-                                    )
+                                    val now = System.currentTimeMillis()
+                                    val updatedTask = if (isChecked) {
+                                        todoItem.copy(isDone = true, completeDate = now)
+                                    } else {
+                                        todoItem.copy(isDone = false, completeDate = null)
+                                    }
+                                    viewModel.updateTask(updatedTask)
                                 },
                                 isRunning = isRunning,
                                 onClick = {
@@ -299,7 +304,8 @@ fun TodoListScreen(
                                 },
                                 onRemainingSecondsChanged = { seconds ->
                                     remainingDuration = seconds.toLong() * 1000L
-                                }
+                                },
+                                lastEvent = lastEvent
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                         }
@@ -363,7 +369,8 @@ fun TodoListScreen(
 fun TodoListItem(
     item: TodoItem, projects: List<Project>, category: String, categoryNames: Map<String, String>,
     onCheckedChange: (Boolean) -> Unit, isRunning: Boolean, onClick: () -> Unit,
-    onDurationClick: (Int) -> Unit, onRemainingSecondsChanged: (Int) -> Unit
+    onDurationClick: (Int) -> Unit, onRemainingSecondsChanged: (Int) -> Unit,
+    lastEvent: Event?
 ) {
     val context = LocalContext.current
     Box(
@@ -391,7 +398,7 @@ fun TodoListItem(
                     isRunning = isRunning,
                     onClick = { remainingSeconds -> onDurationClick(remainingSeconds) },
                     onRemainingSecondsChanged = onRemainingSecondsChanged,
-                    isEnabled = !item.isDone && (duration > 0 || isRunning)
+                    lastEventStartTime = if (isRunning && lastEvent?.startTime != null) lastEvent.startTime else null
                 )
             }
         }
@@ -495,13 +502,14 @@ fun DurationBadge(
     isRunning: Boolean,
     onClick: (Int) -> Unit,
     onRemainingSecondsChanged: (Int) -> Unit,
-    isEnabled: Boolean
+    lastEventStartTime: Long? = null
 ) {
     val durationSeconds = (duration / 1000).toInt()
-    var remainingSeconds by remember(
-        durationSeconds,
-        isRunning
-    ) { mutableIntStateOf(durationSeconds) }
+    val initialRemainingSeconds = if (isRunning && lastEventStartTime != null) {
+        val elapsed = ((System.currentTimeMillis() - lastEventStartTime) / 1000).toInt()
+        (durationSeconds - elapsed).coerceAtLeast(0)
+    } else durationSeconds
+    var remainingSeconds by remember(durationSeconds, isRunning, lastEventStartTime) { mutableIntStateOf(initialRemainingSeconds) }
     var isCountingDown by remember(isRunning) { mutableStateOf(isRunning) }
 
     LaunchedEffect(remainingSeconds) {
@@ -510,28 +518,27 @@ fun DurationBadge(
         }
     }
 
-    LaunchedEffect(isRunning) {
+    LaunchedEffect(isRunning, lastEventStartTime) {
         isCountingDown = isRunning
         if (!isRunning) {
             remainingSeconds = durationSeconds
+        } else if (lastEventStartTime != null) {
+            val elapsed = ((System.currentTimeMillis() - lastEventStartTime) / 1000).toInt()
+            remainingSeconds = (durationSeconds - elapsed).coerceAtLeast(0)
         }
     }
 
-    LaunchedEffect(isCountingDown) {
+    LaunchedEffect(isCountingDown, lastEventStartTime) {
         if (isCountingDown) {
-            val startTimeMs = System.currentTimeMillis()
-
+            var baseStart = lastEventStartTime ?: System.currentTimeMillis()
             while (isCountingDown) {
-                val elapsedTimeMs = System.currentTimeMillis() - startTimeMs
+                val elapsedTimeMs = System.currentTimeMillis() - baseStart
                 val elapsedSeconds = (elapsedTimeMs / 1000).toInt()
                 val newRemainingSeconds = (durationSeconds - elapsedSeconds).coerceAtLeast(0)
-
                 if (newRemainingSeconds != remainingSeconds) {
                     remainingSeconds = newRemainingSeconds
                 }
-
                 delay(1000)
-
                 if (remainingSeconds <= 0) {
                     isCountingDown = false
                     break
@@ -540,7 +547,11 @@ fun DurationBadge(
         }
     }
 
-    val effectivelyEnabled = isEnabled || isCountingDown
+    // Always show the actual duration when not counting down
+    val displayTime = if (isCountingDown) remainingSeconds else durationSeconds
+
+    // Always enable if duration is greater than 0 or if actively counting down
+    val effectivelyEnabled = durationSeconds > 0 || isCountingDown
 
     val backgroundColor = when {
         !effectivelyEnabled -> Color.Gray
@@ -577,7 +588,7 @@ fun DurationBadge(
             modifier = Modifier.size(8.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
-        val timeText = formatDuration(if (isCountingDown) remainingSeconds else durationSeconds)
+        val timeText = formatDuration(displayTime)
         Text(
             text = timeText,
             color = contentColor,

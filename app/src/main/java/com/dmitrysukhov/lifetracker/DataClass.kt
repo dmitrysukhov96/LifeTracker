@@ -12,7 +12,8 @@ data class TodoItem(
     val dateTime: Long? = null,
     val repeatInterval: String? = null,
     val estimatedDurationMs: Long? = null,
-    val isDone: Boolean = false
+    val isDone: Boolean = false,
+    val completeDate: Long? = null
 )
 
 @Entity(tableName = "projects")
