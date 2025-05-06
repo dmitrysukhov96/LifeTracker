@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -22,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,8 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,19 +62,42 @@ import java.util.Locale
 const val DASHBOARD_SCREEN = "dashboard_screen"
 
 @Composable
+fun CategoryBlock(title: String, content: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+            .background(
+                if (isDarkTheme()) PineColor.copy(alpha = 0.1f) else Color.White,
+                RoundedCornerShape(20.dp)
+            )
+            .padding(20.dp)
+    ) {
+        Text(
+            text = title,
+            style = H2.copy(fontWeight = FontWeight.Bold),
+            color = InverseColor,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        content()
+    }
+}
+
+@Composable
 fun DashboardScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
-    todoViewModel: TodoViewModel, habitsViewModel: HabitsViewModel, trackerViewModel: TrackerViewModel
+    todoViewModel: TodoViewModel, habitsViewModel: HabitsViewModel,
+    trackerViewModel: TrackerViewModel
 ) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) { setTopBarState(TopBarState(context.getString(R.string.app_name))) }
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val greeting = when {
-        hour < 4 -> stringResource(R.string.good_night)
-        hour < 12 -> stringResource(R.string.good_morning)
-        hour < 17 -> stringResource(R.string.good_afternoon)
-        else -> stringResource(R.string.good_evening)
+        hour < 4 -> "🌙 Good night"
+        hour < 12 -> "☀️ Good morning"
+        hour < 17 -> "🌤️ Good afternoon"
+        else -> "🌆 Good evening"
     }
-        //todo add greeting
-    val context = LocalContext.current
     val tasks = todoViewModel.todoList.collectAsStateWithLifecycle(listOf()).value
     val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
     val projects = todoViewModel.projects.collectAsStateWithLifecycle().value
@@ -82,30 +105,27 @@ fun DashboardScreen(
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
     var isTrackerStart by remember { mutableStateOf(false) }
     var showTaskDialog by remember { mutableStateOf(false) }
-    if (showTaskDialog) {
-        EventDialog(
-            event = selectedEvent,
-            projects = projects,
-            onDismiss = {
-                showTaskDialog = false
-                selectedEvent = null
-            },
-            onSave = { event ->
-                if (event.eventId == 0L) trackerViewModel.insertEvent(event)
-                else trackerViewModel.updateEvent(event)
-                showTaskDialog = false
-                selectedEvent = null
-            },
-            onDelete = { event ->
-                trackerViewModel.deleteEvent(event.eventId)
-                showTaskDialog = false
-                selectedEvent = null
-            },
-            trackerStart = isTrackerStart,
-            navController = navController
-        )
-    }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).background(BgColor)) {
+
+    if (showTaskDialog) EventDialog(
+        event = selectedEvent, projects = projects, onDismiss = {
+            showTaskDialog = false
+            selectedEvent = null
+        }, onSave = { event ->
+            if (event.eventId == 0L) trackerViewModel.insertEvent(event)
+            else trackerViewModel.updateEvent(event)
+            showTaskDialog = false
+            selectedEvent = null
+        }, onDelete = { event ->
+            trackerViewModel.deleteEvent(event.eventId)
+            showTaskDialog = false
+            selectedEvent = null
+        }, trackerStart = isTrackerStart, navController = navController
+    )
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(BgColor)
+    ) {
         TimeTracker(
             lastEvent = lastEvent, projects = projects, onActionClick = {
                 if (lastEvent == null || lastEvent.endTime != null) {
@@ -113,125 +133,350 @@ fun DashboardScreen(
                     isTrackerStart = true
                     showTaskDialog = true
                 } else trackerViewModel.stopEvent()
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
+            }, modifier = Modifier.padding(bottom = 16.dp)
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        val todayStart = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-        val tomorrowStart = todayStart + 24 * 60 * 60 * 1000
-        val todayTasks = tasks.filter { it.dateTime != null && it.dateTime >= todayStart && it.dateTime < tomorrowStart }
-        Card(
-            Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
-            elevation = CardDefaults.cardElevation(4.dp),
-            shape = RoundedCornerShape(16.dp), colors = cardColors(containerColor = PineColor.copy(0.2f))
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text(text = stringResource(R.string.today) + " Tasks", style = H1)
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 24.dp)) {
+            Text(text = greeting, style = H1, color = PineColor)
+
+            // Today's Tasks
+            val todayStart = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            val tomorrowStart = todayStart + 24 * 60 * 60 * 1000
+            val todayTasks =
+                tasks.filter { it.dateTime != null && it.dateTime >= todayStart && it.dateTime < tomorrowStart && !it.isDone }
+
+            CategoryBlock(title = "📝 Today's Tasks") {
                 if (todayTasks.isEmpty()) {
-                    Text(text = "No tasks for today", style = SimpleText)
+                    Text(
+                        text = "No tasks for today! Enjoy your free time!",
+                        style = SimpleText,
+                        color = PineColor
+                    )
                 } else {
-                    todayTasks.forEach { task ->
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = " - "+task.text, style = SimpleText, modifier = Modifier.padding(start = 8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        todayTasks.forEach { task ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp, horizontal = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(PineColor)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(text = task.text, style = SimpleText, color = InverseColor)
+                            }
                         }
                     }
                 }
             }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        // Tasks Block
-        val completedTasks = tasks.count { it.isDone }
-        val totalTasks = tasks.size
-        val now = System.currentTimeMillis()
-        val monthStart = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, 1)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-        val weekStart = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-        val todayCompleted = tasks.count { it.isDone && it.completeDate != null && it.completeDate >= todayStart && it.completeDate < tomorrowStart }
-        val weekCompleted = tasks.count { it.isDone && it.completeDate != null && it.completeDate >= weekStart }
-        val monthCompleted = tasks.count { it.isDone && it.completeDate != null && it.completeDate >= monthStart }
-        // Record day
-        val completedByDay = tasks.filter { it.isDone && it.completeDate != null }
-            .groupBy { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date(it.completeDate!!)) }
-            .mapValues { it.value.size }
-        val recordDay = completedByDay.maxByOrNull { it.value }
-        Card(
-            Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
-            elevation = CardDefaults.cardElevation(4.dp),
-            shape = RoundedCornerShape(16.dp), colors = cardColors(containerColor = PineColor.copy(0.2f))
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text(text = "Tasks", style = H1)
-                Text(text = "$completedTasks/$totalTasks completed", style = SimpleText)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "This month completed: $monthCompleted", style = SimpleText)
-                Text(text = "This week completed: $weekCompleted", style = SimpleText)
-                Text(text = "Today completed: $todayCompleted", style = SimpleText)
-                Spacer(modifier = Modifier.height(8.dp))
-                if (recordDay != null) {
-                    Text(text = "Record day: ${recordDay.key} - ${recordDay.value} tasks completed!", style = SimpleText, color = AccentColor)
+
+            // Tasks Statistics
+            val completedTasks = tasks.count { it.isDone }
+            val totalTasks = tasks.size
+            val monthStart = Calendar.getInstance().apply {
+                set(Calendar.DAY_OF_MONTH, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            val weekStart = Calendar.getInstance().apply {
+                set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            val todayCompleted =
+                tasks.count { it.isDone && it.completeDate != null && it.completeDate >= todayStart && it.completeDate < tomorrowStart }
+            val weekCompleted =
+                tasks.count { it.isDone && it.completeDate != null && it.completeDate >= weekStart }
+            val monthCompleted =
+                tasks.count { it.isDone && it.completeDate != null && it.completeDate >= monthStart }
+            val completedByDay = tasks.filter { it.isDone && it.completeDate != null }
+                .groupBy {
+                    SimpleDateFormat(
+                        "dd.MM.yyyy",
+                        Locale.getDefault()
+                    ).format(Date(it.completeDate!!))
                 }
-            }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        // Top Habits Card
-        StatCard(
-            title = stringResource(R.string.top_habits),
-            iconPainter = painterResource(R.drawable.plus),
-            content = {
-                Column {
-                    habits.take(3).forEach { habit ->
-                        HabitProgressRow(habit.title, 0.85f)
+                .mapValues { it.value.size }
+            val recordDay = completedByDay.maxByOrNull { it.value }
+
+            CategoryBlock(title = "📊 Tasks Stats") {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "$completedTasks",
+                        style = H2.copy(fontWeight = FontWeight.Bold),
+                        color = PineColor
+                    )
+                    Text(text = " of ", style = SimpleText, color = InverseColor)
+                    Text(
+                        text = "$totalTasks",
+                        style = H2.copy(fontWeight = FontWeight.Bold),
+                        color = PineColor
+                    )
+                    Text(text = " completed", style = SimpleText, color = InverseColor)
+                }
+
+                Row(Modifier.padding(vertical = 8.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text(text = "This month", style = SimpleText, color = InverseColor)
+                        Text(
+                            text = "$monthCompleted",
+                            style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                            color = PineColor
+                        )
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(text = "This week", style = SimpleText, color = InverseColor)
+                        Text(
+                            text = "$weekCompleted",
+                            style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                            color = PineColor
+                        )
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(text = "Today", style = SimpleText, color = InverseColor)
+                        Text(
+                            text = "$todayCompleted",
+                            style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                            color = PineColor
+                        )
                     }
                 }
-            }
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Project Status Card
-        StatCard(
-            title = stringResource(R.string.project_status),
-            iconPainter = painterResource(R.drawable.plus),
-            content = {
-                Column {
-                    ProjectStatusRow(stringResource(R.string.website_redesign), "75%", Color(0xFF4CAF50))
-                    ProjectStatusRow(stringResource(R.string.mobile_app), "45%", Color(0xFF2196F3))
-                    ProjectStatusRow(stringResource(R.string.marketing), "30%", Color(0xFFFFC107))
+                if (recordDay != null) {
+                    Text(
+                        text = "Record: ${recordDay.value} tasks on ${recordDay.key}",
+                        style = SimpleText,
+                        color = AccentColor,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Productivity Insights Card
-        StatCard(
-            title = stringResource(R.string.productivity_insights),
-            iconPainter = painterResource(R.drawable.plus),
-            content = {
-                Column {
-                    InsightRow(stringResource(R.string.most_productive_day), stringResource(R.string.wednesday))
-                    InsightRow(stringResource(R.string.best_time), "9:00 AM - 11:00 AM")
-                    InsightRow(stringResource(R.string.focus_score), "8.5/10")
-                }
+            // Projects
+            CategoryBlock(title = "📁 Projects") {
+                ProjectsSection(projects = projects)
             }
+
+            // Habits & Metrics
+            CategoryBlock(title = "💪 Habits & Metrics") {
+                if (habits.isEmpty()) {
+                    Text(text = "No habits yet!", style = SimpleText, color = PineColor)
+                } else {
+                    Column {
+                        habits.forEach { habit ->
+                            HabitProgressRow(
+                                habitName = habit.title,
+                                progress = 0.7f
+                            ) // Mock progress
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                HabitsMetricsSection(habits = habits)
+            }
+
+            // Tracker Statistics
+            CategoryBlock(title = "⏱️ Tracker Statistics") {
+                TrackerStatsSection()
+            }
+
+            // Turbo Mode Sessions
+            CategoryBlock(title = "🚀 Turbo Mode Sessions") {
+                TurboModeSection()
+            }
+
+            Spacer(Modifier.height(68.dp))
+        }
+    }
+}
+
+// --- MOCK/HELPER SECTIONS ---
+
+@Composable
+fun TrackerStatsSection() {
+    // Mock toggles and progress bars
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(bottom = 8.dp)
+    ) {
+        Text(
+            text = "All time",
+            color = PineColor,
+            style = H2,
+            modifier = Modifier.padding(end = 8.dp)
         )
-        Spacer(Modifier.height(68.dp))
+        Text(
+            text = "Month", style = H2,
+            color = InverseColor.copy(0.5f),
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(
+            text = "Week", style = H2,
+            color = InverseColor.copy(0.5f),
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(text = "Day", style = H2, color = InverseColor.copy(0.5f))
+    }
+    TrackerProgressRow("All Tracked Time", "38:55", 1f, PineColor)
+    TrackerProgressRow("Church", "04:45", 0.12f, Color(0xFF4CAF50))
+    TrackerProgressRow("Personal", "06:05", 0.16f, Color(0xFF2196F3))
+    TrackerProgressRow("Work", "08:45", 0.23f, Color(0xFFFFC107))
+    TrackerProgressRow("Without project", "25:44", 0.66f, Color.Gray)
+}
+
+@Composable
+fun TrackerProgressRow(label: String, value: String, progress: Float, color: Color) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(text = label, style = SimpleText, color = InverseColor)
+            }
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(color.copy(alpha = 0.1f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = value,
+                    style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                    color = color
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(RoundedCornerShape(3.dp)),
+            color = color,
+            trackColor = color.copy(alpha = 0.2f)
+        )
+    }
+}
+
+@Composable
+fun ProjectsSection(projects: List<com.dmitrysukhov.lifetracker.Project>) {
+    // Mock data for demonstration
+    val mockProjects = if (projects.isEmpty()) listOf(
+        Triple("Website Redesign", 12 to 20, 0.6f),
+        Triple("Mobile App", 9 to 15, 0.45f),
+        Triple("Marketing", 3 to 10, 0.3f)
+    ) else projects.map { Triple(it.title, 3 to 5, 0.6f) } // Replace with real stats
+    Column {
+        mockProjects.forEach { (name, pair, percent) ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = name,
+                    style = SimpleText,
+                    color = InverseColor,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "${pair.first}/${pair.second}",
+                    style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                    color = PineColor,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                LinearProgressIndicator(
+                    progress = { percent },
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .height(4.dp)
+                        .padding(horizontal = 8.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = PineColor,
+                    trackColor = PineColor.copy(alpha = 0.2f)
+                )
+                Text(
+                    text = "${(percent * 100).toInt()}%",
+                    style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                    color = PineColor,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun HabitsMetricsSection(habits: List<com.dmitrysukhov.lifetracker.Habit>) {
+    // Mock data for demonstration
+    val mockHabits = if (habits.isEmpty()) listOf(
+        Pair("Read", "3 days in a row! 28 May - 30 May\nMax streak: 5 days! 20 May - 25 May"),
+        Pair("Weight", "min: 79.5, max: 82.5")
+    ) else habits.map { it.title to "3 days in a row! 28 May - 30 May\nMax streak: 5 days! 20 May - 25 May" }
+    Column {
+        mockHabits.forEach { (name, desc) ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = name,
+                    style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                    color = PineColor,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = desc,
+                    style = SimpleText,
+                    color = InverseColor,
+                    modifier = Modifier.weight(2f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TurboModeSection() {
+    // Mock data
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Turbo Mode: 4 sessions. 40 min overall. Well done!",
+            style = SimpleText,
+            color = PineColor
+        )
     }
 }
 
@@ -291,7 +536,7 @@ fun StatRowWithPainter(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = label, 
+                text = label,
                 style = SimpleText,
                 color = InverseColor
             )
@@ -306,30 +551,62 @@ fun StatRowWithPainter(
 
 @Composable
 fun HabitProgressRow(habitName: String, progress: Float) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = cardColors(
+            containerColor = if (isDarkTheme()) PineColor.copy(alpha = 0.05f) else Color.White.copy(
+                alpha = 0.9f
+            )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Text(text = habitName, style = SimpleText, color = InverseColor)
-            Text(
-                text = "${(progress * 100).toInt()}%", color = PineColor,
-                style = SimpleText.copy(fontWeight = FontWeight.Bold),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(PineColor)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = habitName, style = SimpleText, color = InverseColor)
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PineColor.copy(alpha = 0.1f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "${(progress * 100).toInt()}%",
+                        color = PineColor,
+                        style = SimpleText.copy(fontWeight = FontWeight.Bold),
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = PineColor,
+                trackColor = PineColor.copy(alpha = 0.2f)
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
-        LinearProgressIndicator(
-        progress = { progress },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(4.dp)
-            .clip(RoundedCornerShape(2.dp)),
-        color = PineColor,
-        trackColor = PineColor.copy(alpha = 0.2f))
     }
 }
 
