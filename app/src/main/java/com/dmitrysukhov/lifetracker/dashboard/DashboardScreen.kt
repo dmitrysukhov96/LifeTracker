@@ -68,18 +68,11 @@ fun CategoryBlock(title: String, content: @Composable () -> Unit) {
         modifier = Modifier
             .padding(vertical = 6.dp)
             .fillMaxWidth()
-            .background(
-                PineColor.copy(alpha = 0.1f),
-                RoundedCornerShape(20.dp)
-            )
+            .background(PineColor.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
             .padding(16.dp)
     ) {
-        Text(
-            text = title,
-            style = H2.copy(fontWeight = Bold),
-            color = InverseColor,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = title, style = H2.copy(fontWeight = Bold), color = InverseColor)
+        Spacer(Modifier.height(8.dp))
         content()
     }
 }
@@ -101,8 +94,6 @@ fun DashboardScreen(
         hour < 17 -> stringResource(R.string.good_afternoon)
         else -> stringResource(R.string.good_evening)
     } + if (!userName.isNullOrBlank()) ", $userName!" else "!"
-
-
     val tasks = todoViewModel.todoList.collectAsStateWithLifecycle(listOf()).value
     val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
     val projects = projectsViewModel.projects
@@ -161,8 +152,6 @@ fun DashboardScreen(
                 .padding(horizontal = 24.dp, vertical = 4.dp)
         ) {
             Text(text = greeting, style = H1, color = PineColor)
-
-            // Today's Tasks
             val todayStart = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
@@ -174,36 +163,30 @@ fun DashboardScreen(
                 tasks.filter { it.dateTime != null && it.dateTime >= todayStart && it.dateTime < tomorrowStart && !it.isDone }
 
             CategoryBlock(title = "📝 Today's Tasks") {
-                if (todayTasks.isEmpty()) {
-                    Text(
-                        text = "No tasks for today! Enjoy your free time!",
-                        style = SimpleText,
-                        color = PineColor
-                    )
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        todayTasks.forEach { task ->
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(PineColor)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(text = task.text, style = SimpleText, color = InverseColor)
-                            }
+                if (todayTasks.isEmpty()) Text(
+                    text = "No tasks for today! Enjoy your free time!", style = SimpleText,
+                    color = PineColor
+                )
+                else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    todayTasks.forEach { task ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(PineColor)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = task.text, style = SimpleText, color = InverseColor)
                         }
                     }
                 }
             }
-
-            // Tasks Statistics
             val completedTasks = tasks.count { it.isDone }
             val totalTasks = tasks.size
             val monthStart = Calendar.getInstance().apply {
@@ -228,19 +211,14 @@ fun DashboardScreen(
                 tasks.count { it.isDone && it.completeDate != null && it.completeDate >= monthStart }
             val completedByDay = tasks.filter { it.isDone && it.completeDate != null }
                 .groupBy {
-                    SimpleDateFormat(
-                        "dd.MM.yyyy",
-                        Locale.getDefault()
-                    ).format(Date(it.completeDate!!))
-                }
-                .mapValues { it.value.size }
+                    SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                        .format(Date(it.completeDate!!))
+                }.mapValues { it.value.size }
             val recordDay = completedByDay.maxByOrNull { it.value }
-
             CategoryBlock(title = "📊 Tasks Stats") {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "$completedTasks of $totalTasks completed",
-                    style = H2,
+                    text = "$completedTasks of $totalTasks completed", style = H2,
                     color = InverseColor
                 )
                 Spacer(Modifier.height(8.dp))
@@ -248,55 +226,40 @@ fun DashboardScreen(
                     Column(Modifier.weight(1f)) {
                         Text(text = "This month", style = SimpleText, color = InverseColor)
                         Text(
-                            text = "$monthCompleted",
-                            style = SimpleText.copy(fontWeight = Bold),
+                            text = "$monthCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
                         )
                     }
                     Column(Modifier.weight(1f)) {
                         Text(text = "This week", style = SimpleText, color = InverseColor)
                         Text(
-                            text = "$weekCompleted",
-                            style = SimpleText.copy(fontWeight = Bold),
+                            text = "$weekCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
                         )
                     }
                     Column(Modifier.weight(1f)) {
                         Text(text = "Today", style = SimpleText, color = InverseColor)
                         Text(
-                            text = "$todayCompleted",
-                            style = SimpleText.copy(fontWeight = Bold),
+                            text = "$todayCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
                         )
                     }
                 }
                 Spacer(Modifier.height(4.dp))
-                if (recordDay != null) {
-                    Text(
-                        text = "Record: ${recordDay.value} tasks on ${recordDay.key}",
-                        style = SimpleText.copy(fontWeight = Bold),
-                        color = PineColor,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
+                if (recordDay != null) Text(
+                    text = "Record: ${recordDay.value} tasks on ${recordDay.key}",
+                    style = SimpleText.copy(fontWeight = Bold), color = PineColor,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
             CategoryBlock(title = "📁 Projects") { ProjectsSection(projects, tasks) }
             CategoryBlock(title = "💪 Habits & Metrics") {
-                if (habits.isEmpty()) {
+                if (habits.isEmpty())
                     Text(text = "No habits yet!", style = H2, color = PineColor)
-                } else HabitsMetricsSection(habitsViewModel)
-
+                else HabitsMetricsSection(habitsViewModel)
             }
-
-            // Tracker Statistics
-            CategoryBlock(title = "⏱️ Tracker Statistics") {
-                TrackerStatsSection()
-            }
-
-            // Turbo Mode Sessions
-            CategoryBlock(title = "🚀 Turbo Mode Sessions") {
-                TurboModeSection()
-            }
+            CategoryBlock(title = "⏱️ Tracker Statistics") { TrackerStatsSection() }
+            CategoryBlock(title = "🚀 Turbo Mode Sessions") { TurboModeSection() }
             Spacer(Modifier.height(80.dp))
         }
     }
@@ -309,19 +272,15 @@ fun TrackerStatsSection() {
         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
     ) {
         Text(
-            text = "All time",
-            color = PineColor,
-            style = H2,
+            text = "All time", color = PineColor, style = H2,
             modifier = Modifier.padding(end = 6.dp)
         )
         Text(
-            text = "Month", style = H2,
-            color = InverseColor.copy(0.5f),
+            text = "Month", style = H2, color = InverseColor.copy(0.5f),
             modifier = Modifier.padding(end = 6.dp)
         )
         Text(
-            text = "Week", style = H2,
-            color = InverseColor.copy(0.5f),
+            text = "Week", style = H2, color = InverseColor.copy(0.5f),
             modifier = Modifier.padding(end = 6.dp)
         )
         Text(text = "Day", style = H2, color = InverseColor.copy(0.5f))
@@ -335,7 +294,7 @@ fun TrackerStatsSection() {
 
 @Composable
 fun TrackerProgressRow(label: String, value: String, progress: Float, color: Color) {
-    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+    Column(Modifier.padding(vertical = 6.dp)) {
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -356,23 +315,14 @@ fun TrackerProgressRow(label: String, value: String, progress: Float, color: Col
                     .clip(RoundedCornerShape(10.dp))
                     .background(color.copy(alpha = 0.1f))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = value,
-                    style = SimpleText.copy(fontWeight = Bold),
-                    color = color
-                )
-            }
+            ) { Text(text = value, style = SimpleText.copy(fontWeight = Bold), color = color) }
         }
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(Modifier.height(6.dp))
         LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
+            progress = { progress }, trackColor = color.copy(alpha = 0.2f), modifier = Modifier
                 .fillMaxWidth()
                 .height(4.dp)
-                .clip(RoundedCornerShape(2.dp)),
-            color = color,
-            trackColor = color.copy(alpha = 0.2f)
+                .clip(RoundedCornerShape(2.dp)), color = color
         )
     }
 }
@@ -388,38 +338,31 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 val projectColor = Color(project.color)
                 Text(
-                    text = project.title,
-                    style = SimpleText,
-                    color = projectColor, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.width(100.dp)
+                    text = project.title, style = SimpleText, color = projectColor, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.width(100.dp)
                 )
                 Text(
-                    text = "$completedTasks/$totalTasks",
-                    style = SimpleText.copy(fontWeight = Bold),
-                    color = projectColor, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    text = "$completedTasks/$totalTasks", overflow = TextOverflow.Ellipsis,
+                    style = SimpleText.copy(fontWeight = Bold), color = projectColor, maxLines = 1,
                     modifier = Modifier
                         .width(50.dp)
                         .padding(start = 4.dp)
                 )
                 LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
+                    progress = { progress }, modifier = Modifier
                         .weight(1f)
                         .height(3.dp)
                         .padding(horizontal = 4.dp)
-                        .clip(RoundedCornerShape(1.dp)),
-                    color = projectColor,
-                    trackColor = PineColor.copy(alpha = 0.2f),
+                        .clip(RoundedCornerShape(1.dp)), color = projectColor,
+                    trackColor = PineColor.copy(alpha = 0.2f)
                 )
                 Text(
-                    text = "${(progress * 100).toInt()}%",
-                    style = SimpleText.copy(fontWeight = Bold),
-                    color = projectColor, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    text = "${(progress * 100).toInt()}%", overflow = TextOverflow.Ellipsis,
+                    style = SimpleText.copy(fontWeight = Bold), color = projectColor, maxLines = 1,
                     modifier = Modifier
                         .width(50.dp)
                         .padding(start = 4.dp)
@@ -435,27 +378,17 @@ fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         habits.forEach { habit ->
             var metrics by remember { mutableStateOf(Pair("", "")) }
-            LaunchedEffect(habit.id) {
-                habitsViewModel.getHabitMetrics(habit) {
-                    metrics = it
-                }
-            }
+            LaunchedEffect(habit.id) { habitsViewModel.getHabitMetrics(habit) { metrics = it } }
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = habit.title,
-                    style = SimpleText.copy(fontWeight = Bold),
-                    color = Color(habit.color),
-                    modifier = Modifier.weight(1f)
+                    text = habit.title, style = SimpleText.copy(fontWeight = Bold),
+                    color = Color(habit.color), modifier = Modifier.weight(1f)
                 )
-                Column(
-                    modifier = Modifier.weight(2f),
-                    horizontalAlignment = Alignment.End
-                ) {
+                Column(modifier = Modifier.weight(2f), horizontalAlignment = Alignment.End) {
                     Text(metrics.first, style = SimpleText.copy(color = InverseColor))
                     Text(metrics.second, style = SimpleText.copy(color = InverseColor))
                 }
@@ -471,15 +404,7 @@ fun TurboModeSection() {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
     ) {
-        Text(
-            text = "4 sessions",
-            style = SimpleText,
-            color = PineColor
-        )
-        Text(
-            text = "40 min overall. Well done!",
-            style = SimpleText,
-            color = PineColor
-        )
+        Text(text = "4 sessions", style = SimpleText, color = PineColor)
+        Text(text = "40 min overall. Well done!", style = SimpleText, color = PineColor)
     }
 }

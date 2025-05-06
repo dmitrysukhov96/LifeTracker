@@ -87,6 +87,10 @@ fun HabitScreen(
     DisposableEffect(Unit) {
         onDispose { sharedPref.edit { putInt("selected_mode", mode.ordinal) } }
     }
+
+    LaunchedEffect(mode) {
+        sharedPref.edit { putInt("selected_mode", mode.ordinal) }
+    }
     var currentDate by rememberSaveable { mutableStateOf(LocalDate.now(DateTimeZone.UTC)) }
     val periodTitle = when (mode) {
         HabitViewMode.WEEK -> {
@@ -468,13 +472,12 @@ fun HabitCard(
 fun generateMonthDays(currentDate: LocalDate): List<LocalDate?> {
     val firstDayOfMonth = currentDate.withDayOfMonth(1)
     val totalDays = currentDate.dayOfMonth().maximumValue
-    val startOffset = firstDayOfMonth.dayOfWeek % 7
-
+    val startOffset = when (firstDayOfMonth.dayOfWeek) {
+        1 -> 0; 2 -> 1; 3 -> 2; 4 -> 3; 5 -> 4; 6 -> 5; 7 -> 6 ;else -> 0
+    }
     return buildList {
         repeat(startOffset) { add(null) }
-        for (day in 1..totalDays) {
-            add(firstDayOfMonth.withDayOfMonth(day))
-        }
+        for (day in 1..totalDays) { add(firstDayOfMonth.withDayOfMonth(day)) }
     }
 }
 
