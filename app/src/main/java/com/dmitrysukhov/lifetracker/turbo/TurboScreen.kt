@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -48,29 +49,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.utils.AccentColor
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
+import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
+import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import java.util.concurrent.TimeUnit
-import androidx.core.content.edit
-import com.dmitrysukhov.lifetracker.utils.InverseColor
-import com.dmitrysukhov.lifetracker.utils.Small
 
 const val TURBO_SCREEN = "turbo_screen"
 
@@ -177,8 +177,8 @@ fun TurboSetupScreen(
     onAddNewTask: () -> Unit
 ) {
     var showDropdown by remember { mutableStateOf(false) }
-    var hours by remember { mutableStateOf("00") }
-    var minutes by remember { mutableStateOf("45") }
+    var hours by remember { mutableStateOf((session.durationMinutes / 60).toString().padStart(2, '0')) }
+    var minutes by remember { mutableStateOf((session.durationMinutes % 60).toString().padStart(2, '0')) }
     LaunchedEffect(session.durationMinutes) {
         hours = (session.durationMinutes / 60).toString().padStart(2, '0')
         minutes = (session.durationMinutes % 60).toString().padStart(2, '0')
@@ -326,9 +326,8 @@ fun TurboSetupScreen(
                     onValueChange = { newValue ->
                         if (newValue.length <= 2 && newValue.all { it.isDigit() }) {
                             hours = newValue.padStart(2, '0')
-                            val hoursVal = newValue.toIntOrNull() ?: 0
-                            val minutesVal = minutes.toIntOrNull() ?: 0
-                            onDurationChange(hoursVal * 60 + minutesVal)
+                            val totalMinutes = (hours.toIntOrNull() ?: 0) * 60 + (minutes.toIntOrNull() ?: 0)
+                            onDurationChange(totalMinutes)
                         }
                     },
                     modifier = Modifier.width(100.dp),
@@ -338,9 +337,11 @@ fun TurboSetupScreen(
                             stringResource(R.string.hours),
                             style = Small.copy(color = Color.White)
                         )
-                    }, colors = colors(
+                    },
+                    colors = colors(
                         unfocusedBorderColor = Color.White, focusedBorderColor = Color.White
-                    )
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
                 Text(
@@ -352,7 +353,12 @@ fun TurboSetupScreen(
                     value = minutes,
                     onValueChange = { newValue ->
                         if (newValue.length <= 2 && newValue.all { it.isDigit() }) {
-                            minutes = newValue
+                            val minVal = newValue.toIntOrNull() ?: 0
+                            if (minVal in 0..59) {
+                                minutes = newValue.padStart(2, '0')
+                                val totalMinutes = (hours.toIntOrNull() ?: 0) * 60 + minVal
+                                onDurationChange(totalMinutes)
+                            }
                         }
                     },
                     modifier = Modifier.width(100.dp),
@@ -365,7 +371,8 @@ fun TurboSetupScreen(
                     },
                     colors = colors(
                         unfocusedBorderColor = Color.White, focusedBorderColor = Color.White
-                    )
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
         }
@@ -475,7 +482,7 @@ fun TurboCompletedScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
         TurboSetupScreen(
-            todoList = todoList, session = TurboSession(), onTaskSelect = onTaskSelect,
+            todoList = todoList, session = session, onTaskSelect = onTaskSelect,
             onModeSelect = onModeSelect, onDurationChange = onDurationChange, onStart = onStart,
             onAddNewTask = onAddNewTask,
         )

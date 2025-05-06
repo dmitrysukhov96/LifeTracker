@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
@@ -57,6 +59,7 @@ import com.dmitrysukhov.lifetracker.common.ui.TimeTracker
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
@@ -164,12 +167,24 @@ fun EventDialog(
     var startTime by remember { mutableStateOf(startDateTime.toString("HH:mm")) }
     var endDate by remember { mutableStateOf(endDateTime.toString("dd.MM.yyyy")) }
     var endTime by remember { mutableStateOf(endDateTime.toString("HH:mm")) }
-    Dialog(onDismissRequest = onDismiss) {
+    var error: String? by rememberSaveable { mutableStateOf(null) }
+    LaunchedEffect(error) {
+        if (!error.isNullOrEmpty()) {
+            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+            error = null
+        }
+    }
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+    ) {
         Card(
-            modifier = Modifier
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp), shape = RoundedCornerShape(16.dp)
         ) {
+            val now = DateTime.now()
+            fun isFuture(dt: DateTime) = dt.isAfter(now)
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -233,17 +248,14 @@ fun EventDialog(
                                             } ?: Color.Transparent
                                         } ?: Color.Transparent,
                                         RoundedCornerShape(4.dp)
-                                    )
-                                    .let { modifier ->
+                                    ).let { modifier ->
                                         if (selectedProjectId == null) {
                                             modifier.border(
                                                 1.dp,
                                                 InverseColor.copy(0.5f),
                                                 RoundedCornerShape(4.dp)
                                             )
-                                        } else {
-                                            modifier
-                                        }
+                                        } else modifier
                                     }
                             )
                             Text(
@@ -251,10 +263,8 @@ fun EventDialog(
                                     projects.find { it.projectId == id }?.title
                                         ?: stringResource(R.string.select_project)
                                 } ?: stringResource(R.string.no_project),
-                                fontFamily = Montserrat,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = InverseColor
+                                fontFamily = Montserrat, fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium, color = InverseColor
                             )
                         }
                         Icon(
@@ -296,7 +306,6 @@ fun EventDialog(
                             }
                         )
                         HorizontalDivider()
-                        // No project option
                         DropdownMenuItem(
                             text = {
                                 Row(
@@ -308,21 +317,17 @@ fun EventDialog(
                                             .size(16.dp)
                                             .background(Color.Transparent, RoundedCornerShape(4.dp))
                                             .border(
-                                                1.dp,
-                                                InverseColor.copy(0.5f),
+                                                1.dp, InverseColor.copy(0.5f),
                                                 RoundedCornerShape(4.dp)
                                             )
                                     )
                                     Text(
                                         stringResource(R.string.no_project),
-                                        fontFamily = Montserrat,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = InverseColor
+                                        fontFamily = Montserrat, fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium, color = InverseColor
                                     )
                                 }
-                            },
-                            onClick = {
+                            }, onClick = {
                                 setProjectId(null)
                                 expanded = false
                             }
@@ -344,14 +349,11 @@ fun EventDialog(
                                         )
                                         Text(
                                             project.title,
-                                            fontFamily = Montserrat,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = InverseColor
+                                            fontFamily = Montserrat, fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium, color = InverseColor
                                         )
                                     }
-                                },
-                                onClick = {
+                                }, onClick = {
                                     setProjectId(project.projectId)
                                     expanded = false
                                 }
@@ -442,90 +444,54 @@ fun EventDialog(
                     }
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp), horizontalArrangement = Arrangement.End
-                ) {
-                    if (event != null && !trackerStart) {
-                        IconButton(
-                            onClick = { onDelete(event) }, modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            Icon(
-                                painterResource(R.drawable.delete), tint = InverseColor,
-                                contentDescription = stringResource(R.string.delete),
-                            )
-                        }
-                    }
-                    TextButton(onClick = onDismiss) {
-                        Text(
-                            stringResource(R.string.cancel), fontFamily = Montserrat,
-                            fontSize = 16.sp, fontWeight = FontWeight.Medium
-                        )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    if (event != null && !trackerStart) TextButton(onClick = { onDelete(event) }) {
+                        Text(stringResource(R.string.delete), color = PineColor, style = H2)
                     }
                     Spacer(Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            if (taskName.isBlank()) return@Button
-                            if (trackerStart) {
-                                val newEvent = Event(
-                                    eventId = 0, projectId = selectedProjectId ?: 0,
-                                    name = taskName, startTime = DateTime.now().millis,
-                                    endTime = null
-                                )
-                                onSave(newEvent)
-                            } else {
-                                try {
-                                    val startDateTime = DateTime.parse(
-                                        "$startDate $startTime",
-                                        DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
-                                    )
-                                    val endDateTime = DateTime.parse(
-                                        "$endDate $endTime",
-                                        DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
-                                    )
-
-                                    if (endDateTime.isBefore(startDateTime)) {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.error_end_time_before_start),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        return@Button
-                                    }
-
-                                    val newEvent = Event(
-                                        eventId = event?.eventId ?: 0,
-                                        projectId = selectedProjectId ?: 0, name = taskName,
-                                        startTime = startDateTime.millis,
-                                        endTime = endDateTime.millis
-                                    )
-                                    onSave(newEvent)
-                                } catch (e: Exception) {
-                                    when (e) {
-                                        is IllegalArgumentException -> {
-                                            Toast.makeText(
-                                                context,
-                                                context.getString(R.string.error_invalid_date_format),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                            try {
+                                val format = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
+                                val startDT = DateTime.parse("$startDate $startTime", format)
+                                val endDT = DateTime.parse("$endDate $endTime", format)
+                                if (isFuture(startDT) || isFuture(endDT)) error =
+                                    context.getString(R.string.cannot_create_event_in_future) else {
+                                    if (taskName.isBlank()) return@Button
+                                    if (trackerStart) {
+                                        val newEvent = Event(
+                                            eventId = 0, projectId = selectedProjectId ?: 0,
+                                            name = taskName, startTime = DateTime.now().millis,
+                                            endTime = null
+                                        )
+                                        onSave(newEvent)
+                                    } else {
+                                        if (endDT.isBefore(startDT)) {
+                                            error =
+                                                context.getString(R.string.error_end_time_before_start)
+                                            return@Button
                                         }
-
-                                        else -> {
-                                            Toast.makeText(
-                                                context,
-                                                context.getString(R.string.error_parsing_date),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                                        val newEvent = Event(
+                                            eventId = event?.eventId ?: 0,
+                                            projectId = selectedProjectId ?: 0, name = taskName,
+                                            startTime = startDT.millis, endTime = endDT.millis
+                                        )
+                                        onSave(newEvent)
                                     }
                                 }
+                            } catch (e: Exception) {
+                                error = when (e) {
+                                    is IllegalArgumentException ->
+                                        context.getString(R.string.error_invalid_date_format)
+
+                                    else -> context.getString(R.string.error_parsing_date)
+                                }
                             }
-                        }, enabled = taskName.isNotBlank()
+                        }, enabled = taskName.isNotBlank(), modifier = Modifier.height(48.dp)
                     ) {
                         Text(
                             stringResource(R.string.save), fontFamily = Montserrat,
-                            fontSize = 16.sp, fontWeight = FontWeight.Medium
+                            fontWeight = Bold, fontSize = 16.sp
                         )
                     }
                 }

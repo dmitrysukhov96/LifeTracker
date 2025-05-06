@@ -59,36 +59,28 @@ fun TrackerTimeline(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Previous day", tint = PineColor,
-                modifier = Modifier
+                contentDescription = "Previous day", tint = PineColor, modifier = Modifier
                     .clickable { onDateSelected(selectedDate.minusDays(1)) }
                     .padding(8.dp)
             )
-
             Text(
-                text = dateFormatter.print(selectedDate),
-                color = PineColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = Montserrat,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
+                text = dateFormatter.print(selectedDate), color = PineColor,
+                fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = Montserrat,
+                modifier = Modifier.weight(1f), textAlign = TextAlign.Center
             )
-
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Next day", tint = PineColor,
-                modifier = Modifier
+                contentDescription = "Next day", tint = PineColor, modifier = Modifier
                     .clickable { onDateSelected(selectedDate.plusDays(1)) }
                     .padding(8.dp)
             )
         }
-
         Box(
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(bottom = 48.dp)
+                .fillMaxWidth()
                 .verticalScroll(scrollState)
+                .padding(bottom = 48.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
