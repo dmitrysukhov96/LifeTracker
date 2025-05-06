@@ -45,9 +45,7 @@ import java.util.Locale
 
 @Composable
 fun TimeTracker(
-    lastEvent: Event?,
-    projects: List<Project>,
-    onActionClick: () -> Unit,
+    lastEvent: Event?, projects: List<Project>, onActionClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var timeElapsed by remember { mutableLongStateOf(0L) }

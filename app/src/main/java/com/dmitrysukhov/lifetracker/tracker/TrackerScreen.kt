@@ -59,6 +59,7 @@ import com.dmitrysukhov.lifetracker.common.ui.TimeTracker
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
 import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
+import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
@@ -489,10 +490,7 @@ fun EventDialog(
                             }
                         }, enabled = taskName.isNotBlank(), modifier = Modifier.height(48.dp)
                     ) {
-                        Text(
-                            stringResource(R.string.save), fontFamily = Montserrat,
-                            fontWeight = Bold, fontSize = 16.sp
-                        )
+                        Text(stringResource(R.string.save), style = H1.copy(color = Color.White))
                     }
                 }
             }
