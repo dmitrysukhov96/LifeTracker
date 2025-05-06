@@ -51,7 +51,7 @@
     <string name="previous_day">Попередній день</string>
     <string name="next_day">Наступний день</string>
     <string name="start_new_task">Почати нову задачу</string>
-    <string name="edit_task">Редагування</string>
+    <string name="edit">Редагування</string>
     <string name="ok">ОК</string>
     <string name="view_project">Перегляд проекту</string>
     <string name="turbo_screen">Турбо екран</string>
@@ -97,10 +97,10 @@
     <string name="daily_planner">Щоденний планувальник</string>
     <string name="dashboard">Головна</string>
     <string name="username">Ім\'я користувача:</string>
-    <string name="good_morning">Доброго ранку</string>
-    <string name="good_afternoon">Добрий день</string>
-    <string name="good_evening">Добрий вечір</string>
-    <string name="good_night">Доброї ночі</string>
+    <string name="good_morning">☀️ Доброго ранку</string>
+    <string name="good_afternoon">🌤️Добрий день</string>
+    <string name="good_evening">🌆 Добрий вечір</string>
+    <string name="good_night">🌙 Доброї ночі</string>
     <string name="settings">Налаштування</string>
     <string name="select_image">Обрати зображення</string>
     <string name="selected_image">Вибране зображення</string>
@@ -126,7 +126,7 @@
     <string name="resume">Продовжити</string>
     <string name="stop">Стоп</string>
     <string name="complete">Завершити</string>
-    <string name="task_completed">Готово!</string>
+    <string name="task_completed">🎉 Готово!</string>
     <string name="task_completed_in">Ви виконали %1$s за %2$s!</string>
     <string name="what_next">Що робимо далі?</string>
     <string name="go">GO!</string>

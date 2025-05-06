@@ -55,6 +55,7 @@ import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.TimeTracker
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
+import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
@@ -68,7 +69,7 @@ import org.joda.time.format.DateTimeFormat
 @Composable
 fun TrackerScreen(
     setTopBarState: (TopBarState) -> Unit, trackerViewModel: TrackerViewModel,
-    navController: NavHostController
+    navController: NavHostController, projectsViewModel: ProjectsViewModel
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var refreshTrigger by remember { mutableIntStateOf(0) }
@@ -79,40 +80,35 @@ fun TrackerScreen(
     var isTrackerStart by remember { mutableStateOf(false) }
     val title = stringResource(R.string.tracker)
     val lastEvent = trackerViewModel.lastEvent.collectAsState().value
-    
+    val lastProjectId by projectsViewModel.lastCreatedProjectId.collectAsState(null)
+    var selectedProjectId by remember { mutableStateOf(selectedEvent?.projectId) }
+    LaunchedEffect(lastProjectId) {
+        lastProjectId?.let {
+            showTaskDialog = true
+            selectedProjectId = it
+            projectsViewModel.clearLastCreatedProjectId()
+        }
+    }
     LaunchedEffect(Unit) {
         while (true) {
             delay(60000); refreshTrigger += 1
         }
     }
-    
-    LaunchedEffect(refreshTrigger, selectedDate) { 
-        trackerViewModel.refreshEvents() 
-    }
-    
-    LaunchedEffect(Unit) {
-        setTopBarState(TopBarState(title) {
-            IconButton(onClick = {
-                selectedEvent = null
-                isTrackerStart = false
-                showTaskDialog = true
-            }) {
-                Icon(
-                    painterResource(R.drawable.plus), contentDescription = null, tint = Color.White
-                )
-            }
-        })
-    }
-
+    LaunchedEffect(refreshTrigger, selectedDate) { trackerViewModel.refreshEvents() }
+    setTopBarState(TopBarState(title) {
+        IconButton(onClick = {
+            selectedEvent = null
+            isTrackerStart = false
+            showTaskDialog = true
+        }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
+    })
     Column(
         Modifier
             .fillMaxSize()
             .background(BgColor)
     ) {
         TimeTracker(
-            lastEvent = lastEvent,
-            projects = projects,
-            onActionClick = {
+            lastEvent = lastEvent, projects = projects, onActionClick = {
                 if (lastEvent == null || lastEvent.endTime != null) {
                     selectedEvent = null
                     isTrackerStart = true
@@ -120,47 +116,35 @@ fun TrackerScreen(
                 } else trackerViewModel.stopEvent()
             }
         )
-        
         Spacer(Modifier.height(16.dp))
-        
         TrackerTimeline(
-            events = events, 
-            selectedDate = selectedDate, 
-            onDateSelected = { selectedDate = it },
-            projects = projects, 
-            onEventClick = { event ->
+            events = events, selectedDate = selectedDate, onDateSelected = { selectedDate = it },
+            projects = projects, onEventClick = { event ->
                 selectedEvent = event
                 isTrackerStart = false
                 showTaskDialog = true
-            }, 
-            modifier = Modifier
+            }, modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 16.dp)
         )
     }
-    
     if (showTaskDialog) {
         EventDialog(
-            event = selectedEvent, 
-            projects = projects, 
-            onDismiss = {
+            event = selectedEvent, projects = projects, onDismiss = {
                 showTaskDialog = false
                 selectedEvent = null
-            }, 
-            onSave = { event ->
+            }, onSave = { event ->
                 if (event.eventId == 0L) trackerViewModel.insertEvent(event)
                 else trackerViewModel.updateEvent(event)
                 showTaskDialog = false
                 selectedEvent = null
-            }, 
-            onDelete = { event ->
+            }, onDelete = { event ->
                 trackerViewModel.deleteEvent(event.eventId)
                 showTaskDialog = false
                 selectedEvent = null
-            }, 
-            trackerStart = isTrackerStart, 
-            navController = navController
+            }, isTrackerStart, selectedProjectId, { navController.navigate(NEW_PROJECT_SCREEN) },
+            { selectedProjectId = it }
         )
     }
 }
@@ -168,10 +152,10 @@ fun TrackerScreen(
 @Composable
 fun EventDialog(
     event: Event?, projects: List<Project>, onDismiss: () -> Unit, onSave: (Event) -> Unit,
-    onDelete: (Event) -> Unit, trackerStart: Boolean = false, navController: NavHostController
+    onDelete: (Event) -> Unit, trackerStart: Boolean = false,
+    selectedProjectId: Long?, onNavigateToNewProject: () -> Unit, setProjectId: (Long?) -> Unit
 ) {
     var taskName by remember { mutableStateOf(event?.name ?: "") }
-    var selectedProjectId by remember { mutableStateOf(event?.projectId) }
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val startDateTime = event?.let { DateTime(it.startTime) } ?: DateTime.now()
@@ -308,7 +292,7 @@ fun EventDialog(
                             },
                             onClick = {
                                 expanded = false
-                                navController.navigate(NEW_PROJECT_SCREEN)
+                                onNavigateToNewProject()
                             }
                         )
                         HorizontalDivider()
@@ -339,7 +323,7 @@ fun EventDialog(
                                 }
                             },
                             onClick = {
-                                selectedProjectId = null
+                                setProjectId(null)
                                 expanded = false
                             }
                         )
@@ -368,7 +352,7 @@ fun EventDialog(
                                     }
                                 },
                                 onClick = {
-                                    selectedProjectId = project.projectId
+                                    setProjectId(project.projectId)
                                     expanded = false
                                 }
                             )

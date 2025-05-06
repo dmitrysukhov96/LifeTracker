@@ -51,7 +51,7 @@
     <string name="previous_day">Предыдущий день</string>
     <string name="next_day">Следующий день</string>
     <string name="start_new_task">Начать новую задачу</string>
-    <string name="edit_task">Редактировать</string>
+    <string name="edit">Редактирование</string>
     <string name="ok">ОК</string>
     <string name="view_project">Просмотр проекта</string>
     <string name="turbo_screen">Турбо экран</string>
@@ -97,10 +97,10 @@
     <string name="daily_planner">Ежедневный планировщик</string>
     <string name="dashboard">Главная</string>
     <string name="username">Имя пользователя:</string>
-    <string name="good_morning">Доброе утро</string>
-    <string name="good_afternoon">Добрый день</string>
-    <string name="good_evening">Добрый вечер</string>
-    <string name="good_night">Доброй ночи</string>
+    <string name="good_morning">☀️ Доброе утро</string>
+    <string name="good_afternoon">🌤️ Добрый день</string>
+    <string name="good_evening">🌆 Добрый вечер</string>
+    <string name="good_night">🌙 Доброй ночи</string>
     <string name="settings">Настройки</string>
     <string name="select_image">Выбрать изображение</string>
     <string name="selected_image">Выбранное изображение</string>
@@ -126,7 +126,7 @@
     <string name="resume">Продолжить</string>
     <string name="stop">Стоп</string>
     <string name="complete">Завершить</string>
-    <string name="task_completed">Готово!</string>
+    <string name="task_completed">🎉 Готово!</string>
     <string name="task_completed_in">Вы выполнили %1$s за %2$s!</string>
     <string name="what_next">Что делаем дальше?</string>
     <string name="go">GO!</string>

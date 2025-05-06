@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.dmitrysukhov.lifetracker.R
@@ -39,6 +41,7 @@ import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -47,12 +50,12 @@ import java.util.Locale
 @Composable
 fun ProjectsScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
-    viewModel: ProjectsViewModel,
+    todoViewModel: TodoViewModel, viewModel: ProjectsViewModel
 ) {
     val context = LocalContext.current
     val projects by remember { derivedStateOf { viewModel.projects } }
     setTopBarState(
-        TopBarState(stringResource(R.string.projects)) {
+        TopBarState(context.getString(R.string.projects)) {
             IconButton(onClick = {
                 viewModel.selectedProject = null
                 navController.navigate(NEW_PROJECT_SCREEN)
@@ -83,16 +86,22 @@ fun ProjectsScreen(
                     val date = Date(it)
                     SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
                 } ?: stringResource(R.string.no_deadline)
+                val tasks = todoViewModel.todoList.collectAsStateWithLifecycle(emptyList()).value
+                val projectTasks = tasks.filter { it.projectId == project.projectId }
+                val completedTasks = projectTasks.count { it.isDone }
+                val totalTasks = projectTasks.size
+                val progressText = "$completedTasks/$totalTasks completed"
                 ProjectItem(
                     title = project.title,
-                    progress = stringResource(
-                        R.string.tasks_completed, project.completedTasks, project.totalTasks
-                    ),
-                    deadline = deadlineText, gradient = generateGradient(Color(project.color)),
+                    progress = progressText,
+                    deadline = deadlineText,
+                    gradient = generateGradient(Color(project.color)),
                     onClick = {
                         viewModel.selectedProject = project
                         navController.navigate(VIEW_PROJECT_SCREEN)
-                    }, context = context, imagePath = project.imagePath
+                    },
+                    context = context,
+                    imagePath = project.imagePath
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

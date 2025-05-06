@@ -414,7 +414,7 @@ class MainActivity : LocaleBaseActivity() {
                                             contentDescription = null,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height((24 + 56 + 36).dp),
+                                                .height((24 + 56 + 36+ 20).dp),
                                             contentScale = ContentScale.FillWidth
                                         )
                                         Box(
@@ -493,7 +493,7 @@ class MainActivity : LocaleBaseActivity() {
                                         composable(DASHBOARD_SCREEN) {
                                             DashboardScreen(
                                                 setTopBarState, navController, todoViewModel,
-                                                habitViewModel, trackerViewModel
+                                                habitViewModel, trackerViewModel, projectViewModel
                                             )
                                         }
                                         composable(TODOLIST_SCREEN) {
@@ -514,19 +514,19 @@ class MainActivity : LocaleBaseActivity() {
                                         }
                                         composable(NEW_NOTE_SCREEN) {
                                             NewNoteScreen(
-                                                setTopBarState, navController, noteViewModel
+                                                setTopBarState, navController, noteViewModel,
+                                                projectViewModel
                                             )
                                         }
                                         composable(VIEW_PROJECT_SCREEN) {
                                             ViewProjectScreen(
-                                                setTopBarState,
-                                                projectViewModel,
-                                                navController
+                                                setTopBarState, projectViewModel, navController
                                             )
                                         }
                                         composable(TRACKER_SCREEN) {
                                             TrackerScreen(
-                                                setTopBarState, trackerViewModel, navController
+                                                setTopBarState, trackerViewModel, navController,
+                                                projectViewModel
                                             )
                                         }
                                         composable(HABIT_SCREEN) {
@@ -542,8 +542,7 @@ class MainActivity : LocaleBaseActivity() {
                                         }
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(
-                                                setTopBarState,
-                                                navController,
+                                                setTopBarState, navController, todoViewModel,
                                                 projectViewModel
                                             )
                                         }
@@ -560,10 +559,7 @@ class MainActivity : LocaleBaseActivity() {
                                         }
                                         composable(SETTINGS_SCREEN) { SettingsScreen(setTopBarState) }
                                         composable(TURBO_SCREEN) {
-                                            TurboScreen(
-                                                setTopBarState = setTopBarState,
-                                                navController = navController
-                                            )
+                                            TurboScreen(setTopBarState = setTopBarState)
                                         }
                                         composable(ABOUT_DEVELOPER_SCREEN) {
                                             AboutDeveloperScreen(setTopBarState)

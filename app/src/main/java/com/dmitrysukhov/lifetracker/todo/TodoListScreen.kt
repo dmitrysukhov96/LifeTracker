@@ -145,7 +145,7 @@ fun TodoListScreen(
             result[category]?.add(task)
         }
         val categoryOrder = listOf(
-            earlierCategory, yesterdayCategory, todayCategory, 
+            earlierCategory, yesterdayCategory, todayCategory,
             noDateCategory, tomorrowCategory, laterCategory, completedCategory
         )
         LinkedHashMap<String, List<TodoItem>>().apply {
@@ -159,22 +159,20 @@ fun TodoListScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        setTopBarState(TopBarState(context.getString(R.string.todo_list)) {
-            IconButton(onClick = { showImportDialog = true }) {
-                Icon(
-                    painterResource(R.drawable.import_icon),
-                    contentDescription = stringResource(R.string.import_tasks),
-                    tint = Color.White
-                )
-            }
-            IconButton({
-                viewModel.selectedTask = null
-                projectsViewModel.clearLastCreatedProjectId()
-                navController.navigate(NEW_TASK_SCREEN)
-            }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
-        })
-    }
+    setTopBarState(TopBarState(context.getString(R.string.todo_list)) {
+        IconButton(onClick = { showImportDialog = true }) {
+            Icon(
+                painterResource(R.drawable.import_icon),
+                contentDescription = stringResource(R.string.import_tasks),
+                tint = Color.White
+            )
+        }
+        IconButton({
+            viewModel.selectedTask = null
+            projectsViewModel.clearLastCreatedProjectId()
+            navController.navigate(NEW_TASK_SCREEN)
+        }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
+    })
 
     Column(
         modifier = Modifier
@@ -252,7 +250,8 @@ fun TodoListScreen(
                     }
 
                     val isExpanded =
-                        expandedCategories[category] ?: (category == todayCategory || category == noDateCategory)
+                        expandedCategories[category]
+                            ?: (category == todayCategory || category == noDateCategory)
                     if (isExpanded) {
                         items(tasks) { todoItem ->
                             val isRunning =
@@ -402,7 +401,7 @@ fun TodoListItem(
                 )
             }
         }
-        Column(Modifier.align(Alignment.CenterEnd) , horizontalAlignment = Alignment.End) {
+        Column(Modifier.align(Alignment.CenterEnd), horizontalAlignment = Alignment.End) {
             Spacer(Modifier.height(2.dp))
             item.projectId?.let { projectId ->
                 val project = projects.find { it.projectId == projectId }
@@ -432,17 +431,17 @@ fun TodoListItem(
                         time < now -> Color.Red
                         else -> PineColor
                     }
-                    
+
                     Text(
-                        text = timeString, 
+                        text = timeString,
                         color = textColor,
                         style = Small
                     )
-                    
+
                     Icon(
                         painter = painterResource(R.drawable.bell),
-                        contentDescription = null, 
-                        tint = textColor, 
+                        contentDescription = null,
+                        tint = textColor,
                         modifier = Modifier
                             .padding(start = 4.dp)
                             .size(14.dp)
@@ -472,7 +471,7 @@ fun formatTimeBasedOnCategory(
 ): String {
     val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
     val dateTimeFormatter = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-    
+
     return when (category) {
         categoryNames["today"] -> timeFormatter.format(Date(time)) // Just time for today
         categoryNames["yesterday"] -> {
@@ -482,6 +481,7 @@ fun formatTimeBasedOnCategory(
         categoryNames["tomorrow"] -> {
             context.getString(R.string.tomorrow_at, timeFormatter.format(Date(time)))
         }
+
         else -> dateTimeFormatter.format(Date(time)) // Full date and time for other categories
     }
 }
@@ -509,7 +509,11 @@ fun DurationBadge(
         val elapsed = ((System.currentTimeMillis() - lastEventStartTime) / 1000).toInt()
         (durationSeconds - elapsed).coerceAtLeast(0)
     } else durationSeconds
-    var remainingSeconds by remember(durationSeconds, isRunning, lastEventStartTime) { mutableIntStateOf(initialRemainingSeconds) }
+    var remainingSeconds by remember(
+        durationSeconds,
+        isRunning,
+        lastEventStartTime
+    ) { mutableIntStateOf(initialRemainingSeconds) }
     var isCountingDown by remember(isRunning) { mutableStateOf(isRunning) }
 
     LaunchedEffect(remainingSeconds) {
@@ -564,7 +568,7 @@ fun DurationBadge(
         isCountingDown -> Color.White
         else -> PineColor
     }
-    
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,

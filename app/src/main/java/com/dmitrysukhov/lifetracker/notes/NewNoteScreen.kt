@@ -49,6 +49,7 @@ import androidx.navigation.NavController
 import com.dmitrysukhov.lifetracker.Note
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
+import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
@@ -61,7 +62,7 @@ import com.dmitrysukhov.lifetracker.utils.WhitePine
 @Composable
 fun NewNoteScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavController,
-    viewModel: NoteViewModel = hiltViewModel()
+    viewModel: NoteViewModel, projectsViewModel: ProjectsViewModel
 ) {
     val context = LocalContext.current
     var title by remember { mutableStateOf("") }
@@ -78,43 +79,48 @@ fun NewNoteScreen(
         }
     }
     val projects by viewModel.projects.collectAsState()
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = context.getString(R.string.new_note), color = PineColor, topBarActions = {
-                    IconButton(
-                        onClick = {
-                            if (title.isNotBlank()) {
-                                if (isEditing) {
-                                    viewModel.updateNote(
-                                        selectedNote.value?.copy(
+    val lastProjectId by projectsViewModel.lastCreatedProjectId.collectAsState(null)
+    LaunchedEffect(lastProjectId) {
+        lastProjectId?.let {
+            selectedProjectId = it
+            projectsViewModel.clearLastCreatedProjectId()
+        }
+    }
+    setTopBarState(
+        TopBarState(
+            title = context.getString(R.string.new_note), color = PineColor, topBarActions = {
+                IconButton(
+                    onClick = {
+                        if (title.isNotBlank()) {
+                            if (isEditing) {
+                                viewModel.updateNote(
+                                    selectedNote.value?.copy(
+                                        title = title,
+                                        content = content,
+                                        projectId = selectedProjectId
+                                    )
+                                        ?: Note(
                                             title = title,
                                             content = content,
                                             projectId = selectedProjectId
                                         )
-                                            ?: Note(
-                                                title = title,
-                                                content = content,
-                                                projectId = selectedProjectId
-                                            )
-                                    )
-                                } else {
-                                    viewModel.createNote(title, content, selectedProjectId)
-                                }
-                                navController.popBackStack()
+                                )
+                            } else {
+                                viewModel.createNote(title, content, selectedProjectId)
                             }
-                        }, enabled = title.isNotBlank()
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.tick),
-                            contentDescription = stringResource(R.string.save_note),
-                            tint = WhitePine
-                        )
-                    }
+                            navController.popBackStack()
+                        }
+                    }, enabled = title.isNotBlank()
+                ) {
+                    Icon(
+                        painterResource(R.drawable.tick),
+                        contentDescription = stringResource(R.string.save_note),
+                        tint = WhitePine
+                    )
                 }
-            )
+            }
         )
-    }
+    )
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -200,8 +206,7 @@ fun NewNoteScreen(
                 DropdownMenu(
                     expanded = expanded, onDismissRequest = { expanded = false },
                     modifier = Modifier
-                        .background(BgColor)
-                        .border(1.dp, PineColor, RoundedCornerShape(20.dp))
+                        .background(BgColor.copy(0.8f))
                         .clip(RoundedCornerShape(20.dp))
                         .padding(horizontal = 8.dp)
                 ) {

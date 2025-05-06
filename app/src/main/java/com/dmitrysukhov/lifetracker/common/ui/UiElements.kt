@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.dmitrysukhov.lifetracker.utils.Blue
 import com.dmitrysukhov.lifetracker.utils.BlueViolet
 import com.dmitrysukhov.lifetracker.utils.DarkOrange
-import com.dmitrysukhov.lifetracker.utils.ForestGreen
+import com.dmitrysukhov.lifetracker.utils.Rosa
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.LightGreen
@@ -64,7 +64,7 @@ import com.dmitrysukhov.lifetracker.utils.RedViolet
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.SkyBlue
 import com.dmitrysukhov.lifetracker.utils.Small
-import com.dmitrysukhov.lifetracker.utils.Teal
+import com.dmitrysukhov.lifetracker.utils.Brown
 import com.dmitrysukhov.lifetracker.utils.Turquoise
 import com.dmitrysukhov.lifetracker.utils.WhitePine
 import com.dmitrysukhov.lifetracker.utils.Yellow
@@ -160,10 +160,9 @@ fun ToggleSelector(
 fun ColorPicker(
     selectedColorInt: Int, onColorSelected: (Int) -> Unit
 ) {
-    val colors = listOf(
-        Red, DarkOrange, Orange, Yellow, Olive, OliveGreen, LightGreen, Teal, PineColor,
-        ForestGreen, Turquoise, Blue, SkyBlue, PeriwinkleBlue, BlueViolet, Purple, Mauve,
-        RedViolet, Magenta, Pink
+    val colors = listOf(Rosa, Red, DarkOrange, Orange, Yellow, Olive, OliveGreen, LightGreen, PineColor,
+        Turquoise, Blue, SkyBlue, PeriwinkleBlue, BlueViolet, Purple,
+        Magenta, Pink, RedViolet, Mauve, Brown
     )
     Column(Modifier.padding(start = 24.dp)) {
         Row(

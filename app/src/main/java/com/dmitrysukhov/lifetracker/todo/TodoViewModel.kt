@@ -138,23 +138,14 @@ class TodoViewModel @Inject constructor(
     }
 
     fun addTask(
-        text: String,
-        description: String = "",
-        projectId: Long? = null,
-        deadline: Long? = null,
-        repeatInterval: String? = null,
-        estimatedDurationMs: Long? = null
+        text: String, description: String = "", projectId: Long? = null, deadline: Long? = null,
+        repeatInterval: String? = null, estimatedDurationMs: Long? = null
     ) {
         val newTask = TodoItem(
-            text = text,
-            description = description,
-            projectId = projectId,
-            dateTime = deadline,
-            repeatInterval = repeatInterval,
-            estimatedDurationMs = estimatedDurationMs,
+            text = text, description = description, projectId = projectId, dateTime = deadline,
+            repeatInterval = repeatInterval, estimatedDurationMs = estimatedDurationMs,
             isDone = false
         )
-
         viewModelScope.launch {
             val id = todoDao.insertTask(newTask)
             loadTasks()

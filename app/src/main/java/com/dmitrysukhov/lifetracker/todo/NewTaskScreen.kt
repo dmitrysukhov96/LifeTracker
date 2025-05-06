@@ -85,7 +85,7 @@ fun NewTaskScreen(
     val projects by viewModel.projects.collectAsState(listOf())
     val isEditing = viewModel.selectedTask != null
     val topBarTitle =
-        if (isEditing) stringResource(R.string.edit_task) else stringResource(R.string.new_task)
+        if (isEditing) stringResource(R.string.edit) else stringResource(R.string.new_task)
     val saveToastText =
         if (isEditing) stringResource(R.string.update_task_toast) else stringResource(R.string.save_task_toast)
     val lastProjectId by projectsViewModel.lastCreatedProjectId.collectAsState(null)
@@ -95,61 +95,55 @@ fun NewTaskScreen(
             projectsViewModel.clearLastCreatedProjectId()
         }
     }
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = topBarTitle, topBarActions = {
-                    Row {
-                        if (isEditing) IconButton({
-                            viewModel.selectedTask?.let { task ->
-                                viewModel.deleteTask(task)
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.task_deleted),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                navController.navigateUp()
-                            }
-                        }) {
-                            Icon(
-                                painter = painterResource(R.drawable.delete), tint = Color.White,
-                                contentDescription = stringResource(R.string.delete)
-                            )
+    setTopBarState(
+        TopBarState(
+            title = topBarTitle, topBarActions = {
+                Row {
+                    if (isEditing) IconButton({
+                        viewModel.selectedTask?.let { task ->
+                            viewModel.deleteTask(task)
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.task_deleted),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            navController.navigateUp()
                         }
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.delete), tint = Color.White,
+                            contentDescription = stringResource(R.string.delete)
+                        )
+                    }
 
-                        if (title.isNotEmpty()) {
-                            IconButton({
-                                if (isEditing) {
-                                    viewModel.selectedTask?.let { task ->
-                                        viewModel.updateTask(
-                                            task.copy(
-                                                text = title, description = description,
-                                                projectId = selectedProjectId, dateTime = deadline,
-                                                repeatInterval = repeatInterval,
-                                                estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
-                                            )
-                                        )
-                                    }
-                                } else viewModel.addTask(
+                    if (title.isNotEmpty()) IconButton({
+                        if (isEditing) viewModel.selectedTask?.let { task ->
+                            viewModel.updateTask(
+                                task.copy(
                                     text = title, description = description,
-                                    projectId = selectedProjectId, deadline = deadline,
+                                    projectId = selectedProjectId, dateTime = deadline,
                                     repeatInterval = repeatInterval,
-                                    estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs * 60_000 else null
+                                    estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
                                 )
-                                Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
-                                navController.navigateUp()
-                            }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.tick),
-                                    contentDescription = null, tint = Color.White,
-                                )
-                            }
-                        }
+                            )
+                        } else viewModel.addTask(
+                            text = title, description = description,
+                            projectId = selectedProjectId, deadline = deadline,
+                            repeatInterval = repeatInterval,
+                            estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
+                        )
+                        Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
+                        navController.navigateUp()
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.tick),
+                            contentDescription = null, tint = Color.White,
+                        )
                     }
                 }
-            )
+            }
         )
-    }
+    )
     Column(
         Modifier
             .fillMaxSize()
@@ -228,8 +222,10 @@ fun NewTaskScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 8.dp)
-                .clickable { expanded = true }, verticalAlignment = Alignment.CenterVertically,
+                .padding(top = 8.dp)
+                .clickable { expanded = true }
+                .padding(top = 8.dp, bottom = 8.dp)
+                , verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {

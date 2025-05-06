@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,34 +51,32 @@ fun NoteDetailScreen(
     val context = LocalContext.current
     val selectedNote by viewModel.selectedNote.collectAsState()
     val projects by viewModel.projects.collectAsState()
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = context.getString(R.string.note), color = PineColor,
-                topBarActions = {
-                    IconButton(onClick = { navController.navigate(NEW_NOTE_SCREEN) }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(R.string.save_note),
-                            tint = WhitePine
-                        )
-                    }
-                    IconButton(onClick = {
-                        selectedNote?.let {
-                            viewModel.deleteNote(it)
-                            navController.navigateUp()
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.delete_note),
-                            tint = WhitePine
-                        )
-                    }
+    setTopBarState(
+        TopBarState(
+            title = context.getString(R.string.note), color = PineColor,
+            topBarActions = {
+                IconButton(onClick = { navController.navigate(NEW_NOTE_SCREEN) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.save_note),
+                        tint = WhitePine
+                    )
                 }
-            )
+                IconButton(onClick = {
+                    selectedNote?.let {
+                        viewModel.deleteNote(it)
+                        navController.navigateUp()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = stringResource(R.string.delete_note),
+                        tint = WhitePine
+                    )
+                }
+            }
         )
-    }
+    )
     selectedNote?.let { note ->
         Box(
             modifier = Modifier

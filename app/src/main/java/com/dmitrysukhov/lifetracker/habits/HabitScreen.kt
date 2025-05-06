@@ -91,31 +91,28 @@ fun HabitScreen(
     var dialogData by remember { mutableStateOf<Pair<Habit, LocalDate>?>(null) }
     var numberInput by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(context.getString(R.string.habits)) {
-                IconButton(onClick = {
-                    viewModel.selectedHabit = null
-                    navController.navigate(NEW_HABIT_SCREEN)
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.plus), contentDescription = null,
-                        tint = Color.White
-                    )
-                }
+    setTopBarState(
+        TopBarState(context.getString(R.string.habits)) {
+            IconButton(onClick = {
+                viewModel.selectedHabit = null
+                navController.navigate(NEW_HABIT_SCREEN)
+            }) {
+                Icon(
+                    painter = painterResource(R.drawable.plus), contentDescription = null,
+                    tint = Color.White
+                )
             }
-        )
-    }
+        }
+    )
 
     Column(
         Modifier
             .fillMaxSize()
             .background(BgColor)
-            .padding(horizontal = 16.dp)
+            .padding(24.dp)
     ) {
         if (habits.isEmpty()) EmptyPlaceholder(R.string.no_habits, R.string.create_habit_hint)
         else {
-            Spacer(modifier = Modifier.height(16.dp))
             ThreeButtonsSelector(
                 mode.ordinal, stringResource(R.string.week),
                 stringResource(R.string.month), stringResource(R.string.year)
@@ -380,9 +377,11 @@ fun HabitCard(
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .size(16.dp)
-                                    ) else Text( //todo animate
+                                    ) else Text(
+                                        //todo animate
                                         if (habitValue.toInt().toFloat() == habitValue)
-                                            habitValue.toInt().toString() else habitValue.toString(),
+                                            habitValue.toInt()
+                                                .toString() else habitValue.toString(),
                                         style = Small.copy(
                                             color = Color.White, fontWeight = Bold,
                                             lineHeight = 12.sp

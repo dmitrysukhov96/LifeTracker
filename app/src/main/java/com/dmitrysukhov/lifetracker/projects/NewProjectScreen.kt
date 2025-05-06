@@ -54,7 +54,6 @@ import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.ColorPicker
 import com.dmitrysukhov.lifetracker.common.ui.SubtitleWithIcon
-import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.ImageUtils
@@ -62,6 +61,7 @@ import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.TopBarState
+import com.dmitrysukhov.lifetracker.utils.isDarkTheme
 import java.io.File
 
 @Composable
@@ -73,61 +73,50 @@ fun NewProjectScreen(
     val project = viewModel.selectedProject
     var title by rememberSaveable { mutableStateOf(project?.title ?: "") }
     var descr by rememberSaveable { mutableStateOf(project?.description ?: "") }
-    var currentImagePath by rememberSaveable { mutableStateOf(project?.imagePath ?: "") }
+    var currentImagePath by rememberSaveable { mutableStateOf(project?.imagePath) }
     var selectedColorInt by rememberSaveable {
         mutableIntStateOf(project?.color ?: PineColor.toArgb())
     }
     var selectedColor = Color(selectedColorInt)
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = if (project != null) context.getString(R.string.edit_project) else context.getString(
-                    R.string.new_project
-                ), color = selectedColor,
-                imagePath = currentImagePath
-            ) {
-                Row {
-                    if (project != null) {
-                        IconButton(onClick = {
-                            showDeleteConfirmation = true
-                        }) {
-                            Icon(
-                                painter = painterResource(R.drawable.delete),
-                                contentDescription = stringResource(R.string.delete),
-                                tint = Color.White
-                            )
-                        }
-                    }
-                    IconButton(onClick = {
-                        if (project != null) viewModel.updateProject(
-                            project.copy(
-                                title = title,
-                                description = descr,
-                                color = selectedColorInt,
-                                imagePath = currentImagePath
-                            )
-                        ) else viewModel.addProject(
-                            Project(
-                                title = title,
-                                description = descr,
-                                color = selectedColorInt,
-                                imagePath = currentImagePath
-                            )
-                        )
-                        navController.navigateUp()
-                    }) {
-                        if (title.isNotBlank()) Icon(
-                            painter = painterResource(R.drawable.tick),
-                            contentDescription = null, tint = Color.White
-                        )
-                    }
+    setTopBarState(
+        TopBarState(
+            title = if (project != null) context.getString(R.string.edit)
+            else context.getString(R.string.new_project), color = selectedColor,
+            imagePath = currentImagePath
+        ) {
+            Row {
+                if (project != null) IconButton(onClick = { showDeleteConfirmation = true }) {
+                    Icon(
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = stringResource(R.string.delete), tint = Color.White
+                    )
                 }
-            })
-    }
+                IconButton(onClick = {
+                    if (project != null) viewModel.updateProject(
+                        project.copy(
+                            title = title, description = descr,
+                            color = selectedColorInt, imagePath = currentImagePath
+                        )
+                    ) else viewModel.addProject(
+                        Project(
+                            title = title, description = descr, color = selectedColorInt,
+                            imagePath = currentImagePath
+                        )
+                    )
+                    navController.navigateUp()
+                }) {
+                    if (title.isNotBlank()) Icon(
+                        painter = painterResource(R.drawable.tick),
+                        contentDescription = null, tint = Color.White
+                    )
+                }
+            }
+        })
     Column(
         Modifier
-            .background(BgColor)
+            .background(if (isDarkTheme()) Color.Black else Color.White)
+            .background(selectedColor.copy(alpha = 0.1f))
             .fillMaxSize()
             .padding(horizontal = 24.dp)
     ) {
@@ -189,7 +178,7 @@ fun NewProjectScreen(
             }
         }
 
-        if (currentImagePath.isNotEmpty()) {
+        if (currentImagePath?.isNotEmpty() == true) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -224,7 +213,7 @@ fun NewProjectScreen(
                             project?.imagePath?.let { oldPath ->
                                 ImageUtils.deleteImageFromInternalStorage(context, oldPath)
                             }
-                            currentImagePath = ""
+                            currentImagePath = null
                         },
                         modifier = Modifier.size(24.dp)
                     ) {
@@ -268,18 +257,18 @@ fun NewProjectScreen(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text(stringResource(R.string.delete_project)) },
-            text = { Text(stringResource(R.string.delete_project_confirmation)) },
+            title = { Text(stringResource(R.string.delete_project), style = H1) },
+            text = { Text(stringResource(R.string.delete_project_confirmation), style = H2) },
             confirmButton = {
                 TextButton(onClick = {
                     project?.let { viewModel.deleteProject(it.projectId) }
                     showDeleteConfirmation = false
                     viewModel.selectedProject = null
                     navController.popBackStack(PROJECTS_SCREEN, false, false)
-                }) { Text(stringResource(R.string.delete)) }
+                }) { Text(stringResource(R.string.delete), style = H2) }
             }, dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text(stringResource(R.string.cancel))
+                    Text(stringResource(R.string.cancel), style = H2)
                 }
             }
         )

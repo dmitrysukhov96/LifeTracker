@@ -1,5 +1,6 @@
 package com.dmitrysukhov.lifetracker.dashboard
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,14 +31,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Event
+import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
+import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.common.ui.TimeTracker
 import com.dmitrysukhov.lifetracker.habits.HabitsViewModel
+import com.dmitrysukhov.lifetracker.projects.NEW_PROJECT_SCREEN
+import com.dmitrysukhov.lifetracker.projects.ProjectsViewModel
 import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.tracker.EventDialog
 import com.dmitrysukhov.lifetracker.tracker.TrackerViewModel
@@ -80,25 +88,37 @@ fun CategoryBlock(title: String, content: @Composable () -> Unit) {
 fun DashboardScreen(
     setTopBarState: (TopBarState) -> Unit, navController: NavHostController,
     todoViewModel: TodoViewModel, habitsViewModel: HabitsViewModel,
-    trackerViewModel: TrackerViewModel
+    trackerViewModel: TrackerViewModel, projectsViewModel: ProjectsViewModel
 ) {
     val context = LocalContext.current
-    LaunchedEffect(Unit) { setTopBarState(TopBarState(context.getString(R.string.app_name))) }
+    val userName = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        .getString("user_name", "")
+    setTopBarState(TopBarState(context.getString(R.string.app_name)))
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val greeting = when {
-        hour < 4 -> "🌙 Good night"
-        hour < 12 -> "☀️ Good morning"
-        hour < 17 -> "🌤️ Good afternoon"
-        else -> "🌆 Good evening"
-    }
+        hour < 4 -> stringResource(R.string.good_night)
+        hour < 12 -> stringResource(R.string.good_morning)
+        hour < 17 -> stringResource(R.string.good_afternoon)
+        else -> stringResource(R.string.good_evening)
+    } + if (!userName.isNullOrBlank()) ", $userName!" else "!"
+
+
     val tasks = todoViewModel.todoList.collectAsStateWithLifecycle(listOf()).value
     val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
-    val projects = todoViewModel.projects.collectAsStateWithLifecycle().value
+    val projects = projectsViewModel.projects
     val lastEvent = trackerViewModel.lastEvent.collectAsStateWithLifecycle().value
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
     var isTrackerStart by remember { mutableStateOf(false) }
     var showTaskDialog by remember { mutableStateOf(false) }
-
+    val lastProjectId by projectsViewModel.lastCreatedProjectId.collectAsState(null)
+    var selectedProjectId by remember { mutableStateOf(selectedEvent?.projectId) }
+    LaunchedEffect(lastProjectId) {
+        lastProjectId?.let {
+            showTaskDialog = true
+            selectedProjectId = it
+            projectsViewModel.clearLastCreatedProjectId()
+        }
+    }
     if (showTaskDialog) EventDialog(
         event = selectedEvent, projects = projects, onDismiss = {
             showTaskDialog = false
@@ -112,7 +132,8 @@ fun DashboardScreen(
             trackerViewModel.deleteEvent(event.eventId)
             showTaskDialog = false
             selectedEvent = null
-        }, trackerStart = isTrackerStart, navController = navController
+        }, isTrackerStart, selectedProjectId, { navController.navigate(NEW_PROJECT_SCREEN) },
+        { selectedProjectId = it }
     )
     Column(
         Modifier
@@ -210,14 +231,13 @@ fun DashboardScreen(
             val recordDay = completedByDay.maxByOrNull { it.value }
 
             CategoryBlock(title = "📊 Tasks Stats") {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "$completedTasks of $totalTasks completed",
-                        style = H2,
-                        color = InverseColor
-                    )
-                }
-
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "$completedTasks of $totalTasks completed",
+                    style = H2,
+                    color = InverseColor
+                )
+                Spacer(Modifier.height(8.dp))
                 Row(Modifier.padding(vertical = 6.dp)) {
                     Column(Modifier.weight(1f)) {
                         Text(text = "This month", style = SimpleText, color = InverseColor)
@@ -244,7 +264,7 @@ fun DashboardScreen(
                         )
                     }
                 }
-
+                Spacer(Modifier.height(4.dp))
                 if (recordDay != null) {
                     Text(
                         text = "Record: ${recordDay.value} tasks on ${recordDay.key}",
@@ -254,24 +274,12 @@ fun DashboardScreen(
                     )
                 }
             }
-
-            // Projects
-            CategoryBlock(title = "📁 Projects") {
-                ProjectsSection(projects = projects)
-            }
-
-            // Habits & Metrics
+            CategoryBlock(title = "📁 Projects") { ProjectsSection(projects, tasks) }
             CategoryBlock(title = "💪 Habits & Metrics") {
                 if (habits.isEmpty()) {
                     Text(text = "No habits yet!", style = H2, color = PineColor)
-                } else {
-                    Column {
-                        habits.forEach { habit ->
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HabitsMetricsSection(habits = habits)
-                        }
-                    }
-                }
+                } else HabitsMetricsSection(habitsViewModel)
+
             }
 
             // Tracker Statistics
@@ -288,11 +296,8 @@ fun DashboardScreen(
     }
 }
 
-// --- MOCK/HELPER SECTIONS ---
-
 @Composable
 fun TrackerStatsSection() {
-    // Mock toggles and progress bars
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
@@ -367,48 +372,47 @@ fun TrackerProgressRow(label: String, value: String, progress: Float, color: Col
 }
 
 @Composable
-fun ProjectsSection(projects: List<com.dmitrysukhov.lifetracker.Project>) {
-    // Mock data for demonstration
-    val mockProjects = if (projects.isEmpty()) listOf(
-        Triple("Website Redesign", 12 to 20, 0.6f),
-        Triple("Mobile App", 9 to 15, 0.45f),
-        Triple("Marketing", 3 to 10, 0.3f)
-    ) else projects.map { Triple(it.title, 3 to 5, 0.6f) } // Replace with real stats
+fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        mockProjects.forEach { (name, pair, percent) ->
+        projects.forEach { project ->
+            val projectTasks = tasks.filter { it.projectId == project.projectId }
+            val completedTasks = projectTasks.count { it.isDone }
+            val totalTasks = projectTasks.size
+            val progress = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f
             Row(
                 Modifier
                     .fillMaxWidth()
                     .padding(vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val projectColor = Color(project.color)
                 Text(
-                    text = name,
+                    text = project.title,
                     style = SimpleText,
-                    color = InverseColor,
-                    modifier = Modifier.weight(1f)
+                    color = projectColor, maxLines = 1,overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.width(100.dp)
                 )
                 Text(
-                    text = "${pair.first}/${pair.second}",
+                    text = "$completedTasks/$totalTasks",
                     style = SimpleText.copy(fontWeight = Bold),
-                    color = PineColor,
-                    modifier = Modifier.padding(start = 4.dp)
+                    color = projectColor, maxLines = 1,overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.width(50.dp).padding(start = 4.dp)
                 )
                 LinearProgressIndicator(
-                    progress = { percent },
+                    progress = { progress },
                     modifier = Modifier
-                        .weight(1.5f)
+                        .weight(1f)
                         .height(3.dp)
                         .padding(horizontal = 4.dp)
                         .clip(RoundedCornerShape(1.dp)),
-                    color = PineColor,
-                    trackColor = PineColor.copy(alpha = 0.2f)
+                    color = projectColor,
+                    trackColor = PineColor.copy(alpha = 0.2f),
                 )
                 Text(
-                    text = "${(percent * 100).toInt()}%",
+                    text = "${(progress * 100).toInt()}%",
                     style = SimpleText.copy(fontWeight = Bold),
-                    color = PineColor,
-                    modifier = Modifier.padding(start = 4.dp)
+                    color = projectColor,maxLines = 1,overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.width(50.dp).padding(start = 4.dp)
                 )
             }
         }
@@ -416,9 +420,17 @@ fun ProjectsSection(projects: List<com.dmitrysukhov.lifetracker.Project>) {
 }
 
 @Composable
-fun HabitsMetricsSection(habits: List<com.dmitrysukhov.lifetracker.Habit>) {
+fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
+    val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
+    val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        habits.forEach {
+        habits.forEach { habit ->
+            var metrics by remember { mutableStateOf(Pair("", "")) }
+            LaunchedEffect(habit.id) {
+                habitsViewModel.getHabitMetrics(habit) {
+                    metrics = it
+                }
+            }
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -426,20 +438,17 @@ fun HabitsMetricsSection(habits: List<com.dmitrysukhov.lifetracker.Habit>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = it.title,
+                    text = habit.title,
                     style = SimpleText.copy(fontWeight = Bold),
-                    color = Color(it.color),
+                    color = Color(habit.color),
                     modifier = Modifier.weight(1f)
                 )
-                if (it.type == 0) Column(modifier = Modifier.weight(2f), horizontalAlignment = Alignment.End) {
-                    Text("3 days in a row", style = SimpleText.copy(color = InverseColor))
-                    Text("28.05.2025 - 30.05.2025", style = SimpleText.copy(color = InverseColor))
-                    Text("Max streak - 5 days", style = SimpleText.copy(color = InverseColor))
-                    Text("20.05.2025 - 25.05.2025", style = SimpleText.copy(color = InverseColor))
-                } else Column(modifier = Modifier.weight(2f), horizontalAlignment = Alignment.End) {
-                    Text("min: 79.4 - 20.05.2025", style = SimpleText.copy(color = InverseColor))
-                    Text("max: 86.4 - 25.05.2025", style = SimpleText.copy(color = InverseColor))
-
+                Column(
+                    modifier = Modifier.weight(2f),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(metrics.first, style = SimpleText.copy(color = InverseColor))
+                    Text(metrics.second, style = SimpleText.copy(color = InverseColor))
                 }
             }
         }
@@ -448,7 +457,6 @@ fun HabitsMetricsSection(habits: List<com.dmitrysukhov.lifetracker.Habit>) {
 
 @Composable
 fun TurboModeSection() {
-    // Mock data
     Column(
         Modifier
             .fillMaxWidth()

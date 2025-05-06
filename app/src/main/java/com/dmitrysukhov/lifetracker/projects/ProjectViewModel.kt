@@ -26,7 +26,7 @@ class ProjectsViewModel @Inject constructor(
     
     private val _lastCreatedProjectId = MutableStateFlow<Long?>(null)
     val lastCreatedProjectId: StateFlow<Long?> = _lastCreatedProjectId.asStateFlow()
-
+    
     init {
         viewModelScope.launch {
             projectDao.getAllProjects().collectLatest { list ->
@@ -69,6 +69,7 @@ class ProjectsViewModel @Inject constructor(
                 }
             }
             projectDao.update(project)
+            selectedProject = project
         }
     }
     

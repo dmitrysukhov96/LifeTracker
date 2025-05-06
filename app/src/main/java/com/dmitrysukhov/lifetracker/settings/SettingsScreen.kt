@@ -144,7 +144,8 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
             modifier = Modifier.padding(bottom = 8.dp)
         )
         Box(modifier = Modifier.fillMaxWidth()) {
-            Row(modifier = Modifier
+            Row(
+                modifier = Modifier
                     .clickable { themeExpanded = true }
                     .fillMaxWidth()
                     .height(48.dp)

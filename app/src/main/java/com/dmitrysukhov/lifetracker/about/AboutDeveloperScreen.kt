@@ -49,14 +49,13 @@ fun AboutDeveloperScreen(setTopBarState: (TopBarState) -> Unit) {
     val context = LocalContext.current
     val emailAddress = context.getString(R.string.contact_email)
 
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = context.getString(R.string.about_developer),
-                color = PineColor
-            )
+    setTopBarState(
+        TopBarState(
+            title = context.getString(R.string.about_developer),
+            color = PineColor
         )
-    }
+    )
+
 
     Column(
         modifier = Modifier
@@ -130,7 +129,8 @@ fun AboutDeveloperScreen(setTopBarState: (TopBarState) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    val intent = Intent(Intent.ACTION_VIEW, "https://twitter.com/coffeecodedevs".toUri())
+                    val intent =
+                        Intent(Intent.ACTION_VIEW, "https://twitter.com/coffeecodedevs".toUri())
                     try {
                         startActivity(context, intent, null)
                     } catch (_: Exception) {
@@ -156,7 +156,7 @@ fun AboutDeveloperScreen(setTopBarState: (TopBarState) -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.dev_end),
-            style = H2, 
+            style = H2,
             color = InverseColor,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()

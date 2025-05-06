@@ -53,49 +53,48 @@ fun NewHabitScreen(
     var title by rememberSaveable { mutableStateOf(selected?.title ?: "") }
     var selectedTypeIndex by rememberSaveable { mutableIntStateOf(selected?.type ?: 0) }
     var selectedColorInt by rememberSaveable {
-        mutableIntStateOf(selected?.color ?: PineColor.toArgb()
+        mutableIntStateOf(
+            selected?.color ?: PineColor.toArgb()
         )
     }
-    LaunchedEffect(title, selectedTypeIndex, selectedColorInt) {
-        setTopBarState(
-            TopBarState(
-                if (selected == null) context.getString(R.string.new_habit)
-                else context.getString(R.string.edit_habit)
-            ) {
-                Row {
-                    if (selected != null) {
-                        IconButton(onClick = {
-                             viewModel.deleteHabit(selected.id)
-                            navController.navigateUp()
-                        }) {
-                            Icon(
-                                painter = painterResource(R.drawable.delete),
-                                contentDescription = stringResource(R.string.delete),
-                                tint = Color.White
-                            )
-                        }
-                    }
+    setTopBarState(
+        TopBarState(
+            if (selected == null) context.getString(R.string.new_habit)
+            else context.getString(R.string.edit_habit)
+        ) {
+            Row {
+                if (selected != null) {
                     IconButton(onClick = {
-                        val habit = Habit(
-                            id = selected?.id ?: 0, title = title, type = selectedTypeIndex,
-                            color = selectedColorInt
-                        )
-                        if (selected == null) viewModel.addHabit(habit)
-                        else viewModel.updateHabit(habit)
+                        viewModel.deleteHabit(selected.id)
                         navController.navigateUp()
                     }) {
-                        if (title.isNotBlank()) {
-                            Icon(
-                                painter = painterResource(R.drawable.tick),
-                                contentDescription = null,
-                                tint = Color.White
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(R.drawable.delete),
+                            contentDescription = stringResource(R.string.delete),
+                            tint = Color.White
+                        )
+                    }
+                }
+                IconButton(onClick = {
+                    val habit = Habit(
+                        id = selected?.id ?: 0, title = title, type = selectedTypeIndex,
+                        color = selectedColorInt
+                    )
+                    if (selected == null) viewModel.addHabit(habit)
+                    else viewModel.updateHabit(habit)
+                    navController.navigateUp()
+                }) {
+                    if (title.isNotBlank()) {
+                        Icon(
+                            painter = painterResource(R.drawable.tick),
+                            contentDescription = null,
+                            tint = Color.White
+                        )
                     }
                 }
             }
-        )
-    }
+        }
+    )
 
     Column(
         modifier = Modifier
