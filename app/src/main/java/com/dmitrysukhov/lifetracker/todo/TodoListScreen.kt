@@ -182,7 +182,7 @@ fun TodoListScreen(
         if (activeTask != null && lastEvent?.endTime == null) {
             TimeTracker(
                 lastEvent = lastEvent, projects = projects,
-                onActionClick = { viewModel.stopTracking() }
+                onActionClick = {}, onCircleButtonClick = { viewModel.stopTracking() }
             )
             Spacer(Modifier.height(16.dp))
         }

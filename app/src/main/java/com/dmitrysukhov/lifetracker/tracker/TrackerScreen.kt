@@ -112,12 +112,16 @@ fun TrackerScreen(
             .background(BgColor)
     ) {
         TimeTracker(
-            lastEvent = lastEvent, projects = projects, onActionClick = {
+            lastEvent = lastEvent, projects = projects, onCircleButtonClick = {
                 if (lastEvent == null || lastEvent.endTime != null) {
                     selectedEvent = null
                     isTrackerStart = true
                     showTaskDialog = true
                 } else trackerViewModel.stopEvent()
+            }, onActionClick = {
+                selectedEvent = null
+                isTrackerStart = true
+                showTaskDialog = true
             }
         )
         Spacer(Modifier.height(16.dp))
@@ -139,8 +143,10 @@ fun TrackerScreen(
                 showTaskDialog = false
                 selectedEvent = null
             }, onSave = { event ->
-                if (event.eventId == 0L) trackerViewModel.insertEvent(event)
-                else trackerViewModel.updateEvent(event)
+                if (event.eventId == 0L) {
+                    trackerViewModel.stopEvent()
+                    trackerViewModel.insertEvent(event)
+                } else trackerViewModel.updateEvent(event)
                 showTaskDialog = false
                 selectedEvent = null
             }, onDelete = { event ->
@@ -444,7 +450,6 @@ fun EventDialog(
                         )
                     }
                 }
-
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     if (event != null && !trackerStart) TextButton(onClick = { onDelete(event) }) {
                         Text(stringResource(R.string.delete), color = PineColor, style = H2)
@@ -489,9 +494,7 @@ fun EventDialog(
                                 }
                             }
                         }, enabled = taskName.isNotBlank(), modifier = Modifier.height(48.dp)
-                    ) {
-                        Text(stringResource(R.string.save), style = H1.copy(color = Color.White))
-                    }
+                    ) { Text(stringResource(R.string.save), style = H1.copy(color = Color.White)) }
                 }
             }
         }

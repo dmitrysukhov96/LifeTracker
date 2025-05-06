@@ -46,13 +46,12 @@ import java.util.Locale
 @Composable
 fun TimeTracker(
     lastEvent: Event?, projects: List<Project>, onActionClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onCircleButtonClick: () -> Unit, modifier: Modifier = Modifier
 ) {
     var timeElapsed by remember { mutableLongStateOf(0L) }
     val backgroundColor by animateColorAsState(
         targetValue = if (lastEvent != null && lastEvent.endTime == null) AccentColor else Color(0xFFC2EBD6),
-        animationSpec = tween(durationMillis = 300),
-        label = "trackerColor"
+        animationSpec = tween(durationMillis = 300), label = "trackerColor"
     )
     LaunchedEffect(lastEvent) {
         while (true) {
@@ -71,6 +70,7 @@ fun TimeTracker(
             .height(64.dp)
             .clip(RoundedCornerShape(100.dp))
             .background(backgroundColor)
+            .clickable { onActionClick() }
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -81,9 +81,7 @@ fun TimeTracker(
                     lastEvent.endTime == null -> lastEvent.name ?: stringResource(R.string.no_task)
                     else -> stringResource(R.string.no_task)
                 },
-                color = BlackPine,
-                fontWeight = Bold,
-                fontFamily = Montserrat,
+                color = BlackPine, fontWeight = Bold, fontFamily = Montserrat,
                 fontSize = 14.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -114,7 +112,7 @@ fun TimeTracker(
         Row {
             Box(
                 modifier = Modifier
-                    .clickable { onActionClick() }
+                    .clickable { onCircleButtonClick() }
                     .clip(CircleShape)
                     .background(PineColor)
                     .size(45.dp)

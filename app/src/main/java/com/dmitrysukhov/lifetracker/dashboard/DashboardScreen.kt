@@ -124,8 +124,10 @@ fun DashboardScreen(
             showTaskDialog = false
             selectedEvent = null
         }, onSave = { event ->
-            if (event.eventId == 0L) trackerViewModel.insertEvent(event)
-            else trackerViewModel.updateEvent(event)
+            if (event.eventId == 0L) {
+                trackerViewModel.stopEvent()
+                trackerViewModel.insertEvent(event)
+            } else trackerViewModel.updateEvent(event)
             showTaskDialog = false
             selectedEvent = null
         }, onDelete = { event ->
@@ -141,12 +143,16 @@ fun DashboardScreen(
             .background(BgColor)
     ) {
         TimeTracker(
-            lastEvent = lastEvent, projects = projects, onActionClick = {
+            lastEvent = lastEvent, projects = projects, onCircleButtonClick = {
                 if (lastEvent == null || lastEvent.endTime != null) {
                     selectedEvent = null
                     isTrackerStart = true
                     showTaskDialog = true
                 } else trackerViewModel.stopEvent()
+            }, onActionClick = {
+                selectedEvent = null
+                isTrackerStart = true
+                showTaskDialog = true
             }, modifier = Modifier.padding(bottom = 8.dp)
         )
         Column(
@@ -389,14 +395,16 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
                 Text(
                     text = project.title,
                     style = SimpleText,
-                    color = projectColor, maxLines = 1,overflow = TextOverflow.Ellipsis,
+                    color = projectColor, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.width(100.dp)
                 )
                 Text(
                     text = "$completedTasks/$totalTasks",
                     style = SimpleText.copy(fontWeight = Bold),
-                    color = projectColor, maxLines = 1,overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.width(50.dp).padding(start = 4.dp)
+                    color = projectColor, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(50.dp)
+                        .padding(start = 4.dp)
                 )
                 LinearProgressIndicator(
                     progress = { progress },
@@ -411,8 +419,10 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
                 Text(
                     text = "${(progress * 100).toInt()}%",
                     style = SimpleText.copy(fontWeight = Bold),
-                    color = projectColor,maxLines = 1,overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.width(50.dp).padding(start = 4.dp)
+                    color = projectColor, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(50.dp)
+                        .padding(start = 4.dp)
                 )
             }
         }
@@ -422,7 +432,6 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
 @Composable
 fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
     val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
-    val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         habits.forEach { habit ->
             var metrics by remember { mutableStateOf(Pair("", "")) }

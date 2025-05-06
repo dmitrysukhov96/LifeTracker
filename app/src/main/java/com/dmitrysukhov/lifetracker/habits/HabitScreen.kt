@@ -1,5 +1,6 @@
 package com.dmitrysukhov.lifetracker.habits
 
+import android.content.Context.MODE_PRIVATE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +68,7 @@ import org.joda.time.DateTimeZone
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import java.util.Locale
+import androidx.core.content.edit
 
 @Composable
 fun HabitScreen(
@@ -74,9 +77,17 @@ fun HabitScreen(
 ) {
     val context = LocalContext.current
     val habits by viewModel.habits.collectAsStateWithLifecycle(emptyList())
-    var mode by rememberSaveable { mutableStateOf(HabitViewMode.WEEK) }
-    var currentDate by rememberSaveable { mutableStateOf(LocalDate.now(DateTimeZone.UTC)) }
+    val sharedPref = context.getSharedPreferences("habits_prefs", MODE_PRIVATE)
+    var mode by rememberSaveable {
+        mutableStateOf(
+            HabitViewMode.entries[sharedPref.getInt("selected_mode", HabitViewMode.WEEK.ordinal)]
+        )
+    }
 
+    DisposableEffect(Unit) {
+        onDispose { sharedPref.edit { putInt("selected_mode", mode.ordinal) } }
+    }
+    var currentDate by rememberSaveable { mutableStateOf(LocalDate.now(DateTimeZone.UTC)) }
     val periodTitle = when (mode) {
         HabitViewMode.WEEK -> {
             val start = currentDate.withDayOfWeek(1)
@@ -96,12 +107,7 @@ fun HabitScreen(
             IconButton(onClick = {
                 viewModel.selectedHabit = null
                 navController.navigate(NEW_HABIT_SCREEN)
-            }) {
-                Icon(
-                    painter = painterResource(R.drawable.plus), contentDescription = null,
-                    tint = Color.White
-                )
-            }
+            }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
         }
     )
 
@@ -151,9 +157,7 @@ fun HabitScreen(
                         .collectAsStateWithLifecycle(emptyMap())
 
                     HabitCard(
-                        habit = habit,
-                        mode = mode,
-                        currentDate = currentDate,
+                        habit = habit, mode = mode, currentDate = currentDate,
                         onSquareClick = { date ->
                             if (habit.type < HabitType.entries.size && HabitType.entries[habit.type] == HabitType.CHECKBOX) {
                                 val dateMillis =
@@ -162,25 +166,22 @@ fun HabitScreen(
                                     viewModel.deleteHabitEvent(habit.id, dateMillis)
                                 } else viewModel.saveHabitEvent(habit.id, dateMillis, 1f)
                             } else dialogData = habit to date
-                        },
-                        events = eventsMap
+                        }, events = eventsMap
                     ) {
                         viewModel.selectedHabit = habit
                         navController.navigate(NEW_HABIT_SCREEN)
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(Modifier.height(8.dp))
                 }
-                item { Spacer(modifier = Modifier.height(48.dp)) }
+                item { Spacer(Modifier.height(48.dp)) }
             }
         }
     }
-
     if (dialogData != null) {
         val (habit, date) = dialogData!!
         val dateMillis = date.toDateTimeAtStartOfDay(DateTimeZone.UTC).millis
         val existingValue = viewModel.getEventsForHabit(habit.id)
             .collectAsStateWithLifecycle(emptyMap()).value[dateMillis]
-
         LaunchedEffect(existingValue) {
             if (existingValue != null) {
                 numberInput = if (existingValue.toInt().toFloat() == existingValue)
@@ -189,12 +190,10 @@ fun HabitScreen(
         }
 
         AlertDialog(
-            containerColor = BgColor,
-            onDismissRequest = {
+            containerColor = BgColor, onDismissRequest = {
                 dialogData = null
                 numberInput = ""
-            },
-            confirmButton = {
+            }, confirmButton = {
                 TextButton(
                     onClick = {
                         if (numberInput.isNotBlank()) {
@@ -213,8 +212,7 @@ fun HabitScreen(
                         style = SimpleText.copy(fontFamily = Montserrat)
                     )
                 }
-            },
-            dismissButton = {
+            }, dismissButton = {
                 Row {
                     if (existingValue != null) {
                         TextButton(
@@ -225,9 +223,8 @@ fun HabitScreen(
                             }
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.delete),
+                                painter = painterResource(R.drawable.delete), tint = PineColor,
                                 contentDescription = stringResource(R.string.delete),
-                                tint = PineColor,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -244,17 +241,14 @@ fun HabitScreen(
                         )
                     }
                 }
-            },
-            title = {
+            }, title = {
                 Text(
                     text = stringResource(R.string.enter_value),
                     style = H2.copy(fontFamily = Montserrat)
                 )
-            },
-            text = {
+            }, text = {
                 OutlinedTextField(
-                    value = numberInput,
-                    onValueChange = { numberInput = it },
+                    value = numberInput, onValueChange = { numberInput = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     textStyle = SimpleText.copy(fontFamily = Montserrat)
                 )
@@ -275,9 +269,7 @@ fun HabitCard(
             .background(Color(habit.color))
             .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart
-        ) {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
             Text(
                 habit.title,
                 style = H2.copy(color = Color.White, fontWeight = Bold),
@@ -288,10 +280,9 @@ fun HabitCard(
                     .align(Alignment.CenterEnd)
                     .padding(end = 16.dp)
                     .size(20.dp)
-            )
-            { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White) }
+            ) { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White) }
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
         when (mode) {
             HabitViewMode.WEEK -> {
                 val start = currentDate.withDayOfWeek(1)
@@ -314,9 +305,8 @@ fun HabitCard(
                             val isCurrentDay = date.isEqual(LocalDate.now())
                             Text(
                                 date.toString("d"),
-                                style = Small,
+                                style = Small, fontWeight = if (isCurrentDay) Bold else null,
                                 color = if (isCurrentDay) Color.White else Color.White.copy(0.7f),
-                                fontWeight = if (isCurrentDay) Bold else null,
                                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                             )
                             val textStyle = if (habitValue.toString().length > 3) SimpleText else H1
@@ -385,9 +375,8 @@ fun HabitCard(
                                         style = Small.copy(
                                             color = Color.White, fontWeight = Bold,
                                             lineHeight = 12.sp
-                                        ),
-                                        modifier = Modifier.align(Alignment.Center),
-                                        textAlign = TextAlign.Center,
+                                        ), modifier = Modifier.align(Alignment.Center),
+                                        textAlign = TextAlign.Center
                                     )
                                 }
                             }
@@ -494,5 +483,3 @@ enum class HabitViewMode { WEEK, MONTH, YEAR }
 const val HABIT_SCREEN = "Habits"
 
 enum class HabitType { CHECKBOX, NUMBER }
-//todo more better, less better - think how to show it. arrow?
-
