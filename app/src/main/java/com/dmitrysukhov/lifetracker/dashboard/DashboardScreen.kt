@@ -2,9 +2,13 @@ package com.dmitrysukhov.lifetracker.dashboard
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +17,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,12 +43,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.font.FontWeight.Companion.Medium
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.dmitrysukhov.lifetracker.Event
+import com.dmitrysukhov.lifetracker.Habit
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.TodoItem
@@ -52,6 +67,7 @@ import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
+import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
@@ -59,6 +75,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 const val DASHBOARD_SCREEN = "dashboard_screen"
 
@@ -162,9 +179,9 @@ fun DashboardScreen(
             val todayTasks =
                 tasks.filter { it.dateTime != null && it.dateTime >= todayStart && it.dateTime < tomorrowStart && !it.isDone }
 
-            CategoryBlock(title = "📝 Today's Tasks") {
+            CategoryBlock(title = stringResource(R.string.todays_tasks)) {
                 if (todayTasks.isEmpty()) Text(
-                    text = "No tasks for today! Enjoy your free time!", style = SimpleText,
+                    text = stringResource(R.string.no_tasks_for_today), style = SimpleText,
                     color = PineColor
                 )
                 else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -215,30 +232,30 @@ fun DashboardScreen(
                         .format(Date(it.completeDate!!))
                 }.mapValues { it.value.size }
             val recordDay = completedByDay.maxByOrNull { it.value }
-            CategoryBlock(title = "📊 Tasks Stats") {
+            CategoryBlock(title = stringResource(R.string.tasks_stats)) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "$completedTasks of $totalTasks completed", style = H2,
+                    text = stringResource(R.string.tasks_completed_of_total, completedTasks, totalTasks), style = H2,
                     color = InverseColor
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.padding(vertical = 6.dp)) {
                     Column(Modifier.weight(1f)) {
-                        Text(text = "This month", style = SimpleText, color = InverseColor)
+                        Text(text = stringResource(R.string.this_month), style = SimpleText, color = InverseColor)
                         Text(
                             text = "$monthCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
                         )
                     }
                     Column(Modifier.weight(1f)) {
-                        Text(text = "This week", style = SimpleText, color = InverseColor)
+                        Text(text = stringResource(R.string.this_week), style = SimpleText, color = InverseColor)
                         Text(
                             text = "$weekCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
                         )
                     }
                     Column(Modifier.weight(1f)) {
-                        Text(text = "Today", style = SimpleText, color = InverseColor)
+                        Text(text = stringResource(R.string.this_day), style = SimpleText, color = InverseColor)
                         Text(
                             text = "$todayCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
@@ -247,49 +264,103 @@ fun DashboardScreen(
                 }
                 Spacer(Modifier.height(4.dp))
                 if (recordDay != null) Text(
-                    text = "Record: ${recordDay.value} tasks on ${recordDay.key}",
+                    text = stringResource(R.string.record_tasks, recordDay.value, recordDay.key),
                     style = SimpleText.copy(fontWeight = Bold), color = PineColor,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
-            CategoryBlock(title = "📁 Projects") { ProjectsSection(projects, tasks) }
-            CategoryBlock(title = "💪 Habits & Metrics") {
-                if (habits.isEmpty())
-                    Text(text = "No habits yet!", style = H2, color = PineColor)
-                else HabitsMetricsSection(habitsViewModel)
-            }
-            CategoryBlock(title = "⏱️ Tracker Statistics") { TrackerStatsSection() }
-            CategoryBlock(title = "🚀 Turbo Mode Sessions") { TurboModeSection() }
+            CategoryBlock(title = stringResource(R.string.projects_section)) { ProjectsSection(projects, tasks) }
+            CategoryBlock(title = stringResource(R.string.habits_metrics)) { HabitsMetricsSection(habitsViewModel) }
+            CategoryBlock(title = stringResource(R.string.tracker_stats)) { TrackerStatsSection(trackerViewModel) }
+            CategoryBlock(title = stringResource(R.string.turbo_mode_sessions)) { TurboModeSection() }
             Spacer(Modifier.height(80.dp))
         }
     }
 }
 
 @Composable
-fun TrackerStatsSection() {
+fun TrackerStatsSection(
+    trackerViewModel: TrackerViewModel
+) {
+    val projects by trackerViewModel.projects.collectAsStateWithLifecycle()
+    val eventStats by trackerViewModel.eventStats.collectAsStateWithLifecycle()
+    val selectedTimeRange by trackerViewModel.selectedTimeRange.collectAsStateWithLifecycle()
+    
+    // Calculate project durations
+    val projectDurations = projects.mapNotNull { project ->
+        eventStats[project.projectId]?.let { duration ->
+            project.projectId to duration
+        }
+    }
+    val noProjectDuration = eventStats[null] ?: 0L
+    
+    // Total duration should be sum of all project durations and no-project duration
+    val totalDuration = projectDurations.sumOf { it.second } + noProjectDuration
+    val totalDurationFormatted = formatDuration(totalDuration)
+    
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
     ) {
-        Text(
-            text = "All time", color = PineColor, style = H2,
-            modifier = Modifier.padding(end = 6.dp)
-        )
-        Text(
-            text = "Month", style = H2, color = InverseColor.copy(0.5f),
-            modifier = Modifier.padding(end = 6.dp)
-        )
-        Text(
-            text = "Week", style = H2, color = InverseColor.copy(0.5f),
-            modifier = Modifier.padding(end = 6.dp)
-        )
-        Text(text = "Day", style = H2, color = InverseColor.copy(0.5f))
+        TimeRange.values().forEach { timeRange ->
+            Text(
+                text = when (timeRange) {
+                    TimeRange.ALL_TIME -> stringResource(R.string.all_time)
+                    TimeRange.MONTH -> stringResource(R.string.month)
+                    TimeRange.WEEK -> stringResource(R.string.week)
+                    TimeRange.DAY -> stringResource(R.string.day)
+                },
+                style = H2,
+                color = if (timeRange == selectedTimeRange) PineColor else InverseColor.copy(0.5f),
+                modifier = Modifier
+                    .padding(end = 6.dp)
+                    .clickable { trackerViewModel.setTimeRange(timeRange) }
+            )
+        }
     }
-    TrackerProgressRow("All Tracked Time", "38:55", 1f, PineColor)
-    TrackerProgressRow("Church", "04:45", 0.12f, Color(0xFF4CAF50))
-    TrackerProgressRow("Personal", "06:05", 0.16f, Color(0xFF2196F3))
-    TrackerProgressRow("Work", "08:45", 0.23f, Color(0xFFFFC107))
-    TrackerProgressRow("Without project", "25:44", 0.66f, Color.Gray)
+    
+    // Total tracked time
+    TrackerProgressRow(
+        stringResource(R.string.all_tracked_time),
+        totalDurationFormatted,
+        1f,
+        PineColor
+    )
+    
+    // Project times
+    projectDurations.forEach { (projectId, duration) ->
+        val project = projects.find { it.projectId == projectId }
+        if (project != null && duration > 0) {
+            val progress = if (totalDuration > 0) duration.toFloat() / totalDuration else 0f
+            TrackerProgressRow(
+                project.title,
+                formatDuration(duration),
+                progress,
+                Color(project.color)
+            )
+        }
+    }
+    
+    // Time without project
+    if (noProjectDuration > 0) {
+        val progress = if (totalDuration > 0) noProjectDuration.toFloat() / totalDuration else 0f
+        TrackerProgressRow(
+            stringResource(R.string.without_project),
+            formatDuration(noProjectDuration),
+            progress,
+            Color.Gray
+        )
+    }
+}
+
+enum class TimeRange {
+    ALL_TIME, MONTH, WEEK, DAY
+}
+
+private fun formatDuration(durationMs: Long): String {
+    val hours = TimeUnit.MILLISECONDS.toHours(durationMs)
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMs) % 60
+    return String.format("%02d:%02d", hours, minutes)
 }
 
 @Composable
@@ -375,22 +446,89 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
 @Composable
 fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
     val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        habits.forEach { habit ->
+    val context  = LocalContext.current
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+//        contentPadding = PaddingValues(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(habits) { habit ->
             var metrics by remember { mutableStateOf(Pair("", "")) }
-            LaunchedEffect(habit.id) { habitsViewModel.getHabitMetrics(habit) { metrics = it } }
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically
+            LaunchedEffect(habit.id) {
+                habitsViewModel.getHabitMetrics(
+                    habit = habit,
+                    noDataString = context.getString(R.string.no_data),
+                    daysInARowFormat = context.getString(R.string.days_in_a_row),
+                    maxStreakFormat = context.getString(R.string.max_streak),
+                    minimumFormat = context.getString(R.string.minimum),
+                    maximumFormat = context.getString(R.string.maximum)
+                ) { metrics = it }
+            }
+            
+            Box(
+                modifier = Modifier
+                    .width(200.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(habit.color).copy(alpha = 0.15f))
+                    .border(
+                        width = 1.dp,
+                        color = Color(habit.color).copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(12.dp)
             ) {
-                Text(
-                    text = habit.title, style = SimpleText.copy(fontWeight = Bold),
-                    color = Color(habit.color), modifier = Modifier.weight(1f)
-                )
-                Column(modifier = Modifier.weight(2f), horizontalAlignment = Alignment.End) {
-                    Text(metrics.first, style = SimpleText.copy(color = InverseColor))
-                    Text(metrics.second, style = SimpleText.copy(color = InverseColor))
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    // Title
+                    Text(
+                        text = habit.title,
+                        style = SimpleText.copy(
+                            fontWeight = Bold,
+                            fontSize = 16.sp
+                        ),
+                        color = Color(habit.color)
+                    )
+                    
+                    // Current metrics
+                    Text(
+                        text = metrics.first.split("(").first().trim(),
+                        style = SimpleText.copy(
+                            fontSize = 14.sp,
+                            fontWeight = Medium
+                        ),
+                        color = InverseColor
+                    )
+                    
+                    // Date range
+                    Text(
+                        text = metrics.first.split("(").getOrNull(1)?.removeSuffix(")") ?: "",
+                        style = SimpleText.copy(
+                            fontSize = 12.sp,
+                            color = InverseColor.copy(alpha = 0.7f)
+                        )
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    // Max metrics
+                    Text(
+                        text = metrics.second.split("(").first().trim(),
+                        style = SimpleText.copy(
+                            fontSize = 14.sp,
+                            fontWeight = Medium
+                        ),
+                        color = InverseColor
+                    )
+                    
+                    // Max date range
+                    Text(
+                        text = metrics.second.split("(").getOrNull(1)?.removeSuffix(")") ?: "",
+                        style = SimpleText.copy(
+                            fontSize = 12.sp,
+                            color = InverseColor.copy(alpha = 0.7f)
+                        )
+                    )
                 }
             }
         }
@@ -404,7 +542,7 @@ fun TurboModeSection() {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
     ) {
-        Text(text = "4 sessions", style = SimpleText, color = PineColor)
-        Text(text = "40 min overall. Well done!", style = SimpleText, color = PineColor)
+        Text(text = stringResource(R.string.sessions_count, 4), style = SimpleText, color = PineColor)
+        Text(text = stringResource(R.string.overall_time, 40), style = SimpleText, color = PineColor)
     }
 }

@@ -151,6 +151,28 @@
     <string name="most_productive_day">Самый продуктивный день</string>
     <string name="best_time">Лучшее время</string>
     <string name="focus_score">Оценка фокуса</string>
+    <string name="todays_tasks">📝 Задачи на сегодня</string>
+    <string name="no_tasks_for_today">Нет задач на сегодня! Наслаждайтесь свободным временем!</string>
+    <string name="tasks_stats">📊 Статистика задач</string>
+    <string name="tasks_completed_of_total">%1$d из %2$d выполнено</string>
+    <string name="this_month">Этот месяц</string>
+    <string name="this_week">Эта неделя</string>
+    <string name="this_day">Сегодня</string>
+    <string name="record_tasks">Рекорд: %1$d задач - %2$s</string>
+    <string name="projects_section">📁 Проекты</string>
+    <string name="habits_metrics">💪 Привычки и метрики</string>
+    <string name="no_habits_yet">Пока нет привычек!</string>
+    <string name="tracker_stats">⏱️ Статистика трекера</string>
+    <string name="all_time">Все время</string>
+    <string name="day">День</string>
+    <string name="all_tracked_time">Всего отслежено</string>
+    <string name="church">Церковь</string>
+    <string name="personal">Личное</string>
+    <string name="work">Работа</string>
+    <string name="without_project">Без проекта</string>
+    <string name="turbo_mode_sessions">🚀 Сессии турбо-режима</string>
+    <string name="sessions_count">%1$d сессий</string>
+    <string name="overall_time">%1$d мин всего. Отличная работа!</string>
 
     <!-- About Developer strings -->
     <string name="about_developer">О разработчике</string>
@@ -207,4 +229,11 @@
     <!-- TodoList strings -->
     <string name="task_reminders">Напоминания о задачах</string>
     <string name="task_reminders_desc">Уведомления для запланированных задач</string>
+
+    <!-- Habit metrics strings -->
+    <string name="no_data">Нет данных</string>
+    <string name="days_in_a_row">%1$d дней подряд (%2$s – %3$s)</string>
+    <string name="max_streak">Максимально подряд: %1$d (%2$s – %3$s)</string>
+    <string name="minimum">Минимум: %1$s (%2$s)</string>
+    <string name="maximum">Максимум: %1$s (%2$s)</string>
 </resources>

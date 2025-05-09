@@ -208,4 +208,33 @@
     <string name="yesterday_at">Yesterday at %s</string>
     <string name="tomorrow_at">Tomorrow at %s</string>
     <string name="cannot_create_event_in_future">Нельзя создать событие в будущем</string>
+
+    <!-- New dashboard strings -->
+    <string name="todays_tasks">📝 Today\'s Tasks</string>
+    <string name="no_tasks_for_today">No tasks for today! Enjoy your free time!</string>
+    <string name="tasks_stats">📊 Tasks Stats</string>
+    <string name="tasks_completed_of_total">%1$d of %2$d completed</string>
+    <string name="this_month">This month</string>
+    <string name="this_week">This week</string>
+    <string name="this_day">Today</string>
+    <string name="record_tasks">Record: %1$d tasks - %2$s</string>
+    <string name="projects_section">📁 Projects</string>
+    <string name="habits_metrics">💪 Habits &amp; Metrics</string>
+    <string name="no_habits_yet">No habits yet!</string>
+    <string name="tracker_stats">⏱️ Tracker Statistics</string>
+    <string name="all_time">All time</string>
+    <string name="day">Day</string>
+    <string name="all_tracked_time">All Tracked Time</string>
+    <string name="church">Church</string>
+    <string name="personal">Personal</string>
+    <string name="work">Work</string>
+    <string name="without_project">Without project</string>
+    <string name="turbo_mode_sessions">🚀 Turbo Mode Sessions</string>
+    <string name="sessions_count">%1$d sessions</string>
+    <string name="overall_time">%1$d min overall. Well done!</string>
+    <string name="no_data">No data</string>
+    <string name="days_in_a_row">%1$d days in a row (%2$s – %3$s)</string>
+    <string name="max_streak">Max streak: %1$d (%2$s – %3$s)</string>
+    <string name="minimum">Minimum: %1$s (%2$s)</string>
+    <string name="maximum">Maximum: %1$s (%2$s)</string>
 </resources>

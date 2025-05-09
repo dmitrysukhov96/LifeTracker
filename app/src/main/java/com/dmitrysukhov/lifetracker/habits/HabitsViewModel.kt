@@ -1,10 +1,12 @@
 package com.dmitrysukhov.lifetracker.habits
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.dmitrysukhov.lifetracker.Habit
+import com.dmitrysukhov.lifetracker.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +21,8 @@ import java.util.Locale
 
 @HiltViewModel
 class HabitsViewModel @Inject constructor(
-    private val habitDao: HabitDao, private val habitEventDao: HabitEventDao
+    private val habitDao: HabitDao,
+    private val habitEventDao: HabitEventDao
 ) : ViewModel() {
     var selectedHabit: Habit? = null
     val habits: StateFlow<List<Habit>> = habitDao.getAllHabits()
@@ -82,16 +85,19 @@ class HabitsViewModel @Inject constructor(
         habitEventDao.getEventsForHabit(habitId)
             .map { events -> calculateStreaks(events) }
 
-    /**
-     * Возвращает метрики привычки в виде пары локализованных строк для отображения.
-     * Для типа 0 (чекбокс) — текущий и максимальный стрик с датами.
-     * Для типа 1/2 (числовые) — минимум и максимум с датами.
-     */
-    fun getHabitMetrics(habit: Habit, onResult: (Pair<String, String>) -> Unit) {
+    fun getHabitMetrics(
+        habit: Habit,
+        noDataString: String,
+        daysInARowFormat: String,
+        maxStreakFormat: String,
+        minimumFormat: String,
+        maximumFormat: String,
+        onResult: (Pair<String, String>) -> Unit
+    ) {
         viewModelScope.launch {
             habitEventDao.getEventsForHabit(habit.id).collect { events ->
                 if (events.isEmpty()) {
-                    onResult(Pair("Нет данных", "Нет данных"))
+                    onResult(Pair(noDataString, noDataString))
                     return@collect
                 }
                 val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
@@ -104,25 +110,43 @@ class HabitsViewModel @Inject constructor(
                         val currentRange = streakRanges.lastOrNull()
                         val maxRange = streakRanges.maxByOrNull { it.second - it.first }
                         val currentStr = if (currentRange != null) {
-                            "$currentStreak дней подряд (${dateFormat.format(Date(currentRange.first))} – ${dateFormat.format(Date(currentRange.second))})"
-                        } else "Нет данных"
+                            String.format(
+                                daysInARowFormat,
+                                currentStreak,
+                                dateFormat.format(Date(currentRange.first)),
+                                dateFormat.format(Date(currentRange.second))
+                            )
+                        } else noDataString
                         val maxStr = if (maxRange != null) {
-                            "Максимальный стрик: $maxStreak (${dateFormat.format(Date(maxRange.first))} – ${dateFormat.format(Date(maxRange.second))})"
-                        } else "Нет данных"
+                            String.format(
+                                maxStreakFormat,
+                                maxStreak,
+                                dateFormat.format(Date(maxRange.first)),
+                                dateFormat.format(Date(maxRange.second))
+                            )
+                        } else noDataString
                         onResult(Pair(currentStr, maxStr))
                     }
                     1, 2 -> { // Числовые
                         val minEvent = events.minByOrNull { it.value }
                         val maxEvent = events.maxByOrNull { it.value }
                         val minStr = if (minEvent != null) {
-                            "Минимум: ${minEvent.value} (${dateFormat.format(Date(minEvent.date))})"
-                        } else "Нет данных"
+                            String.format(
+                                minimumFormat,
+                                minEvent.value.toString(),
+                                dateFormat.format(Date(minEvent.date))
+                            )
+                        } else noDataString
                         val maxStr = if (maxEvent != null) {
-                            "Максимум: ${maxEvent.value} (${dateFormat.format(Date(maxEvent.date))})"
-                        } else "Нет данных"
+                            String.format(
+                                maximumFormat,
+                                maxEvent.value.toString(),
+                                dateFormat.format(Date(maxEvent.date))
+                            )
+                        } else noDataString
                         onResult(Pair(minStr, maxStr))
                     }
-                    else -> onResult(Pair("Нет данных", "Нет данных"))
+                    else -> onResult(Pair(noDataString, noDataString))
                 }
             }
         }

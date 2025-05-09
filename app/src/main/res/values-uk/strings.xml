@@ -151,6 +151,28 @@
     <string name="most_productive_day">Найпродуктивніший день</string>
     <string name="best_time">Найкращий час</string>
     <string name="focus_score">Оцінка фокусу</string>
+    <string name="todays_tasks">📝 Завдання на сьогодні</string>
+    <string name="no_tasks_for_today">Немає завдань на сьогодні! Насолоджуйтесь вільним часом!</string>
+    <string name="tasks_stats">📊 Статистика завдань</string>
+    <string name="tasks_completed_of_total">%1$d з %2$d виконано</string>
+    <string name="this_month">Цей місяць</string>
+    <string name="this_week">Цього тижня</string>
+    <string name="this_day">Сьогодні</string>
+    <string name="record_tasks">Рекорд: %1$d завдань - %2$s</string>
+    <string name="projects_section">📁 Проекти</string>
+    <string name="habits_metrics">💪 Звички та метрики</string>
+    <string name="no_habits_yet">Поки немає звичок!</string>
+    <string name="tracker_stats">⏱️ Статистика трекера</string>
+    <string name="all_time">Весь час</string>
+    <string name="day">День</string>
+    <string name="all_tracked_time">Всього відстежено</string>
+    <string name="church">Церква</string>
+    <string name="personal">Особисте</string>
+    <string name="work">Робота</string>
+    <string name="without_project">Без проекту</string>
+    <string name="turbo_mode_sessions">🚀 Сесії турбо-режиму</string>
+    <string name="sessions_count">%1$d сесій</string>
+    <string name="overall_time">%1$d хв всього. Чудова робота!</string>
     
     <!-- About Developer strings -->
     <string name="about_developer">Про розробника</string>
@@ -199,4 +221,9 @@
     <string name="reminder_channel_description">Сповіщення про заплановані завдання</string>
     <string name="notification_enabled">Сповіщення увімкнено</string>
     <string name="notification_disabled">Сповіщення вимкнено</string>
+    <string name="no_data">Немає даних</string>
+    <string name="days_in_a_row">%1$d днів поспіль (%2$s – %3$s)</string>
+    <string name="max_streak">Максимально поспіль: %1$d (%2$s – %3$s)</string>
+    <string name="minimum">Мінімум: %1$s (%2$s)</string>
+    <string name="maximum">Максимум: %1$s (%2$s)</string>
 </resources>

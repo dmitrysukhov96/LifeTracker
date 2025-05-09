@@ -188,7 +188,7 @@ fun TodoListScreen(
         }
 
         if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint) else {
-            LazyColumn(Modifier.padding(24.dp)) {
+            LazyColumn(Modifier.background(BgColor).padding(24.dp)) {
                 for ((category, tasks) in categorizedTasks) {
                     item {
                         if (category != completedCategory) {
