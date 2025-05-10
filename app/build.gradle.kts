@@ -36,7 +36,7 @@ dependencies {
     implementation(libs.androidx.ui)
     ksp(libs.androidx.room.compiler)
     implementation(libs.hilt.android)
-    implementation (libs.coil.compose)
+    implementation(libs.coil.compose)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.material3)
@@ -51,4 +51,6 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.appcompat)
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
 }

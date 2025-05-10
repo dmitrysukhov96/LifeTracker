@@ -1,12 +1,10 @@
 package com.dmitrysukhov.lifetracker.habits
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.dmitrysukhov.lifetracker.Habit
-import com.dmitrysukhov.lifetracker.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,10 +12,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
 @HiltViewModel
 class HabitsViewModel @Inject constructor(
@@ -81,17 +79,9 @@ class HabitsViewModel @Inject constructor(
         return Triple(currentStreak, maxStreak, streaks)
     }
 
-    fun getStreaksForHabit(habitId: Long): Flow<Triple<Int, Int, List<Pair<Long, Long>>>> =
-        habitEventDao.getEventsForHabit(habitId)
-            .map { events -> calculateStreaks(events) }
-
     fun getHabitMetrics(
-        habit: Habit,
-        noDataString: String,
-        daysInARowFormat: String,
-        maxStreakFormat: String,
-        minimumFormat: String,
-        maximumFormat: String,
+        habit: Habit, noDataString: String, daysInARowFormat: String,
+        maxStreakFormat: String, minimumFormat: String, maximumFormat: String,
         onResult: (Pair<String, String>) -> Unit
     ) {
         viewModelScope.launch {

@@ -2,9 +2,12 @@ package com.dmitrysukhov.lifetracker
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.LinearEasing
@@ -47,7 +50,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.NavigationDrawerItemDefaults.colors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -133,6 +136,7 @@ import com.dmitrysukhov.lifetracker.utils.LocaleBaseActivity
 import com.dmitrysukhov.lifetracker.utils.LocaleHelper
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.MyApplicationTheme
+import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.WhitePine
@@ -147,6 +151,8 @@ class MainActivity : LocaleBaseActivity() {
     companion object {
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 100
     }
+
+    private var showPermissionDialog by mutableStateOf(false)
 
     override fun attachBaseContext(newBase: Context) {
         val sharedPref = newBase.getSharedPreferences("user_prefs", MODE_PRIVATE)
@@ -164,72 +170,124 @@ class MainActivity : LocaleBaseActivity() {
         applyLanguageSettings()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        requestNotificationPermission()
-
         setContent {
             val context = LocalContext.current
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = false
             var topBarState by remember { mutableStateOf(TopBarState(context.getString(R.string.app_name))) }
+            LaunchedEffect(Unit) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    when {
+                        ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED -> {
+                        }
+
+                        shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                            showPermissionDialog = true
+                        }
+
+                        else -> {
+                            ActivityCompat.requestPermissions(
+                                this@MainActivity,
+                                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                                NOTIFICATION_PERMISSION_REQUEST_CODE
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (showPermissionDialog) AlertDialog(
+                containerColor = BgColor,
+                onDismissRequest = { showPermissionDialog = false }, title = {
+                    Text(
+                        stringResource(R.string.notification_permission_title),
+                        style = H1, color = InverseColor
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(R.string.notification_permission_message),
+                        style = SimpleText, color = InverseColor
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val intent =
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", packageName, null)
+                                }
+                            startActivity(intent)
+                            showPermissionDialog = false
+                        }
+                    ) {
+                        Text(
+                            stringResource(R.string.settings),
+                            style = SimpleText, color = PineColor
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showPermissionDialog = false }) {
+                        Text(
+                            stringResource(R.string.cancel), style = SimpleText,
+                            color = PineColor
+                        )
+                    }
+                }
+            )
+
+
             LaunchedEffect(topBarState.color) {
                 systemUiController.setNavigationBarColor(
                     topBarState.color, darkIcons = useDarkIcons
                 )
             }
             MyApplicationTheme {
-                // Name dialog logic
                 val sharedPref = context.getSharedPreferences("user_prefs", MODE_PRIVATE)
                 var showNameDialog by rememberSaveable {
                     mutableStateOf(!sharedPref.getBoolean("dont_ask_name", false))
                 }
                 var userName by rememberSaveable { mutableStateOf("") }
-                if (showNameDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showNameDialog = false },
-                        title = {
-                            Text(
-                                text = stringResource(R.string.dialog_ask_name),
-                                style = H1
-                            )
-                        },
-                        text = {
-                            OutlinedTextField(
-                                value = userName, onValueChange = { userName = it },
-                                placeholder = {
-                                    Text(
-                                        text = stringResource(R.string.dialog_ask_name),
-                                        style = SimpleText
-                                    )
-                                }, singleLine = true, modifier = Modifier.fillMaxWidth()
-                            )
-                        }, confirmButton = {
-                            Button(
-                                onClick = {
-                                    sharedPref.edit {
-                                        putString("user_name", userName.trim())
-                                            .putBoolean("dont_ask_name", true)
-                                    }
-                                    showNameDialog = false
-                                }, enabled = userName.isNotBlank()
-                            ) {
-                                Text(text = stringResource(R.string.ok), style = SimpleText)
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    sharedPref.edit { putBoolean("dont_ask_name", true) }
-                                    showNameDialog = false
-                                }
-                            ) {
+                if (showNameDialog) AlertDialog(
+                    containerColor = BgColor, onDismissRequest = { showNameDialog = false },
+                    title = { Text(text = stringResource(R.string.dialog_ask_name), style = H1) },
+                    text = {
+                        OutlinedTextField(
+                            value = userName, onValueChange = { userName = it },
+                            placeholder = {
                                 Text(
-                                    text = stringResource(R.string.dialog_dont_ask_again),
+                                    text = stringResource(R.string.dialog_ask_name),
                                     style = SimpleText
                                 )
+                            }, singleLine = true, modifier = Modifier.fillMaxWidth()
+                        )
+                    }, confirmButton = {
+                        Button(
+                            onClick = {
+                                sharedPref.edit {
+                                    putString("user_name", userName.trim())
+                                        .putBoolean("dont_ask_name", true)
+                                }
+                                showNameDialog = false
+                            }, enabled = userName.isNotBlank()
+                        ) { Text(text = stringResource(R.string.ok), style = SimpleText) }
+                    }, dismissButton = {
+                        TextButton(
+                            onClick = {
+                                sharedPref.edit { putBoolean("dont_ask_name", true) }
+                                showNameDialog = false
                             }
+                        ) {
+                            Text(
+                                text = stringResource(R.string.dialog_dont_ask_again),
+                                style = SimpleText
+                            )
                         }
-                    )
-                }
+                    }
+                )
                 val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val trackerViewModel: TrackerViewModel = hiltViewModel()
@@ -300,7 +358,7 @@ class MainActivity : LocaleBaseActivity() {
                                             destination.icon, destination.title,
                                             modifier = Modifier.size(20.dp)
                                         )
-                                    }, colors = NavigationDrawerItemDefaults.colors(
+                                    }, colors = colors(
                                         selectedTextColor = topBarState.color,
                                         selectedContainerColor = topBarState.color.copy(0.1f),
                                         unselectedTextColor = InverseColor,
@@ -362,13 +420,10 @@ class MainActivity : LocaleBaseActivity() {
                                                 decorationBox = { innerTextField ->
                                                     Box(contentAlignment = Alignment.CenterStart) {
                                                         innerTextField()
-                                                        if (taskText.isEmpty()) {
-                                                            Text(
-                                                                stringResource(R.string.enter_task_hint),
-                                                                color = Color.White,
-                                                                style = H2
-                                                            )
-                                                        }
+                                                        if (taskText.isEmpty()) Text(
+                                                            stringResource(R.string.enter_task_hint),
+                                                            color = Color.White, style = H2
+                                                        )
                                                     }
                                                 },
 
@@ -414,7 +469,7 @@ class MainActivity : LocaleBaseActivity() {
                                             contentDescription = null,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height((24 + 56 + 36+ 20).dp),
+                                                .height((24 + 56 + 36 + 20).dp),
                                             contentScale = ContentScale.FillWidth
                                         )
                                         Box(
@@ -559,7 +614,10 @@ class MainActivity : LocaleBaseActivity() {
                                         }
                                         composable(SETTINGS_SCREEN) { SettingsScreen(setTopBarState) }
                                         composable(TURBO_SCREEN) {
-                                            TurboScreen(setTopBarState = setTopBarState)
+                                            TurboScreen(
+                                                setTopBarState, trackerViewModel, todoViewModel,
+                                                navController
+                                            )
                                         }
                                         composable(ABOUT_DEVELOPER_SCREEN) {
                                             AboutDeveloperScreen(setTopBarState)
@@ -580,15 +638,15 @@ class MainActivity : LocaleBaseActivity() {
         if (languageCode != null) LocaleHelper.applyLanguage(this, languageCode)
     }
 
-    private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                NOTIFICATION_PERMISSION_REQUEST_CODE
-            )
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                // Если пользователь отказал в разрешении, показываем наш диалог
+                showPermissionDialog = true
+            }
         }
     }
 }

@@ -60,7 +60,7 @@ class NoteViewModel @Inject constructor(
         }
     }
     
-    fun selectNote(note: Note) {
+    fun selectNote(note: Note?) {
         _selectedNote.value = note
     }
     

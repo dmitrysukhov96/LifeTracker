@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -56,7 +55,10 @@ fun NotesListScreen(
     setTopBarState(
         TopBarState(
             title = context.getString(R.string.notes), color = PineColor, topBarActions = {
-                IconButton(onClick = { navController.navigate(NEW_NOTE_SCREEN) }) {
+                IconButton(onClick = { 
+                    viewModel.selectNote(null)
+                    navController.navigate(NEW_NOTE_SCREEN) 
+                }) {
                     Icon(
                         painter = painterResource(R.drawable.plus), contentDescription = null,
                         tint = Color.White

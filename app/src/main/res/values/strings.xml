@@ -30,10 +30,10 @@
     <string name="delete">Delete</string>
     <string name="enter_value">Enter value</string>
     <string name="add_task">Add Task</string>
-    <string name="error_end_time_before_start">End time must be after start time</string>
-    <string name="error_invalid_date_format">Invalid date/time format</string>
+    <string name="error_end_time_before_start">End time cannot be before start time</string>
+    <string name="error_invalid_date_format">Invalid date format</string>
     <string name="error_invalid_date_value">Invalid date value</string>
-    <string name="error_parsing_date">Error parsing date/time</string>
+    <string name="error_parsing_date">Error parsing date</string>
     
     <!-- New strings -->
     <string name="tracker">Tracker</string>
@@ -131,7 +131,6 @@
     <string name="resume">Resume</string>
     <string name="stop">Stop</string>
     <string name="complete">Complete</string>
-    <string name="task_completed">🎉 Task Completed!</string>
     <string name="task_completed_in">You completed %1$s in %2$s!</string>
     <string name="what_next">What\'s next?</string>
     <string name="go">GO!</string>
@@ -204,6 +203,10 @@
     <string name="task_reminders">Task Reminders</string>
     <string name="task_reminders_desc">Notifications for scheduled tasks</string>
     
+    <!-- Notification permission strings -->
+    <string name="notification_permission_title">Notifications Required</string>
+    <string name="notification_permission_message">Notifications are essential for task reminders and tracking your goals. Please enable notifications in settings to get the most out of the app.</string>
+    
     <!-- Date formatting strings -->
     <string name="yesterday_at">Yesterday at %s</string>
     <string name="tomorrow_at">Tomorrow at %s</string>
@@ -237,4 +240,11 @@
     <string name="max_streak">Max streak: %1$d (%2$s – %3$s)</string>
     <string name="minimum">Minimum: %1$s (%2$s)</string>
     <string name="maximum">Maximum: %1$s (%2$s)</string>
+    <string name="stop_tracker_first">To edit this event, please stop the tracker first</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="congratulations">Congratulations! 🎉</string>
+    <string name="task_completed">You completed task \"%1$s\"</string>
+    <string name="completed_in_time">in %1$s</string>
+    <string name="continue_text">Continue</string>
 </resources>

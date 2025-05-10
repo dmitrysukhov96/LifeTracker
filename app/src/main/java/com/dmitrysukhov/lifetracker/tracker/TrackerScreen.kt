@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -25,7 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults.colors
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -75,17 +77,26 @@ fun TrackerScreen(
     setTopBarState: (TopBarState) -> Unit, trackerViewModel: TrackerViewModel,
     navController: NavHostController, projectsViewModel: ProjectsViewModel
 ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-    val events by trackerViewModel.getEventsForDate(selectedDate).collectAsState(emptyList())
-    val projects by trackerViewModel.projects.collectAsState()
     var showTaskDialog by remember { mutableStateOf(false) }
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
     var isTrackerStart by remember { mutableStateOf(false) }
     val title = stringResource(R.string.tracker)
+    setTopBarState(TopBarState(title) {
+        IconButton(onClick = {
+            selectedEvent = null
+            isTrackerStart = true
+            showTaskDialog = true
+        }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
+    })
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+    val events by trackerViewModel.getEventsForDate(selectedDate).collectAsState(emptyList())
+    val projects by trackerViewModel.projects.collectAsState()
     val lastEvent = trackerViewModel.lastEvent.collectAsState().value
     val lastProjectId by projectsViewModel.lastCreatedProjectId.collectAsState(null)
     var selectedProjectId by remember { mutableStateOf(selectedEvent?.projectId) }
+    val context = LocalContext.current
+
     LaunchedEffect(lastProjectId) {
         lastProjectId?.let {
             showTaskDialog = true
@@ -99,13 +110,6 @@ fun TrackerScreen(
         }
     }
     LaunchedEffect(refreshTrigger, selectedDate) { trackerViewModel.refreshEvents() }
-    setTopBarState(TopBarState(title) {
-        IconButton(onClick = {
-            selectedEvent = null
-            isTrackerStart = false
-            showTaskDialog = true
-        }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
-    })
     Column(
         Modifier
             .fillMaxSize()
@@ -128,6 +132,10 @@ fun TrackerScreen(
         TrackerTimeline(
             events = events, selectedDate = selectedDate, onDateSelected = { selectedDate = it },
             projects = projects, onEventClick = { event ->
+                if (event.endTime == null) {
+                    Toast.makeText(context, context.getString(R.string.stop_tracker_first), Toast.LENGTH_SHORT).show()
+                    return@TrackerTimeline
+                }
                 selectedEvent = event
                 isTrackerStart = false
                 showTaskDialog = true
@@ -138,49 +146,70 @@ fun TrackerScreen(
         )
     }
     if (showTaskDialog) {
-        EventDialog(
-            event = selectedEvent, projects = projects, onDismiss = {
-                showTaskDialog = false
-                selectedEvent = null
-            }, onSave = { event ->
-                if (event.eventId == 0L) {
+        if (selectedEvent != null) {
+            EditEventDialog(
+                event = selectedEvent!!,
+                projects = projects,
+                onDismiss = {
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                onSave = { event ->
+                    trackerViewModel.updateEvent(event)
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                onDelete = { event ->
+                    trackerViewModel.deleteEvent(event.eventId)
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                selectedProjectId = selectedProjectId,
+                onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
+                setProjectId = { selectedProjectId = it }
+            )
+        } else {
+            NewEventDialog(
+                projects = projects,
+                onDismiss = {
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                onSave = { event ->
                     trackerViewModel.stopEvent()
                     trackerViewModel.insertEvent(event)
-                } else trackerViewModel.updateEvent(event)
-                showTaskDialog = false
-                selectedEvent = null
-            }, onDelete = { event ->
-                trackerViewModel.deleteEvent(event.eventId)
-                showTaskDialog = false
-                selectedEvent = null
-            }, isTrackerStart, selectedProjectId, { navController.navigate(NEW_PROJECT_SCREEN) },
-            { selectedProjectId = it }
-        )
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                selectedProjectId = selectedProjectId,
+                onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
+                setProjectId = { selectedProjectId = it }
+            )
+        }
     }
 }
 
 @Composable
-fun EventDialog(
-    event: Event?, projects: List<Project>, onDismiss: () -> Unit, onSave: (Event) -> Unit,
-    onDelete: (Event) -> Unit, trackerStart: Boolean = false,
-    selectedProjectId: Long?, onNavigateToNewProject: () -> Unit, setProjectId: (Long?) -> Unit
+fun NewEventDialog(
+    projects: List<Project>,
+    onDismiss: () -> Unit,
+    onSave: (Event) -> Unit,
+    selectedProjectId: Long?,
+    onNavigateToNewProject: () -> Unit,
+    setProjectId: (Long?) -> Unit
 ) {
-    var taskName by remember { mutableStateOf(event?.name ?: "") }
+    var taskName by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val startDateTime = event?.let { DateTime(it.startTime) } ?: DateTime.now()
-    val endDateTime = event?.endTime?.let { DateTime(it) } ?: DateTime.now()
-    var startDate by remember { mutableStateOf(startDateTime.toString("dd.MM.yyyy")) }
-    var startTime by remember { mutableStateOf(startDateTime.toString("HH:mm")) }
-    var endDate by remember { mutableStateOf(endDateTime.toString("dd.MM.yyyy")) }
-    var endTime by remember { mutableStateOf(endDateTime.toString("HH:mm")) }
     var error: String? by rememberSaveable { mutableStateOf(null) }
+
     LaunchedEffect(error) {
         if (!error.isNullOrEmpty()) {
             Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
             error = null
         }
     }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
@@ -188,10 +217,9 @@ fun EventDialog(
         Card(
             Modifier
                 .fillMaxWidth()
-                .padding(16.dp), shape = RoundedCornerShape(16.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            val now = DateTime.now()
-            fun isFuture(dt: DateTime) = dt.isAfter(now)
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -199,28 +227,39 @@ fun EventDialog(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = when {
-                        trackerStart -> stringResource(R.string.start_new_task)
-                        event == null -> stringResource(R.string.new_event)
-                        else -> stringResource(R.string.edit_event)
-                    }, style = MaterialTheme.typography.titleLarge, fontFamily = Montserrat,
-                    fontWeight = Bold, fontSize = 20.sp, modifier = Modifier.padding(bottom = 16.dp)
+                    text = stringResource(R.string.start_new_task),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontFamily = Montserrat,
+                    fontWeight = Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
+
                 OutlinedTextField(
-                    value = taskName, colors = colors(
+                    value = taskName,
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PineColor,
                         unfocusedBorderColor = InverseColor.copy(0.5f)
-                    ), onValueChange = { taskName = it }, label = {
+                    ),
+                    onValueChange = { taskName = it },
+                    label = {
                         Text(
-                            stringResource(R.string.task_name), fontFamily = Montserrat,
-                            fontSize = 16.sp, fontWeight = FontWeight.Medium
+                            stringResource(R.string.task_name),
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
                         )
-                    }, textStyle = TextStyle(
-                        fontFamily = Montserrat, fontSize = 16.sp, fontWeight = FontWeight.Medium
-                    ), modifier = Modifier
+                    },
+                    textStyle = TextStyle(
+                        fontFamily = Montserrat,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 )
+
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -270,19 +309,25 @@ fun EventDialog(
                                     projects.find { it.projectId == id }?.title
                                         ?: stringResource(R.string.select_project)
                                 } ?: stringResource(R.string.no_project),
-                                fontFamily = Montserrat, fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium, color = InverseColor
+                                fontFamily = Montserrat,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = InverseColor
                             )
                         }
                         Icon(
-                            painterResource(R.drawable.arrow_down), contentDescription = null,
-                            tint = PineColor, modifier = Modifier
+                            painterResource(R.drawable.arrow_down),
+                            contentDescription = null,
+                            tint = PineColor,
+                            modifier = Modifier
                                 .padding(top = 1.dp)
                                 .rotate(if (expanded) 180f else 0f)
                         )
                     }
+
                     DropdownMenu(
-                        expanded = expanded, onDismissRequest = { expanded = false },
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
                         modifier = Modifier
                             .background(BgColor)
                             .padding(horizontal = 8.dp)
@@ -324,17 +369,21 @@ fun EventDialog(
                                             .size(16.dp)
                                             .background(Color.Transparent, RoundedCornerShape(4.dp))
                                             .border(
-                                                1.dp, InverseColor.copy(0.5f),
+                                                1.dp,
+                                                InverseColor.copy(0.5f),
                                                 RoundedCornerShape(4.dp)
                                             )
                                     )
                                     Text(
                                         stringResource(R.string.no_project),
-                                        fontFamily = Montserrat, fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium, color = InverseColor
+                                        fontFamily = Montserrat,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = InverseColor
                                     )
                                 }
-                            }, onClick = {
+                            },
+                            onClick = {
                                 setProjectId(null)
                                 expanded = false
                             }
@@ -356,11 +405,14 @@ fun EventDialog(
                                         )
                                         Text(
                                             project.title,
-                                            fontFamily = Montserrat, fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium, color = InverseColor
+                                            fontFamily = Montserrat,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = InverseColor
                                         )
                                     }
-                                }, onClick = {
+                                },
+                                onClick = {
                                     setProjectId(project.projectId)
                                     expanded = false
                                 }
@@ -368,90 +420,404 @@ fun EventDialog(
                         }
                     }
                 }
-                if (!trackerStart) {
-                    Text(
-                        text = stringResource(R.string.start), fontFamily = Montserrat,
-                        fontWeight = Bold, fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Button(
+                        onClick = {
+                            if (taskName.isBlank()) return@Button
+                            val newEvent = Event(
+                                eventId = 0,
+                                projectId = selectedProjectId ?: 0,
+                                name = taskName,
+                                startTime = DateTime.now().millis,
+                                endTime = null
+                            )
+                            onSave(newEvent)
+                        },
+                        enabled = taskName.isNotBlank(),
+                        modifier = Modifier.height(48.dp)
                     ) {
-                        OutlinedTextField(
-                            value = startDate, colors = colors(
-                                focusedBorderColor = PineColor,
-                                unfocusedBorderColor = InverseColor.copy(0.5f)
-                            ), onValueChange = { startDate = it }, label = {
-                                Text(
-                                    stringResource(R.string.date), fontFamily = Montserrat,
-                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
-                                )
-                            }, textStyle = TextStyle(
-                                fontFamily = Montserrat, fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            ), modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = startTime, colors = colors(
-                                focusedBorderColor = PineColor,
-                                unfocusedBorderColor = InverseColor.copy(0.5f)
-                            ), onValueChange = { startTime = it }, label = {
-                                Text(
-                                    stringResource(R.string.time), fontFamily = Montserrat,
-                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
-                                )
-                            }, textStyle = TextStyle(
-                                fontFamily = Montserrat, fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            ), modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Text(
-                        text = stringResource(R.string.end), fontFamily = Montserrat,
-                        fontWeight = Bold, fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = endDate, colors = colors(
-                                focusedBorderColor = PineColor,
-                                unfocusedBorderColor = InverseColor.copy(0.5f)
-                            ), onValueChange = { endDate = it }, label = {
-                                Text(
-                                    stringResource(R.string.date), fontFamily = Montserrat,
-                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
-                                )
-                            }, textStyle = TextStyle(
-                                fontFamily = Montserrat, fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            ), modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = endTime, colors = colors(
-                                focusedBorderColor = PineColor,
-                                unfocusedBorderColor = InverseColor.copy(0.5f)
-                            ), onValueChange = { endTime = it }, label = {
-                                Text(
-                                    stringResource(R.string.time), fontFamily = Montserrat,
-                                    fontSize = 16.sp, fontWeight = FontWeight.Medium
-                                )
-                            }, textStyle = TextStyle(
-                                fontFamily = Montserrat, fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            ), modifier = Modifier.weight(1f)
-                        )
+                        Text(stringResource(R.string.save), style = H1.copy(color = Color.White))
                     }
                 }
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    if (event != null && !trackerStart) TextButton(onClick = { onDelete(event) }) {
+            }
+        }
+    }
+}
+
+@Composable
+fun EditEventDialog(
+    event: Event,
+    projects: List<Project>,
+    onDismiss: () -> Unit,
+    onSave: (Event) -> Unit,
+    onDelete: (Event) -> Unit,
+    selectedProjectId: Long?,
+    onNavigateToNewProject: () -> Unit,
+    setProjectId: (Long?) -> Unit
+) {
+    var taskName by remember { mutableStateOf(event.name) }
+    var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val startDateTime = DateTime(event.startTime)
+    val endDateTime = event.endTime?.let { DateTime(it) } ?: DateTime.now()
+    var startDate by remember { mutableStateOf(startDateTime.toString("dd.MM.yyyy")) }
+    var startTime by remember { mutableStateOf(startDateTime.toString("HH:mm")) }
+    var endDate by remember { mutableStateOf(endDateTime.toString("dd.MM.yyyy")) }
+    var endTime by remember { mutableStateOf(endDateTime.toString("HH:mm")) }
+    var error: String? by rememberSaveable { mutableStateOf(null) }
+
+    LaunchedEffect(error) {
+        if (!error.isNullOrEmpty()) {
+            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+            error = null
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+    ) {
+        Card(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            val now = DateTime.now()
+            fun isFuture(dt: DateTime) = dt.isAfter(now)
+
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(BgColor)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.edit_event),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontFamily = Montserrat,
+                    fontWeight = Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                OutlinedTextField(
+                    value = taskName?:"",
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PineColor,
+                        unfocusedBorderColor = InverseColor.copy(0.5f)
+                    ),
+                    onValueChange = { taskName = it },
+                    label = {
+                        Text(
+                            stringResource(R.string.task_name),
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    },
+                    textStyle = TextStyle(
+                        fontFamily = Montserrat,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Row(
+                        Modifier
+                            .clickable { expanded = true }
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .border(
+                                if (expanded) 2.dp else 1.dp,
+                                if (expanded) PineColor else InverseColor.copy(0.5f),
+                                RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(
+                                        selectedProjectId?.let { id ->
+                                            projects.find { it.projectId == id }?.let { project ->
+                                                Color(project.color)
+                                            } ?: Color.Transparent
+                                        } ?: Color.Transparent,
+                                        RoundedCornerShape(4.dp)
+                                    ).let { modifier ->
+                                        if (selectedProjectId == null) {
+                                            modifier.border(
+                                                1.dp,
+                                                InverseColor.copy(0.5f),
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                        } else modifier
+                                    }
+                            )
+                            Text(
+                                text = selectedProjectId?.let { id ->
+                                    projects.find { it.projectId == id }?.title
+                                        ?: stringResource(R.string.select_project)
+                                } ?: stringResource(R.string.no_project),
+                                fontFamily = Montserrat,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = InverseColor
+                            )
+                        }
+                        Icon(
+                            painterResource(R.drawable.arrow_down),
+                            contentDescription = null,
+                            tint = PineColor,
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .rotate(if (expanded) 180f else 0f)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier
+                            .background(BgColor)
+                            .padding(horizontal = 8.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.plus),
+                                        contentDescription = null,
+                                        tint = PineColor
+                                    )
+                                    Text(
+                                        stringResource(R.string.add_project),
+                                        fontFamily = Montserrat,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = PineColor
+                                    )
+                                }
+                            },
+                            onClick = {
+                                expanded = false
+                                onNavigateToNewProject()
+                            }
+                        )
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .background(Color.Transparent, RoundedCornerShape(4.dp))
+                                            .border(
+                                                1.dp,
+                                                InverseColor.copy(0.5f),
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                    )
+                                    Text(
+                                        stringResource(R.string.no_project),
+                                        fontFamily = Montserrat,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = InverseColor
+                                    )
+                                }
+                            },
+                            onClick = {
+                                setProjectId(null)
+                                expanded = false
+                            }
+                        )
+                        projects.forEach { project ->
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .background(
+                                                    Color(project.color),
+                                                    RoundedCornerShape(4.dp)
+                                                )
+                                        )
+                                        Text(
+                                            project.title,
+                                            fontFamily = Montserrat,
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = InverseColor
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    setProjectId(project.projectId)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Text(
+                    text = stringResource(R.string.start_time),
+                    fontFamily = Montserrat,
+                    fontWeight = Bold,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = startDate,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PineColor,
+                            unfocusedBorderColor = InverseColor.copy(0.5f)
+                        ),
+                        onValueChange = { startDate = it },
+                        label = {
+                            Text(
+                                stringResource(R.string.date),
+                                fontFamily = Montserrat,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        textStyle = TextStyle(
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.width(120.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                    OutlinedTextField(
+                        value = startTime,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PineColor,
+                            unfocusedBorderColor = InverseColor.copy(0.5f)
+                        ),
+                        onValueChange = { startTime = it },
+                        label = {
+                            Text(
+                                stringResource(R.string.time),
+                                fontFamily = Montserrat,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        textStyle = TextStyle(
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.width(80.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+
+                Text(
+                    text = stringResource(R.string.end_time),
+                    fontFamily = Montserrat,
+                    fontWeight = Bold,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = endDate,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PineColor,
+                            unfocusedBorderColor = InverseColor.copy(0.5f)
+                        ),
+                        onValueChange = { endDate = it },
+                        label = {
+                            Text(
+                                stringResource(R.string.date),
+                                fontFamily = Montserrat,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        textStyle = TextStyle(
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.width(120.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                    OutlinedTextField(
+                        value = endTime,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PineColor,
+                            unfocusedBorderColor = InverseColor.copy(0.5f)
+                        ),
+                        onValueChange = { endTime = it },
+                        label = {
+                            Text(
+                                stringResource(R.string.time),
+                                fontFamily = Montserrat,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        textStyle = TextStyle(
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.width(80.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = { onDelete(event) }) {
                         Text(stringResource(R.string.delete), color = PineColor, style = H2)
                     }
                     Spacer(Modifier.width(8.dp))
@@ -461,40 +827,36 @@ fun EventDialog(
                                 val format = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
                                 val startDT = DateTime.parse("$startDate $startTime", format)
                                 val endDT = DateTime.parse("$endDate $endTime", format)
-                                if (isFuture(startDT) || isFuture(endDT)) error =
-                                    context.getString(R.string.cannot_create_event_in_future) else {
-                                    if (taskName.isBlank()) return@Button
-                                    if (trackerStart) {
-                                        val newEvent = Event(
-                                            eventId = 0, projectId = selectedProjectId ?: 0,
-                                            name = taskName, startTime = DateTime.now().millis,
-                                            endTime = null
-                                        )
-                                        onSave(newEvent)
-                                    } else {
-                                        if (endDT.isBefore(startDT)) {
-                                            error =
-                                                context.getString(R.string.error_end_time_before_start)
-                                            return@Button
-                                        }
-                                        val newEvent = Event(
-                                            eventId = event?.eventId ?: 0,
-                                            projectId = selectedProjectId ?: 0, name = taskName,
-                                            startTime = startDT.millis, endTime = endDT.millis
-                                        )
-                                        onSave(newEvent)
-                                    }
+                                if (isFuture(startDT) || isFuture(endDT)) {
+                                    error = context.getString(R.string.cannot_create_event_in_future)
+                                    return@Button
                                 }
+                                if (taskName?.isBlank() == true) return@Button
+                                if (endDT.isBefore(startDT)) {
+                                    error = context.getString(R.string.error_end_time_before_start)
+                                    return@Button
+                                }
+                                val updatedEvent = Event(
+                                    eventId = event.eventId,
+                                    projectId = selectedProjectId ?: 0,
+                                    name = taskName,
+                                    startTime = startDT.millis,
+                                    endTime = endDT.millis
+                                )
+                                onSave(updatedEvent)
                             } catch (e: Exception) {
                                 error = when (e) {
                                     is IllegalArgumentException ->
                                         context.getString(R.string.error_invalid_date_format)
-
                                     else -> context.getString(R.string.error_parsing_date)
                                 }
                             }
-                        }, enabled = taskName.isNotBlank(), modifier = Modifier.height(48.dp)
-                    ) { Text(stringResource(R.string.save), style = H1.copy(color = Color.White)) }
+                        },
+                        enabled = taskName?.isNotBlank() == true,
+                        modifier = Modifier.height(48.dp)
+                    ) {
+                        Text(stringResource(R.string.save), style = H1.copy(color = Color.White))
+                    }
                 }
             }
         }

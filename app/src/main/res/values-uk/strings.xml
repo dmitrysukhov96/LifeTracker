@@ -26,7 +26,6 @@
     <string name="end">Кінець</string>
     <string name="date">Дата</string>
     <string name="time">Час</string>
-    <string name="cancel">Скасувати</string>
     <string name="save">Зберегти</string>
     <string name="delete">Видалити</string>
     <string name="enter_value">Введіть значення</string>
@@ -101,7 +100,6 @@
     <string name="good_afternoon">🌤️Добрий день</string>
     <string name="good_evening">🌆 Добрий вечір</string>
     <string name="good_night">🌙 Доброї ночі</string>
-    <string name="settings">Налаштування</string>
     <string name="select_image">Обрати зображення</string>
     <string name="selected_image">Вибране зображення</string>
     <string name="change_image">Змінити зображення</string>
@@ -126,7 +124,6 @@
     <string name="resume">Продовжити</string>
     <string name="stop">Стоп</string>
     <string name="complete">Завершити</string>
-    <string name="task_completed">🎉 Готово!</string>
     <string name="task_completed_in">Ви виконали %1$s за %2$s!</string>
     <string name="what_next">Що робимо далі?</string>
     <string name="go">GO!</string>
@@ -226,4 +223,17 @@
     <string name="max_streak">Максимально поспіль: %1$d (%2$s – %3$s)</string>
     <string name="minimum">Мінімум: %1$s (%2$s)</string>
     <string name="maximum">Максимум: %1$s (%2$s)</string>
+    <string name="task_reminders_desc">Сповіщення для запланованих завдань</string>
+
+    <!-- Notification permission strings -->
+    <string name="notification_permission_title">Потрібні сповіщення</string>
+    <string name="notification_permission_message">Сповіщення необхідні для нагадувань про завдання та відстеження ваших цілей. Будь ласка, увімкніть сповіщення в налаштуваннях, щоб отримати максимальну користь від додатку.</string>
+    <string name="settings">Налаштування</string>
+    <string name="cancel">Скасувати</string>
+
+    <!-- Date formatting strings -->
+    <string name="congratulations">Вітаємо! 🎉</string>
+    <string name="task_completed">Ви виконали завдання \"%1$s\"</string>
+    <string name="completed_in_time">за %1$s</string>
+    <string name="continue_text">Продовжити</string>
 </resources>

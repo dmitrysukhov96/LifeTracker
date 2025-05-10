@@ -181,14 +181,14 @@ fun TrackerTimeline(
                         val startMinutes = ((adjustedStart.millis - dayStart.millis) / 60000).toInt()
                         val durationMinutes = Duration(adjustedStart, adjustedEnd).standardMinutes
                         val topPadding = (startMinutes * 4f / 3f).dp + 19.dp
-                        val height = (durationMinutes * 4f / 3f).dp
+                        val height = (durationMinutes * 4f / 3f)
                         val project = projects.find { it.projectId == event.projectId }
                         val color = project?.let { Color(it.color) } ?: Color(0xFF4CAF50)
 
                         EventBlock(
                             event = event, color = color, projects = projects, modifier = Modifier
                                 .fillMaxWidth()
-                                .height(height)
+                                .height(maxOf(0.5f, height).dp)
                                 .offset(y = topPadding)
                                 .clickable { onEventClick(event) }
                         )

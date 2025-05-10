@@ -126,7 +126,6 @@
     <string name="resume">Продолжить</string>
     <string name="stop">Стоп</string>
     <string name="complete">Завершить</string>
-    <string name="task_completed">🎉 Готово!</string>
     <string name="task_completed_in">Вы выполнили %1$s за %2$s!</string>
     <string name="what_next">Что делаем дальше?</string>
     <string name="go">GO!</string>
@@ -236,4 +235,14 @@
     <string name="max_streak">Максимально подряд: %1$d (%2$s – %3$s)</string>
     <string name="minimum">Минимум: %1$s (%2$s)</string>
     <string name="maximum">Максимум: %1$s (%2$s)</string>
+
+    <!-- Notification permission strings -->
+    <string name="notification_permission_title">Требуются уведомления</string>
+    <string name="notification_permission_message">Уведомления необходимы для напоминаний о задачах и отслеживания ваших целей. Пожалуйста, включите уведомления в настройках, чтобы получить максимальную пользу от приложения.</string>
+
+    <!-- New turbo mode completion strings -->
+    <string name="congratulations">Поздравляем! 🎉</string>
+    <string name="task_completed">Вы выполнили задачу \"%1$s\"</string>
+    <string name="completed_in_time">за %1$s</string>
+    <string name="continue_text">Продолжить</string>
 </resources>
