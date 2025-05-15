@@ -8,7 +8,6 @@ A modern Android productivity app designed to help users track their daily tasks
 - **Habit Tracking**: Build consistency by tracking your daily habits
 - **Turbo Mode**: Focus session timer to boost productivity
 - **Dashboard**: Overview of your daily and weekly progress
-- **Daily Planner**: Plan your day with a structured schedule
 - **Multi-language Support**: Supports English, Russian, and Ukrainian
 
 ## Tech Stack
