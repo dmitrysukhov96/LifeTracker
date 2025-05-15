@@ -44,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dmitrysukhov.lifetracker.Note
 import com.dmitrysukhov.lifetracker.R
@@ -86,41 +85,44 @@ fun NewNoteScreen(
             projectsViewModel.clearLastCreatedProjectId()
         }
     }
-    setTopBarState(
-        TopBarState(
-            title = context.getString(R.string.new_note), color = PineColor, topBarActions = {
-                IconButton(
-                    onClick = {
-                        if (title.isNotBlank()) {
-                            if (isEditing) {
-                                viewModel.updateNote(
-                                    selectedNote.value?.copy(
-                                        title = title,
-                                        content = content,
-                                        projectId = selectedProjectId
-                                    )
-                                        ?: Note(
+    LaunchedEffect(Unit) {
+        setTopBarState(
+            TopBarState(
+                title = context.getString(R.string.new_note), color = PineColor,
+                screen = NEW_NOTE_SCREEN, topBarActions = {
+                    IconButton(
+                        onClick = {
+                            if (title.isNotBlank()) {
+                                if (isEditing) {
+                                    viewModel.updateNote(
+                                        selectedNote.value?.copy(
                                             title = title,
                                             content = content,
                                             projectId = selectedProjectId
                                         )
-                                )
-                            } else {
-                                viewModel.createNote(title, content, selectedProjectId)
+                                            ?: Note(
+                                                title = title,
+                                                content = content,
+                                                projectId = selectedProjectId
+                                            )
+                                    )
+                                } else {
+                                    viewModel.createNote(title, content, selectedProjectId)
+                                }
+                                navController.popBackStack()
                             }
-                            navController.popBackStack()
-                        }
-                    }, enabled = title.isNotBlank()
-                ) {
-                    Icon(
-                        painterResource(R.drawable.tick),
-                        contentDescription = stringResource(R.string.save_note),
-                        tint = WhitePine
-                    )
+                        }, enabled = title.isNotBlank()
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.tick),
+                            contentDescription = stringResource(R.string.save_note),
+                            tint = WhitePine
+                        )
+                    }
                 }
-            }
+            )
         )
-    )
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()

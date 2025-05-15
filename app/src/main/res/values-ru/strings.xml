@@ -245,4 +245,8 @@
     <string name="task_completed">Вы выполнили задачу \"%1$s\"</string>
     <string name="completed_in_time">за %1$s</string>
     <string name="continue_text">Продолжить</string>
+
+    <!-- New strings for adding photo and deadline -->
+    <string name="add_photo">Добавьте фото</string>
+    <string name="add_deadline">Добавьте крайний срок</string>
 </resources>

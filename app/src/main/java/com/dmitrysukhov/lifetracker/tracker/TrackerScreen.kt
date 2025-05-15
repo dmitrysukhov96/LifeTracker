@@ -81,7 +81,7 @@ fun TrackerScreen(
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
     var isTrackerStart by remember { mutableStateOf(false) }
     val title = stringResource(R.string.tracker)
-    setTopBarState(TopBarState(title) {
+    setTopBarState(TopBarState(title, screen = TRACKER_SCREEN) {
         IconButton(onClick = {
             selectedEvent = null
             isTrackerStart = true
@@ -133,7 +133,11 @@ fun TrackerScreen(
             events = events, selectedDate = selectedDate, onDateSelected = { selectedDate = it },
             projects = projects, onEventClick = { event ->
                 if (event.endTime == null) {
-                    Toast.makeText(context, context.getString(R.string.stop_tracker_first), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.stop_tracker_first),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@TrackerTimeline
                 }
                 selectedEvent = event
@@ -146,29 +150,7 @@ fun TrackerScreen(
         )
     }
     if (showTaskDialog) {
-        if (selectedEvent != null) {
-            EditEventDialog(
-                event = selectedEvent!!,
-                projects = projects,
-                onDismiss = {
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                onSave = { event ->
-                    trackerViewModel.updateEvent(event)
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                onDelete = { event ->
-                    trackerViewModel.deleteEvent(event.eventId)
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                selectedProjectId = selectedProjectId,
-                onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
-                setProjectId = { selectedProjectId = it }
-            )
-        } else {
+        if (isTrackerStart) {
             NewEventDialog(
                 projects = projects,
                 onDismiss = {
@@ -178,6 +160,30 @@ fun TrackerScreen(
                 onSave = { event ->
                     trackerViewModel.stopEvent()
                     trackerViewModel.insertEvent(event)
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                selectedProjectId = selectedProjectId,
+                onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
+                setProjectId = { selectedProjectId = it }
+            )
+        } else {
+            AddEditEventDialog(
+                event = selectedEvent, projects = projects, onDismiss = {
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                onSave = { event ->
+                    if (selectedEvent == null) {
+                        trackerViewModel.insertEvent(event)
+                    } else {
+                        trackerViewModel.updateEvent(event)
+                    }
+                    showTaskDialog = false
+                    selectedEvent = null
+                },
+                onDelete = { event ->
+                    trackerViewModel.deleteEvent(event.eventId)
                     showTaskDialog = false
                     selectedEvent = null
                 },
@@ -449,8 +455,8 @@ fun NewEventDialog(
 }
 
 @Composable
-fun EditEventDialog(
-    event: Event,
+fun AddEditEventDialog(
+    event: Event?,
     projects: List<Project>,
     onDismiss: () -> Unit,
     onSave: (Event) -> Unit,
@@ -459,11 +465,12 @@ fun EditEventDialog(
     onNavigateToNewProject: () -> Unit,
     setProjectId: (Long?) -> Unit
 ) {
-    var taskName by remember { mutableStateOf(event.name) }
+    var taskName by remember { mutableStateOf(event?.name ?: "") }
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val startDateTime = DateTime(event.startTime)
-    val endDateTime = event.endTime?.let { DateTime(it) } ?: DateTime.now()
+    val now = DateTime.now()
+    val startDateTime = event?.let { DateTime(it.startTime) } ?: now
+    val endDateTime = event?.endTime?.let { DateTime(it) } ?: now.plusHours(1)
     var startDate by remember { mutableStateOf(startDateTime.toString("dd.MM.yyyy")) }
     var startTime by remember { mutableStateOf(startDateTime.toString("HH:mm")) }
     var endDate by remember { mutableStateOf(endDateTime.toString("dd.MM.yyyy")) }
@@ -487,7 +494,6 @@ fun EditEventDialog(
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            val now = DateTime.now()
             fun isFuture(dt: DateTime) = dt.isAfter(now)
 
             Column(
@@ -497,7 +503,9 @@ fun EditEventDialog(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.edit_event),
+                    text = if (event == null) stringResource(R.string.add_event) else stringResource(
+                        R.string.edit_event
+                    ),
                     style = MaterialTheme.typography.titleLarge,
                     fontFamily = Montserrat,
                     fontWeight = Bold,
@@ -506,7 +514,7 @@ fun EditEventDialog(
                 )
 
                 OutlinedTextField(
-                    value = taskName?:"",
+                    value = taskName,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PineColor,
                         unfocusedBorderColor = InverseColor.copy(0.5f)
@@ -747,7 +755,6 @@ fun EditEventDialog(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        modifier = Modifier.width(80.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }
@@ -808,7 +815,6 @@ fun EditEventDialog(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        modifier = Modifier.width(80.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }
@@ -817,10 +823,12 @@ fun EditEventDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = { onDelete(event) }) {
-                        Text(stringResource(R.string.delete), color = PineColor, style = H2)
+                    if (event != null) {
+                        TextButton(onClick = { onDelete(event) }) {
+                            Text(stringResource(R.string.delete), color = PineColor, style = H2)
+                        }
+                        Spacer(Modifier.width(8.dp))
                     }
-                    Spacer(Modifier.width(8.dp))
                     Button(
                         onClick = {
                             try {
@@ -828,16 +836,17 @@ fun EditEventDialog(
                                 val startDT = DateTime.parse("$startDate $startTime", format)
                                 val endDT = DateTime.parse("$endDate $endTime", format)
                                 if (isFuture(startDT) || isFuture(endDT)) {
-                                    error = context.getString(R.string.cannot_create_event_in_future)
+                                    error =
+                                        context.getString(R.string.cannot_create_event_in_future)
                                     return@Button
                                 }
-                                if (taskName?.isBlank() == true) return@Button
+                                if (taskName.isBlank()) return@Button
                                 if (endDT.isBefore(startDT)) {
                                     error = context.getString(R.string.error_end_time_before_start)
                                     return@Button
                                 }
                                 val updatedEvent = Event(
-                                    eventId = event.eventId,
+                                    eventId = event?.eventId ?: 0,
                                     projectId = selectedProjectId ?: 0,
                                     name = taskName,
                                     startTime = startDT.millis,
@@ -848,11 +857,12 @@ fun EditEventDialog(
                                 error = when (e) {
                                     is IllegalArgumentException ->
                                         context.getString(R.string.error_invalid_date_format)
+
                                     else -> context.getString(R.string.error_parsing_date)
                                 }
                             }
                         },
-                        enabled = taskName?.isNotBlank() == true,
+                        enabled = taskName.isNotBlank(),
                         modifier = Modifier.height(48.dp)
                     ) {
                         Text(stringResource(R.string.save), style = H1.copy(color = Color.White))

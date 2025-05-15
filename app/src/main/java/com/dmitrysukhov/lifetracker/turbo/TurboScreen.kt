@@ -98,8 +98,13 @@ fun TurboScreen(
     var showCompletionScreen by remember { mutableStateOf(false) }
     var completedEvent by remember { mutableStateOf<Event?>(null) }
     var selectedProjectId by remember { mutableStateOf<Long?>(null) }
+    var cameFromSetup by remember { mutableStateOf(false) }
     
-    setTopBarState(TopBarState(title = context.getString(R.string.turbo_mode), color = PineColor))
+    LaunchedEffect(Unit) {
+        setTopBarState(TopBarState(title = context.getString(R.string.turbo_mode),
+            screen = TURBO_SCREEN, color = PineColor))
+    }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -113,6 +118,7 @@ fun TurboScreen(
                         showCompletionScreen = false
                         selectedTask = null
                         additionalEvent = null
+                        cameFromSetup = false
                     }
                 )
             }
@@ -122,6 +128,7 @@ fun TurboScreen(
                     event = lastEvent,
                     selectedMode = selectedMode,
                     durationMinutes = durationMinutes,
+                    cameFromSetup = cameFromSetup,
                     onStop = { 
                         val currentTime = System.currentTimeMillis()
                         val eventDuration = currentTime - (lastEvent?.startTime ?: currentTime)
@@ -168,6 +175,7 @@ fun TurboScreen(
                     onModeSelect = { selectedMode = it },
                     onDurationChange = { durationMinutes = it },
                     onStart = { 
+                        cameFromSetup = true
                         viewModel.insertEvent(
                             Event(
                                 name = selectedTask?.text ?: context.getString(R.string.focus_session),
@@ -449,21 +457,24 @@ fun TurboActiveScreen(
     event: Event?,
     selectedMode: TimerMode,
     durationMinutes: Int,
+    cameFromSetup: Boolean,
     onStop: () -> Unit
 ) {
     var timeElapsed by remember { mutableLongStateOf(0L) }
     var timeRemaining by remember { mutableLongStateOf(durationMinutes * 60L) }
     var isWarning by remember { mutableStateOf(false) }
     
+    // Use stopwatch mode if we didn't come from setup screen (i.e. there was an active event)
+    val effectiveMode = if (!cameFromSetup) TimerMode.STOPWATCH else selectedMode
+    
     LaunchedEffect(event) {
         while (true) {
             if (event?.endTime == null) {
                 timeElapsed = (System.currentTimeMillis() - (event?.startTime ?: 0)) / 1000
-                if (selectedMode == TimerMode.COUNTDOWN) {
+                if (effectiveMode == TimerMode.COUNTDOWN) {
                     timeRemaining = maxOf(0, durationMinutes * 60L - timeElapsed)
                     isWarning = timeRemaining <= 10
                     
-                    // Auto-complete when timer reaches zero
                     if (timeRemaining == 0L) {
                         onStop()
                         break
@@ -499,7 +510,7 @@ fun TurboActiveScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (selectedMode == TimerMode.COUNTDOWN) {
+                text = if (effectiveMode == TimerMode.COUNTDOWN) {
                     formatTimeRemaining(timeRemaining)
                 } else {
                     formatTimeElapsed(timeElapsed)
@@ -507,7 +518,7 @@ fun TurboActiveScreen(
                 style = SimpleText.copy(
                     fontSize = 42.sp,
                     fontWeight = Bold,
-                    color = if (isWarning) Color(0xFFFFA500) else Color.White // Orange color for warning
+                    color = if (isWarning) Color(0xFFFFA500) else Color.White
                 )
             )
         }

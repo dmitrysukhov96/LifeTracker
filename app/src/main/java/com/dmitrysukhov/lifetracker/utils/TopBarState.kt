@@ -6,6 +6,6 @@ import androidx.compose.ui.graphics.Color
 
 data class TopBarState(
     val title: String = "", val color: Color = PineColor,
-    val imagePath: String? = null,
+    val screen: String?, val imagePath: String? = null,
     val topBarActions: @Composable() (RowScope.() -> Unit) = {}
 )

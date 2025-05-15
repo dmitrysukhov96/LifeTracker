@@ -236,4 +236,8 @@
     <string name="task_completed">Ви виконали завдання \"%1$s\"</string>
     <string name="completed_in_time">за %1$s</string>
     <string name="continue_text">Продовжити</string>
+
+    <!-- New strings from the code block -->
+    <string name="add_photo">Додайте фото</string>
+    <string name="add_deadline">Додайте крайній термін</string>
 </resources>

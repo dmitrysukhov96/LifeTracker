@@ -52,12 +52,14 @@ fun NotesListScreen(
     viewModel: NoteViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+
     setTopBarState(
         TopBarState(
-            title = context.getString(R.string.notes), color = PineColor, topBarActions = {
-                IconButton(onClick = { 
+            title = context.getString(R.string.notes),
+            color = PineColor, screen = NOTES_SCREEN, topBarActions = {
+                IconButton(onClick = {
                     viewModel.selectNote(null)
-                    navController.navigate(NEW_NOTE_SCREEN) 
+                    navController.navigate(NEW_NOTE_SCREEN)
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.plus), contentDescription = null,
@@ -67,6 +69,7 @@ fun NotesListScreen(
             }
         )
     )
+
     val notes by viewModel.notes.collectAsState()
     val projects by viewModel.projects.collectAsState()
 

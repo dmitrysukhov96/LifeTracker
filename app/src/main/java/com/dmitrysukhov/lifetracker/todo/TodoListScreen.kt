@@ -159,7 +159,7 @@ fun TodoListScreen(
         }
     }
 
-    setTopBarState(TopBarState(context.getString(R.string.todo_list)) {
+    setTopBarState(TopBarState(context.getString(R.string.todo_list), screen = TODOLIST_SCREEN) {
         IconButton(onClick = { showImportDialog = true }) {
             Icon(
                 painterResource(R.drawable.import_icon),
@@ -188,7 +188,9 @@ fun TodoListScreen(
         }
 
         if (todoList.isEmpty()) EmptyPlaceholder(R.string.no_tasks, R.string.add_task_hint) else {
-            LazyColumn(Modifier.background(BgColor).padding(24.dp)) {
+            LazyColumn(Modifier
+                .background(BgColor)
+                .padding(24.dp)) {
                 for ((category, tasks) in categorizedTasks) {
                     item {
                         if (category != completedCategory) {

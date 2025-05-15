@@ -170,11 +170,19 @@ class MainActivity : LocaleBaseActivity() {
         applyLanguageSettings()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             val context = LocalContext.current
             val systemUiController = rememberSystemUiController()
             val useDarkIcons = false
-            var topBarState by remember { mutableStateOf(TopBarState(context.getString(R.string.app_name))) }
+            var topBarState by remember {
+                mutableStateOf(
+                    TopBarState(
+                        context.getString(R.string.app_name),
+                        screen = DASHBOARD_SCREEN
+                    )
+                )
+            }
             LaunchedEffect(Unit) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     when {
@@ -288,17 +296,29 @@ class MainActivity : LocaleBaseActivity() {
                         }
                     }
                 )
-                val setTopBarState: (TopBarState) -> Unit = { topBarState = it }
+                val navController = rememberNavController()
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination?.route ?: ""
+                val setTopBarState: (TopBarState) -> Unit =
+                    { if (it.screen == currentDestination) topBarState = it }
+                if (currentDestination == SETTINGS_SCREEN) setTopBarState(
+                    TopBarState(
+                        context.getString(R.string.settings), screen = SETTINGS_SCREEN
+                    )
+                )
+                else if (currentDestination == ABOUT_DEVELOPER_SCREEN) setTopBarState(
+                    TopBarState(
+                        title = context.getString(R.string.about_developer), color = PineColor,
+                        screen = ABOUT_DEVELOPER_SCREEN
+                    )
+                )
                 val todoViewModel: TodoViewModel = hiltViewModel()
                 val trackerViewModel: TrackerViewModel = hiltViewModel()
                 val projectViewModel: ProjectsViewModel = hiltViewModel()
                 val habitViewModel: HabitsViewModel = hiltViewModel()
                 val noteViewModel: NoteViewModel = hiltViewModel()
-                val navController = rememberNavController()
                 val scope = rememberCoroutineScope()
-                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination?.route ?: ""
                 val drawerMenuDestinations = listOf(
                     Destination(
                         stringResource(R.string.dashboard), DASHBOARD_SCREEN,
@@ -522,7 +542,9 @@ class MainActivity : LocaleBaseActivity() {
                                             fontSize = 20.sp, maxLines = 1,
                                             fontWeight = FontWeight.Bold,
                                             color = WhitePine,
-                                            modifier = Modifier.align(Alignment.Center)
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .padding(horizontal = 64.dp)
                                         )
 
                                         Row(
@@ -535,7 +557,8 @@ class MainActivity : LocaleBaseActivity() {
                                     }
                                     NavHost(
                                         navController = navController,
-                                        startDestination = DASHBOARD_SCREEN, modifier = Modifier
+                                        startDestination = DASHBOARD_SCREEN,
+                                        modifier = Modifier
                                             .padding(
                                                 top = WindowInsets.systemBars
                                                     .asPaddingValues()
@@ -590,10 +613,7 @@ class MainActivity : LocaleBaseActivity() {
                                             )
                                         }
                                         composable(NEW_HABIT_SCREEN) {
-                                            NewHabitScreen(
-                                                setTopBarState,
-                                                navController, habitViewModel
-                                            )
+                                            NewHabitScreen(setTopBarState, habitViewModel)
                                         }
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(
@@ -612,7 +632,9 @@ class MainActivity : LocaleBaseActivity() {
                                                 setTopBarState, navController, projectViewModel
                                             )
                                         }
-                                        composable(SETTINGS_SCREEN) { SettingsScreen(setTopBarState) }
+                                        composable(SETTINGS_SCREEN) {
+                                            SettingsScreen(setTopBarState)
+                                        }
                                         composable(TURBO_SCREEN) {
                                             TurboScreen(
                                                 setTopBarState, trackerViewModel, todoViewModel,
@@ -644,7 +666,6 @@ class MainActivity : LocaleBaseActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                // Если пользователь отказал в разрешении, показываем наш диалог
                 showPermissionDialog = true
             }
         }

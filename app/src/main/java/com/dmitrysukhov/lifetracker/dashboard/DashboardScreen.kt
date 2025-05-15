@@ -93,7 +93,7 @@ fun DashboardScreen(
     val context = LocalContext.current
     val userName = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         .getString("user_name", "")
-    setTopBarState(TopBarState(context.getString(R.string.app_name)))
+    setTopBarState(TopBarState(context.getString(R.string.app_name), screen = DASHBOARD_SCREEN))
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val greeting = when {
         hour < 4 -> stringResource(R.string.good_night)
@@ -138,14 +138,14 @@ fun DashboardScreen(
             .fillMaxSize()
     ) {
         TimeTracker(
-            lastEvent = lastEvent, 
+            lastEvent = lastEvent,
             projects = projects,
-            onActionClick = { 
+            onActionClick = {
                 selectedEvent = null
                 isTrackerStart = true
                 showTaskDialog = true
             },
-            onCircleButtonClick = { 
+            onCircleButtonClick = {
                 if (lastEvent == null || lastEvent.endTime != null) {
                     selectedEvent = null
                     isTrackerStart = true
@@ -228,27 +228,43 @@ fun DashboardScreen(
             CategoryBlock(title = stringResource(R.string.tasks_stats)) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = stringResource(R.string.tasks_completed_of_total, completedTasks, totalTasks), style = H2,
+                    text = stringResource(
+                        R.string.tasks_completed_of_total,
+                        completedTasks,
+                        totalTasks
+                    ), style = H2,
                     color = InverseColor
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.padding(vertical = 6.dp)) {
                     Column(Modifier.weight(1f)) {
-                        Text(text = stringResource(R.string.this_month), style = SimpleText, color = InverseColor)
+                        Text(
+                            text = stringResource(R.string.this_month),
+                            style = SimpleText,
+                            color = InverseColor
+                        )
                         Text(
                             text = "$monthCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
                         )
                     }
                     Column(Modifier.weight(1f)) {
-                        Text(text = stringResource(R.string.this_week), style = SimpleText, color = InverseColor)
+                        Text(
+                            text = stringResource(R.string.this_week),
+                            style = SimpleText,
+                            color = InverseColor
+                        )
                         Text(
                             text = "$weekCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
                         )
                     }
                     Column(Modifier.weight(1f)) {
-                        Text(text = stringResource(R.string.this_day), style = SimpleText, color = InverseColor)
+                        Text(
+                            text = stringResource(R.string.this_day),
+                            style = SimpleText,
+                            color = InverseColor
+                        )
                         Text(
                             text = "$todayCompleted", style = SimpleText.copy(fontWeight = Bold),
                             color = PineColor
@@ -262,9 +278,22 @@ fun DashboardScreen(
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
-            CategoryBlock(title = stringResource(R.string.projects_section)) { ProjectsSection(projects, tasks) }
-            CategoryBlock(title = stringResource(R.string.habits_metrics)) { HabitsMetricsSection(habitsViewModel) }
-            CategoryBlock(title = stringResource(R.string.tracker_stats)) { TrackerStatsSection(trackerViewModel) }
+            CategoryBlock(title = stringResource(R.string.projects_section)) {
+                ProjectsSection(
+                    projects,
+                    tasks
+                )
+            }
+            CategoryBlock(title = stringResource(R.string.habits_metrics)) {
+                HabitsMetricsSection(
+                    habitsViewModel
+                )
+            }
+            CategoryBlock(title = stringResource(R.string.tracker_stats)) {
+                TrackerStatsSection(
+                    trackerViewModel
+                )
+            }
             CategoryBlock(title = stringResource(R.string.turbo_mode_sessions)) { TurboModeSection() }
             Spacer(Modifier.height(80.dp))
         }
@@ -278,7 +307,7 @@ fun TrackerStatsSection(
     val projects by trackerViewModel.projects.collectAsStateWithLifecycle()
     val eventStats by trackerViewModel.eventStats.collectAsStateWithLifecycle()
     val selectedTimeRange by trackerViewModel.selectedTimeRange.collectAsStateWithLifecycle()
-    
+
     // Calculate project durations
     val projectDurations = projects.mapNotNull { project ->
         eventStats[project.projectId]?.let { duration ->
@@ -286,11 +315,11 @@ fun TrackerStatsSection(
         }
     }
     val noProjectDuration = eventStats[null] ?: 0L
-    
+
     // Total duration should be sum of all project durations and no-project duration
     val totalDuration = projectDurations.sumOf { it.second } + noProjectDuration
     val totalDurationFormatted = formatDuration(totalDuration)
-    
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
@@ -311,7 +340,7 @@ fun TrackerStatsSection(
             )
         }
     }
-    
+
     // Total tracked time
     TrackerProgressRow(
         stringResource(R.string.all_tracked_time),
@@ -319,7 +348,7 @@ fun TrackerStatsSection(
         1f,
         PineColor
     )
-    
+
     // Project times
     projectDurations.forEach { (projectId, duration) ->
         val project = projects.find { it.projectId == projectId }
@@ -333,7 +362,7 @@ fun TrackerStatsSection(
             )
         }
     }
-    
+
     // Time without project
     if (noProjectDuration > 0) {
         val progress = if (totalDuration > 0) noProjectDuration.toFloat() / totalDuration else 0f
@@ -413,12 +442,19 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
                 ) {
                     val projectColor = Color(project.color)
                     Text(
-                        text = project.title, style = SimpleText, color = projectColor, maxLines = 1,
-                        overflow = TextOverflow.Ellipsis, modifier = Modifier.width(100.dp)
+                        text = project.title,
+                        style = SimpleText,
+                        color = projectColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.width(100.dp)
                     )
                     Text(
-                        text = "$completedTasks/$totalTasks", overflow = TextOverflow.Ellipsis,
-                        style = SimpleText.copy(fontWeight = Bold), color = projectColor, maxLines = 1,
+                        text = "$completedTasks/$totalTasks",
+                        overflow = TextOverflow.Ellipsis,
+                        style = SimpleText.copy(fontWeight = Bold),
+                        color = projectColor,
+                        maxLines = 1,
                         modifier = Modifier
                             .width(50.dp)
                             .padding(start = 4.dp)
@@ -432,8 +468,11 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
                         trackColor = PineColor.copy(alpha = 0.2f)
                     )
                     Text(
-                        text = "${(progress * 100).toInt()}%", overflow = TextOverflow.Ellipsis,
-                        style = SimpleText.copy(fontWeight = Bold), color = projectColor, maxLines = 1,
+                        text = "${(progress * 100).toInt()}%",
+                        overflow = TextOverflow.Ellipsis,
+                        style = SimpleText.copy(fontWeight = Bold),
+                        color = projectColor,
+                        maxLines = 1,
                         modifier = Modifier
                             .width(50.dp)
                             .padding(start = 4.dp)
@@ -448,7 +487,7 @@ fun ProjectsSection(projects: List<Project>, tasks: List<TodoItem>) {
 fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
     val habits = habitsViewModel.habits.collectAsStateWithLifecycle().value
     val context = LocalContext.current
-    
+
     if (habits.isEmpty()) {
         Text(
             text = stringResource(R.string.no_habits_yet),
@@ -472,7 +511,7 @@ fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
                         maximumFormat = context.getString(R.string.maximum)
                     ) { metrics = it }
                 }
-                
+
                 Box(
                     modifier = Modifier
                         .width(200.dp)
@@ -497,7 +536,7 @@ fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
                             ),
                             color = Color(habit.color)
                         )
-                        
+
                         // Current metrics
                         Text(
                             text = metrics.first.split("(").first().trim(),
@@ -507,7 +546,7 @@ fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
                             ),
                             color = InverseColor
                         )
-                        
+
                         // Date range
                         Text(
                             text = metrics.first.split("(").getOrNull(1)?.removeSuffix(")") ?: "",
@@ -516,9 +555,9 @@ fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
                                 color = InverseColor.copy(alpha = 0.7f)
                             )
                         )
-                        
+
                         Spacer(modifier = Modifier.height(4.dp))
-                        
+
                         // Max metrics
                         Text(
                             text = metrics.second.split("(").first().trim(),
@@ -528,7 +567,7 @@ fun HabitsMetricsSection(habitsViewModel: HabitsViewModel) {
                             ),
                             color = InverseColor
                         )
-                        
+
                         // Max date range
                         Text(
                             text = metrics.second.split("(").getOrNull(1)?.removeSuffix(")") ?: "",
@@ -556,7 +595,15 @@ fun TurboModeSection() {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
     ) {
-        Text(text = stringResource(R.string.sessions_count, sessions), style = SimpleText, color = PineColor)
-        Text(text = stringResource(R.string.overall_time, totalTimeMinutes), style = SimpleText, color = PineColor)
+        Text(
+            text = stringResource(R.string.sessions_count, sessions),
+            style = SimpleText,
+            color = PineColor
+        )
+        Text(
+            text = stringResource(R.string.overall_time, totalTimeMinutes),
+            style = SimpleText,
+            color = PineColor
+        )
     }
 }

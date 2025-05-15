@@ -17,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,11 +36,11 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.EmptyPlaceholder
+import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.utils.BgColor
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
-import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -55,7 +54,7 @@ fun ProjectsScreen(
     val context = LocalContext.current
     val projects by remember { derivedStateOf { viewModel.projects } }
     setTopBarState(
-        TopBarState(context.getString(R.string.projects)) {
+        TopBarState(context.getString(R.string.projects), screen = PROJECTS_SCREEN) {
             IconButton(onClick = {
                 viewModel.selectedProject = null
                 navController.navigate(NEW_PROJECT_SCREEN)

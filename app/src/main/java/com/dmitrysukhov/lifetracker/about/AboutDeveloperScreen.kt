@@ -20,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,15 +47,12 @@ const val ABOUT_DEVELOPER_SCREEN = "about_developer_screen"
 fun AboutDeveloperScreen(setTopBarState: (TopBarState) -> Unit) {
     val context = LocalContext.current
     val emailAddress = context.getString(R.string.contact_email)
-
     setTopBarState(
         TopBarState(
             title = context.getString(R.string.about_developer),
-            color = PineColor
+            color = PineColor, screen = ABOUT_DEVELOPER_SCREEN
         )
     )
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()

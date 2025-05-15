@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.ColorPicker
 import com.dmitrysukhov.lifetracker.common.ui.SubtitleWithIcon
@@ -79,40 +78,17 @@ fun NewProjectScreen(
     }
     var selectedColor = Color(selectedColorInt)
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    setTopBarState(
-        TopBarState(
-            title = if (project != null) context.getString(R.string.edit)
-            else context.getString(R.string.new_project), color = selectedColor,
-            imagePath = currentImagePath
-        ) {
-            Row {
-                if (project != null) IconButton(onClick = { showDeleteConfirmation = true }) {
-                    Icon(
-                        painter = painterResource(R.drawable.delete),
-                        contentDescription = stringResource(R.string.delete), tint = Color.White
-                    )
-                }
-                IconButton(onClick = {
-                    if (project != null) viewModel.updateProject(
-                        project.copy(
-                            title = title, description = descr,
-                            color = selectedColorInt, imagePath = currentImagePath
-                        )
-                    ) else viewModel.addProject(
-                        Project(
-                            title = title, description = descr, color = selectedColorInt,
-                            imagePath = currentImagePath
-                        )
-                    )
-                    navController.navigateUp()
-                }) {
-                    if (title.isNotBlank()) Icon(
-                        painter = painterResource(R.drawable.tick),
-                        contentDescription = null, tint = Color.White
-                    )
-                }
-            }
-        })
+    
+    LaunchedEffect(Unit) {
+        setTopBarState(
+            TopBarState(
+                title = if (project != null) context.getString(R.string.edit)
+                else context.getString(R.string.new_project), color = selectedColor,
+                screen = NEW_PROJECT_SCREEN,
+                imagePath = currentImagePath
+            )
+        )
+    }
     Column(
         Modifier
             .background(if (isDarkTheme()) Color.Black else Color.White)
@@ -159,13 +135,22 @@ fun NewProjectScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Image selection
+        // Color selection FIRST
         SubtitleWithIcon(
-            textRes = R.string.select_image,
-            iconRes = R.drawable.palette, //todo
+            textRes = R.string.select_color,
+            iconRes = R.drawable.palette,
             iconColor = selectedColor
         )
-
+        ColorPicker(
+            selectedColorInt = selectedColorInt,
+            onColorSelected = { selectedColorInt = it }
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        SubtitleWithIcon(
+            textRes = R.string.add_photo,
+            iconRes = R.drawable.image_add,
+            iconColor = selectedColor
+        )
         val imagePickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
         ) { uri ->
@@ -177,7 +162,6 @@ fun NewProjectScreen(
                 currentImagePath = newPath
             }
         }
-
         if (currentImagePath?.isNotEmpty() == true) {
             Box(
                 modifier = Modifier
@@ -235,24 +219,78 @@ fun NewProjectScreen(
                     .clickable { imagePickerLauncher.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = stringResource(R.string.select_image),
-                    color = selectedColor,
-                    style = TextStyle(fontSize = 16.sp, fontWeight = W700)
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(R.drawable.import_icon),
+                        contentDescription = null,
+                        tint = selectedColor,
+                        modifier = Modifier.size(36.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.add_photo),
+                        color = selectedColor,
+                        style = TextStyle(fontSize = 16.sp, fontWeight = W700)
+                    )
+                }
             }
         }
-        Column(Modifier.padding(top = 32.dp)) {
-            SubtitleWithIcon(
-                textRes = R.string.select_color,
-                iconRes = R.drawable.palette,
-                iconColor = selectedColor
-            )
-            ColorPicker(
-                selectedColorInt = selectedColorInt,
-                onColorSelected = { selectedColorInt = it }
-            )
-        }
+        Spacer(modifier = Modifier.height(24.dp))
+        // Goal field
+        SubtitleWithIcon(
+            textRes = R.string.goal_colon,
+            iconRes = R.drawable.task,
+            iconColor = selectedColor
+        )
+        var goal by rememberSaveable { mutableStateOf("") }
+        BasicTextField(
+            value = goal,
+            onValueChange = { goal = it },
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = W700,
+                fontFamily = Montserrat,
+                color = InverseColor
+            ),
+            decorationBox = { innerTextField ->
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    if (goal.isEmpty()) Text(
+                        stringResource(R.string.goal_colon),
+                        style = H2, color = selectedColor.copy(0.5f)
+                    )
+                    innerTextField()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        // Deadline field
+        SubtitleWithIcon(
+            textRes = R.string.add_deadline,
+            iconRes = R.drawable.data,
+            iconColor = selectedColor
+        )
+        var deadline by rememberSaveable { mutableStateOf("") }
+        BasicTextField(
+            value = deadline,
+            onValueChange = { deadline = it },
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontWeight = W700,
+                fontFamily = Montserrat,
+                color = InverseColor
+            ),
+            decorationBox = { innerTextField ->
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    if (deadline.isEmpty()) Text(
+                        stringResource(R.string.add_deadline),
+                        style = H2, color = selectedColor.copy(0.5f)
+                    )
+                    innerTextField()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
     if (showDeleteConfirmation) {
         AlertDialog(

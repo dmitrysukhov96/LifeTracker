@@ -7,9 +7,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.dmitrysukhov.lifetracker.MainActivity
 import com.dmitrysukhov.lifetracker.R
+import java.util.*
 
 class TodoReminderReceiver : BroadcastReceiver() {
     companion object {
@@ -21,9 +23,24 @@ class TodoReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val taskId = intent.getLongExtra(EXTRA_TASK_ID, 0)
         val taskTitle = intent.getStringExtra(EXTRA_TASK_TITLE) ?: ""
+        val scheduledTime = intent.getLongExtra("scheduled_time", 0L)
         
-        createNotificationChannel(context)
-        showNotification(context, taskId, taskTitle)
+        val currentTime = System.currentTimeMillis()
+        val timeDiff = currentTime - scheduledTime
+        
+        Log.d("TodoReminderReceiver", "Received notification for task $taskId:")
+        Log.d("TodoReminderReceiver", "Scheduled time: ${Date(scheduledTime)}")
+        Log.d("TodoReminderReceiver", "Current time: ${Date(currentTime)}")
+        Log.d("TodoReminderReceiver", "Time difference: ${timeDiff / 1000} seconds")
+        
+        // Only show notification if we're within 5 minutes of the scheduled time
+        // This helps prevent notifications from being triggered too early
+        if (Math.abs(timeDiff) <= 5 * 60 * 1000) {
+            createNotificationChannel(context)
+            showNotification(context, taskId, taskTitle)
+        } else {
+            Log.w("TodoReminderReceiver", "Notification received too early/late, ignoring")
+        }
     }
 
     private fun createNotificationChannel(context: Context) {
@@ -55,13 +72,16 @@ class TodoReminderReceiver : BroadcastReceiver() {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.bell)
-            .setContentTitle(context.getString(R.string.task_reminder))
-            .setContentText(taskTitle)
+            .setContentTitle(taskTitle)
+            .setContentText(context.getString(R.string.task_reminder))
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText(taskTitle)
+                .setSummaryText(context.getString(R.string.task_reminder)))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
         
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(taskId.toInt(), builder.build())
     }
 } 

@@ -107,7 +107,7 @@ fun HabitScreen(
     var numberInput by remember { mutableStateOf("") }
 
     setTopBarState(
-        TopBarState(context.getString(R.string.habits)) {
+        TopBarState(context.getString(R.string.habits), screen = HABIT_SCREEN) {
             IconButton(onClick = {
                 viewModel.selectedHabit = null
                 navController.navigate(NEW_HABIT_SCREEN)
@@ -473,11 +473,13 @@ fun generateMonthDays(currentDate: LocalDate): List<LocalDate?> {
     val firstDayOfMonth = currentDate.withDayOfMonth(1)
     val totalDays = currentDate.dayOfMonth().maximumValue
     val startOffset = when (firstDayOfMonth.dayOfWeek) {
-        1 -> 0; 2 -> 1; 3 -> 2; 4 -> 3; 5 -> 4; 6 -> 5; 7 -> 6 ;else -> 0
+        1 -> 0; 2 -> 1; 3 -> 2; 4 -> 3; 5 -> 4; 6 -> 5; 7 -> 6;else -> 0
     }
     return buildList {
         repeat(startOffset) { add(null) }
-        for (day in 1..totalDays) { add(firstDayOfMonth.withDayOfMonth(day)) }
+        for (day in 1..totalDays) {
+            add(firstDayOfMonth.withDayOfMonth(day))
+        }
     }
 }
 

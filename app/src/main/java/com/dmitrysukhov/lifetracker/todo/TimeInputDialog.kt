@@ -42,7 +42,7 @@ fun TimeInputDialog(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTimeField(
                         value = hoursText,
-                        onValueChange = { hoursText = it },
+                        onValueChange = { if (it.length < 4) hoursText = it },
                         label = stringResource(R.string.hours),
                         modifier = Modifier.weight(1f)
                     )

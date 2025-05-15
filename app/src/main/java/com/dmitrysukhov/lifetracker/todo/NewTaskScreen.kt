@@ -95,55 +95,57 @@ fun NewTaskScreen(
             projectsViewModel.clearLastCreatedProjectId()
         }
     }
-    setTopBarState(
-        TopBarState(
-            title = topBarTitle, topBarActions = {
-                Row {
-                    if (isEditing) IconButton({
-                        viewModel.selectedTask?.let { task ->
-                            viewModel.deleteTask(task)
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.task_deleted),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            navController.navigateUp()
-                        }
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.delete), tint = Color.White,
-                            contentDescription = stringResource(R.string.delete)
-                        )
-                    }
-
-                    if (title.isNotEmpty()) IconButton({
-                        if (isEditing) viewModel.selectedTask?.let { task ->
-                            viewModel.updateTask(
-                                task.copy(
-                                    text = title, description = description,
-                                    projectId = selectedProjectId, dateTime = deadline,
-                                    repeatInterval = repeatInterval,
-                                    estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
-                                )
+    LaunchedEffect(Unit) {
+        setTopBarState(
+            TopBarState(
+                title = topBarTitle, screen = NEW_TASK_SCREEN, topBarActions = {
+                    Row {
+                        if (isEditing) IconButton({
+                            viewModel.selectedTask?.let { task ->
+                                viewModel.deleteTask(task)
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.task_deleted),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                navController.navigateUp()
+                            }
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.delete), tint = Color.White,
+                                contentDescription = stringResource(R.string.delete)
                             )
-                        } else viewModel.addTask(
-                            text = title, description = description,
-                            projectId = selectedProjectId, deadline = deadline,
-                            repeatInterval = repeatInterval,
-                            estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
-                        )
-                        Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
-                        navController.navigateUp()
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.tick),
-                            contentDescription = null, tint = Color.White,
-                        )
+                        }
+
+                        if (title.isNotEmpty()) IconButton({
+                            if (isEditing) viewModel.selectedTask?.let { task ->
+                                viewModel.updateTask(
+                                    task.copy(
+                                        text = title, description = description,
+                                        projectId = selectedProjectId, dateTime = deadline,
+                                        repeatInterval = repeatInterval,
+                                        estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
+                                    )
+                                )
+                            } else viewModel.addTask(
+                                text = title, description = description,
+                                projectId = selectedProjectId, deadline = deadline,
+                                repeatInterval = repeatInterval,
+                                estimatedDurationMs = if (estimatedDurationMs > 0) estimatedDurationMs else null
+                            )
+                            Toast.makeText(context, saveToastText, Toast.LENGTH_SHORT).show()
+                            navController.navigateUp()
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.tick),
+                                contentDescription = null, tint = Color.White,
+                            )
+                        }
                     }
                 }
-            }
+            )
         )
-    )
+    }
     Column(
         Modifier
             .fillMaxSize()

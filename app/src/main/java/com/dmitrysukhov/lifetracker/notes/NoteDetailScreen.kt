@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,32 +50,35 @@ fun NoteDetailScreen(
     val context = LocalContext.current
     val selectedNote by viewModel.selectedNote.collectAsState()
     val projects by viewModel.projects.collectAsState()
-    setTopBarState(
-        TopBarState(
-            title = context.getString(R.string.note), color = PineColor,
-            topBarActions = {
-                IconButton(onClick = { navController.navigate(NEW_NOTE_SCREEN) }) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(R.string.save_note),
-                        tint = WhitePine
-                    )
-                }
-                IconButton(onClick = {
-                    selectedNote?.let {
-                        viewModel.deleteNote(it)
-                        navController.navigateUp()
+    
+    LaunchedEffect(Unit) {
+        setTopBarState(
+            TopBarState(
+                title = context.getString(R.string.note), color = PineColor,
+                screen = NOTE_DETAIL_SCREEN, topBarActions = {
+                    IconButton(onClick = { navController.navigate(NEW_NOTE_SCREEN) }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(R.string.save_note),
+                            tint = WhitePine
+                        )
                     }
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.delete),
-                        contentDescription = stringResource(R.string.delete_note),
-                        tint = WhitePine
-                    )
+                    IconButton(onClick = {
+                        selectedNote?.let {
+                            viewModel.deleteNote(it)
+                            navController.navigateUp()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.delete),
+                            contentDescription = stringResource(R.string.delete_note),
+                            tint = WhitePine
+                        )
+                    }
                 }
-            }
+            )
         )
-    )
+    }
     selectedNote?.let { note ->
         Box(
             modifier = Modifier

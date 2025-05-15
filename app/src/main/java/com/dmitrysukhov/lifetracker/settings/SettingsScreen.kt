@@ -26,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +61,9 @@ enum class ThemeMode(val stringRes: Int) {
 @Composable
 fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
     val context = LocalContext.current
+
+    setTopBarState(TopBarState(context.getString(R.string.settings), screen = SETTINGS_SCREEN))
+
     val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     var currentUserName by remember { mutableStateOf(sharedPref.getString("user_name", "") ?: "") }
     var editedUserName by remember { mutableStateOf(currentUserName) }
@@ -96,14 +98,11 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
         val configuration = Configuration(context.resources.configuration)
         configuration.setLocale(locale)
         context.resources.updateConfiguration(configuration, context.resources.displayMetrics)
-        setTopBarState(TopBarState(context.getString(R.string.settings)))
+        setTopBarState(TopBarState(context.getString(R.string.settings), screen = SETTINGS_SCREEN))
         (context as? Activity)?.let {
             it.finish()
             it.startActivity(it.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
-    }
-    LaunchedEffect(selectedLanguage) {
-        setTopBarState(TopBarState(context.getString(R.string.settings)))
     }
     Column(
         modifier = Modifier
@@ -212,8 +211,6 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
 
         HorizontalDivider()
         Spacer(modifier = Modifier.height(24.dp))
-
-        // Language selection
         Text(
             text = "Language / Язык / Мова",
             color = InverseColor,

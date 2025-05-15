@@ -1,9 +1,8 @@
 package com.dmitrysukhov.lifetracker.todo
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitrysukhov.lifetracker.Event
@@ -18,13 +17,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import java.util.Calendar
+import javax.inject.Inject
 
 @HiltViewModel
 class TodoViewModel @Inject constructor(
     private val todoDao: TodoDao,
     private val eventRepository: EventRepository,
+    private val notificationManager: TodoNotificationManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     var selectedTask: TodoItem? = null
@@ -152,6 +152,7 @@ class TodoViewModel @Inject constructor(
             
             deadline?.let {
                 scheduleNotification(id, text, it)
+                startNotificationService()
             }
         }
     }
@@ -168,6 +169,7 @@ class TodoViewModel @Inject constructor(
             item.dateTime?.let {
                 cancelNotification(item.id)
                 scheduleNotification(item.id, item.text, it)
+                startNotificationService()
             } ?: run {
                 cancelNotification(item.id)
             }
@@ -187,54 +189,12 @@ class TodoViewModel @Inject constructor(
         }
     }
     
-    private fun scheduleNotification(taskId: Long, taskTitle: String, notificationTime: Long) {
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = notificationTime
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val adjustedNotificationTime = calendar.timeInMillis
-        
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        
-        val intent = Intent(context, TodoReminderReceiver::class.java).apply {
-            putExtra(TodoReminderReceiver.EXTRA_TASK_ID, taskId)
-            putExtra(TodoReminderReceiver.EXTRA_TASK_TITLE, taskTitle)
-        }
-        
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            taskId.toInt(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        if (adjustedNotificationTime > System.currentTimeMillis()) {
-            try {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    adjustedNotificationTime,
-                    pendingIntent
-                )
-            } catch (_: Exception) {
-            }
-        }
+    fun scheduleNotification(taskId: Long, taskTitle: String, notificationTime: Long) {
+        notificationManager.scheduleNotification(taskId, taskTitle, notificationTime)
     }
     
     private fun cancelNotification(taskId: Long) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, TodoReminderReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            taskId.toInt(),
-            intent, 
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        pendingIntent?.let {
-            alarmManager.cancel(it)
-            it.cancel()
-        }
+        notificationManager.cancelNotification(taskId)
     }
 
     fun stopTrackingWithTask(updatedTask: TodoItem) {
@@ -252,6 +212,15 @@ class TodoViewModel @Inject constructor(
             todoDao.updateTask(updatedTask)
             loadTasks()
             println("Updated task ${updatedTask.id} with explicit duration: ${updatedTask.estimatedDurationMs}ms")
+        }
+    }
+
+    private fun startNotificationService() {
+        val serviceIntent = Intent(context, TodoNotificationService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent)
+        } else {
+            context.startService(serviceIntent)
         }
     }
 }

@@ -19,6 +19,7 @@
     <string name="shopping">Shopping</string>
     <string name="new_event">New Event</string>
     <string name="edit_event">Edit Event</string>
+    <string name="add_event">Add Event</string>
     <string name="task_name">Task Name</string>
     <string name="select_project">Select Project</string>
     <string name="start">Start</string>
@@ -247,4 +248,6 @@
     <string name="task_completed">You completed task \"%1$s\"</string>
     <string name="completed_in_time">in %1$s</string>
     <string name="continue_text">Continue</string>
+    <string name="add_photo">Add photo</string>
+    <string name="add_deadline">Add deadline</string>
 </resources>

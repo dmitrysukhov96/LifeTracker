@@ -20,4 +20,7 @@ interface TodoDao {
 
     @Delete
     suspend fun deleteTask(task: TodoItem)
+
+    @Query("SELECT * FROM todo WHERE dateTime IS NOT NULL AND isDone = 0")
+    suspend fun getTasksWithDeadlines(): List<TodoItem>
 }

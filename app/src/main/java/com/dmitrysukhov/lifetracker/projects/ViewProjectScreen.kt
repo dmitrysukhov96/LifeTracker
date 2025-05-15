@@ -40,21 +40,23 @@ fun ViewProjectScreen(
 ) {
     val project = viewModel.selectedProject
     val projectColor = project?.let { Color(it.color) } ?: Color(0xFF669DE5)
-    setTopBarState(
-        TopBarState(
-            title = project?.title ?: "",
-            color = projectColor,
-            imagePath = if (project?.imagePath.isNullOrEmpty()) null else project?.imagePath,
-            topBarActions = {
-                IconButton(onClick = {
-                    // Keep the selected project and navigate to edit screen
-                    navController.navigate(NEW_PROJECT_SCREEN)
-                }) {
-                    Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White)
+    
+    LaunchedEffect(Unit) {
+        setTopBarState(
+            TopBarState(
+                title = project?.title ?: "", color = projectColor, screen = VIEW_PROJECT_SCREEN,
+                imagePath = if (project?.imagePath.isNullOrEmpty()) null else project?.imagePath,
+                topBarActions = {
+                    IconButton(onClick = {
+                        // Keep the selected project and navigate to edit screen
+                        navController.navigate(NEW_PROJECT_SCREEN)
+                    }) {
+                        Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White)
+                    }
                 }
-            }
+            )
         )
-    )
+    }
 
     Column(
         modifier = Modifier
