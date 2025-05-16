@@ -121,34 +121,6 @@ fun AboutDeveloperScreen(setTopBarState: (TopBarState) -> Unit) {
                 style = SimpleText.copy(fontSize = 18.sp)
             )
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    val intent =
-                        Intent(Intent.ACTION_VIEW, "https://twitter.com/coffeecodedevs".toUri())
-                    try {
-                        startActivity(context, intent, null)
-                    } catch (_: Exception) {
-                    }
-                }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.twitter),
-                contentDescription = "Twitter",
-                tint = PineColor,
-                modifier = Modifier.size(28.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "@coffeecodedevs",
-                color = PineColor,
-                fontWeight = FontWeight.Bold,
-                style = SimpleText.copy(fontSize = 18.sp)
-            )
-        }
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.dev_end),

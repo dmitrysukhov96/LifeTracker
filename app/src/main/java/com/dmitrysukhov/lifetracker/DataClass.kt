@@ -40,7 +40,6 @@ data class Event(
 data class Habit(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val title: String,
-    /** 0 = Checkbox, 1 = Number (greater is better), 2 = Number (less is better) */
     val type: Int,
     val color: Int
 )

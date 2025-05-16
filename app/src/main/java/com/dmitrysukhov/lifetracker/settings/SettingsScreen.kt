@@ -178,7 +178,7 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
                 expanded = themeExpanded,
                 onDismissRequest = { themeExpanded = false },
                 modifier = Modifier
-                    .background(BgColor)
+                    .background(BgColor.copy(0.6f))
                     .padding(horizontal = 8.dp)
             ) {
                 ThemeMode.entries.forEach { theme ->
@@ -261,7 +261,7 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
                 expanded = languageExpanded,
                 onDismissRequest = { languageExpanded = false },
                 modifier = Modifier
-                    .background(BgColor)
+                    .background(BgColor.copy(0.6f))
                     .padding(horizontal = 8.dp)
             ) {
                 DropdownMenuItem(

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -26,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,15 +50,24 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.R
 import com.dmitrysukhov.lifetracker.common.ui.ColorPicker
 import com.dmitrysukhov.lifetracker.common.ui.SubtitleWithIcon
+import android.view.ContextThemeWrapper
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import com.dmitrysukhov.lifetracker.utils.H1
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.ImageUtils
 import com.dmitrysukhov.lifetracker.utils.InverseColor
 import com.dmitrysukhov.lifetracker.utils.Montserrat
 import com.dmitrysukhov.lifetracker.utils.PineColor
+import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.TopBarState
 import com.dmitrysukhov.lifetracker.utils.isDarkTheme
 import java.io.File
@@ -78,21 +87,121 @@ fun NewProjectScreen(
     }
     var selectedColor = Color(selectedColorInt)
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = if (project != null) context.getString(R.string.edit)
-                else context.getString(R.string.new_project), color = selectedColor,
-                screen = NEW_PROJECT_SCREEN,
-                imagePath = currentImagePath
-            )
-        )
+
+    // Initialize goal from project if available
+    var goal by rememberSaveable { mutableStateOf(project?.goal ?: "") }
+
+    // Format and initialize deadline if available
+    var deadline by rememberSaveable {
+        val formattedDate = project?.deadlineMillis?.let { millis ->
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            dateFormat.format(Date(millis))
+        } ?: ""
+        mutableStateOf(formattedDate)
     }
+
+    setTopBarState(
+        TopBarState(
+            title = if (project != null) context.getString(R.string.edit)
+            else context.getString(R.string.new_project), color = selectedColor,
+            screen = NEW_PROJECT_SCREEN,
+            imagePath = currentImagePath, topBarActions = {
+                Row {
+                    if (project != null) {
+                        IconButton(onClick = {
+                            showDeleteConfirmation = true
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.delete),
+                                contentDescription = stringResource(R.string.delete),
+                                tint = Color.White
+                            )
+                        }
+                    }
+                    IconButton(onClick = {
+                        // Validate deadline date if not empty
+                        if (deadline.isNotEmpty()) {
+                            val isValidDate = try {
+                                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                dateFormat.isLenient = false
+                                val parsedDate = dateFormat.parse(deadline)
+
+                                // Check if date is before 1970
+                                val calendar = Calendar.getInstance()
+                                calendar.set(1970, 0, 1) // January 1, 1970
+                                val minDate = calendar.time
+
+                                if (parsedDate != null && parsedDate.before(minDate)) {
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.error_date_before_1970),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@IconButton
+                                }
+
+                                true
+                            } catch (_: Exception) {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.error_invalid_date_format),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                false
+                            }
+
+                            if (!isValidDate) {
+                                return@IconButton
+                            }
+                        }
+
+                        // Parse deadline to milliseconds if it's not empty
+                        val deadlineMillis = if (deadline.isNotEmpty()) {
+                            try {
+                                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                dateFormat.parse(deadline)?.time
+                            } catch (_: Exception) {
+                                null
+                            }
+                        } else {
+                            null
+                        }
+
+                        // Proceed with saving if validation passes or deadline is empty
+                        if (project != null) viewModel.updateProject(
+                            project.copy(
+                                title = title,
+                                description = descr,
+                                color = selectedColorInt,
+                                imagePath = currentImagePath,
+                                goal = goal.takeIf { it.isNotEmpty() },
+                                deadlineMillis = deadlineMillis
+                            )
+                        ) else viewModel.addProject(
+                            Project(
+                                title = title,
+                                description = descr,
+                                color = selectedColorInt,
+                                imagePath = currentImagePath,
+                                goal = goal.takeIf { it.isNotEmpty() },
+                                deadlineMillis = deadlineMillis
+                            )
+                        )
+                        navController.navigateUp()
+                    }) {
+                        if (title.isNotBlank()) Icon(
+                            painter = painterResource(R.drawable.tick),
+                            contentDescription = null, tint = Color.White
+                        )
+                    }
+                }
+            }
+        )
+    )
     Column(
         Modifier
             .background(if (isDarkTheme()) Color.Black else Color.White)
-            .background(selectedColor.copy(alpha = 0.1f))
+            .background(selectedColor.copy(alpha = if (isDarkTheme()) 0.1f else 0.05f))
             .fillMaxSize()
             .padding(horizontal = 24.dp)
     ) {
@@ -111,46 +220,35 @@ fun NewProjectScreen(
             }, modifier = Modifier.fillMaxWidth(), maxLines = 1,
             cursorBrush = SolidColor(selectedColor)
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+        HorizontalDivider(color = selectedColor.copy(0.5f), thickness = 0.5.dp)
         BasicTextField(
-            value = descr, cursorBrush = SolidColor(selectedColor),
-            onValueChange = { descr = it },
-            textStyle = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = W700,
-                fontFamily = Montserrat,
-                color = InverseColor
-            ),
+            value = descr,
+            onValueChange = { if (it.length <= 300) descr = it },
+            textStyle = SimpleText.copy(color = InverseColor),
+            cursorBrush = SolidColor(selectedColor),
+            maxLines = 5,
             decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (descr.isEmpty()) Text(
-                        stringResource(R.string.description_hint),
-                        style = H2, color = selectedColor.copy(0.5f)
+                        stringResource(R.string.description_hint), style = SimpleText,
+                        color = selectedColor.copy(0.5f)
                     )
                     innerTextField()
                 }
             },
             modifier = Modifier.fillMaxWidth()
         )
-
-        // Color selection FIRST
+        Spacer(modifier = Modifier.height(16.dp))
         SubtitleWithIcon(
-            textRes = R.string.select_color,
-            iconRes = R.drawable.palette,
-            iconColor = selectedColor
+            textRes = R.string.select_color, iconRes = R.drawable.palette, iconColor = selectedColor
         )
         ColorPicker(
-            selectedColorInt = selectedColorInt,
-            onColorSelected = { selectedColorInt = it }
+            selectedColorInt = selectedColorInt, onColorSelected = { selectedColorInt = it }
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalDivider(color = selectedColor.copy(0.5f), thickness = 0.5.dp)
         Spacer(modifier = Modifier.height(24.dp))
-        SubtitleWithIcon(
-            textRes = R.string.add_photo,
-            iconRes = R.drawable.image_add,
-            iconColor = selectedColor
-        )
         val imagePickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
         ) { uri ->
@@ -161,6 +259,26 @@ fun NewProjectScreen(
                 }
                 currentImagePath = newPath
             }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { imagePickerLauncher.launch("image/*") },
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            SubtitleWithIcon(
+                textRes = R.string.add_photo,
+                iconRes = R.drawable.image_add,
+                iconColor = selectedColor
+            )
+            if (currentImagePath == null) Icon(
+                painterResource(R.drawable.plus),
+                null,
+                modifier = Modifier
+                    .padding(end = 4.dp)
+                    .size(16.dp),
+                tint = selectedColor
+            )
         }
         if (currentImagePath?.isNotEmpty() == true) {
             Box(
@@ -209,43 +327,18 @@ fun NewProjectScreen(
                     }
                 }
             }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(selectedColor.copy(alpha = 0.2f))
-                    .clickable { imagePickerLauncher.launch("image/*") },
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        painter = painterResource(R.drawable.import_icon),
-                        contentDescription = null,
-                        tint = selectedColor,
-                        modifier = Modifier.size(36.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.add_photo),
-                        color = selectedColor,
-                        style = TextStyle(fontSize = 16.sp, fontWeight = W700)
-                    )
-                }
-            }
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalDivider(color = selectedColor.copy(0.5f), thickness = 0.5.dp)
         Spacer(modifier = Modifier.height(24.dp))
-        // Goal field
         SubtitleWithIcon(
             textRes = R.string.goal_colon,
-            iconRes = R.drawable.task,
+            iconRes = R.drawable.goal,
             iconColor = selectedColor
         )
-        var goal by rememberSaveable { mutableStateOf("") }
         BasicTextField(
-            value = goal,
-            onValueChange = { goal = it },
+            value = goal, cursorBrush = SolidColor(selectedColor),
+            onValueChange = { if (it.length < 200) goal = it }, maxLines = 3,
             textStyle = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = W700,
@@ -253,7 +346,11 @@ fun NewProjectScreen(
                 color = InverseColor
             ),
             decorationBox = { innerTextField ->
-                Box(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp)
+                ) {
                     if (goal.isEmpty()) Text(
                         stringResource(R.string.goal_colon),
                         style = H2, color = selectedColor.copy(0.5f)
@@ -264,33 +361,79 @@ fun NewProjectScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(24.dp))
-        // Deadline field
-        SubtitleWithIcon(
-            textRes = R.string.add_deadline,
-            iconRes = R.drawable.data,
-            iconColor = selectedColor
-        )
-        var deadline by rememberSaveable { mutableStateOf("") }
-        BasicTextField(
-            value = deadline,
-            onValueChange = { deadline = it },
-            textStyle = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = W700,
-                fontFamily = Montserrat,
-                color = InverseColor
-            ),
-            decorationBox = { innerTextField ->
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    if (deadline.isEmpty()) Text(
-                        stringResource(R.string.add_deadline),
-                        style = H2, color = selectedColor.copy(0.5f)
-                    )
-                    innerTextField()
+        val datePickerTheme = getDatePickerTheme()
+        val showDatePicker = {
+            val calendar = Calendar.getInstance()
+            if (deadline.isNotEmpty()) {
+                try {
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    val date = dateFormat.parse(deadline)
+                    if (date != null) {
+                        calendar.time = date
+                    }
+                } catch (_: Exception) {
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
+            }
+
+            val datePicker = android.app.DatePickerDialog(
+                ContextThemeWrapper(context, datePickerTheme),
+                { _, year, month, day ->
+                    calendar.set(year, month, day)
+                    calendar.set(Calendar.HOUR_OF_DAY, 12)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    deadline = dateFormat.format(calendar.time)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.show()
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable { showDatePicker() }, horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            SubtitleWithIcon(
+                textRes = R.string.add_deadline,
+                iconRes = R.drawable.data,
+                iconColor = selectedColor
+            )
+            if (deadline.isEmpty()) Icon(
+                painterResource(R.drawable.plus), null, modifier = Modifier
+                    .padding(end = 4.dp)
+                    .size(16.dp), tint = selectedColor
+            )
+        }
+        Row(modifier = Modifier.padding(start = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (deadline.isEmpty())
+                    stringResource(R.string.deadline)
+                else deadline,
+                style = H2,
+                color = if (deadline.isEmpty()) selectedColor.copy(0.5f) else InverseColor
+            )
+
+            if (deadline.isNotEmpty()) {
+                Spacer(Modifier.width(12.dp))
+                IconButton(
+                    onClick = { deadline = "" },
+                    modifier = Modifier.size(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Clear",
+                        tint = InverseColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+        }
+        HorizontalDivider(thickness = 0.5.dp, color = selectedColor.copy(0.5f))
     }
     if (showDeleteConfirmation) {
         AlertDialog(
@@ -314,3 +457,9 @@ fun NewProjectScreen(
 }
 
 const val NEW_PROJECT_SCREEN = "new_project_screen"
+
+@Composable
+fun getDatePickerTheme(): Int {
+    return if (isDarkTheme()) R.style.CustomDatePickerDarkTheme
+    else R.style.CustomDatePickerLightTheme
+}

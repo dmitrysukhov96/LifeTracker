@@ -6,7 +6,7 @@
     <string name="description_colon">Описание:</string>
     <string name="tasks_colon">Задачи:</string>
     <string name="add_task">Добавить задачу</string>
-    <string name="goal_colon">Цель:</string>
+    <string name="goal_colon">Цель проекта:</string>
     <string name="new_task">Новая задача</string>
     <string name="save_task_toast">Задача сохранена</string>
     <string name="update_task_toast">Задача обновлена</string>
@@ -20,6 +20,7 @@
     <string name="shopping">Покупки</string>
     <string name="new_event">Новое событие</string>
     <string name="edit_event">Редактировать событие</string>
+    <string name="add_event">Добавить событие</string>
     <string name="task_name">Название задачи</string>
     <string name="select_project">Выбрать проект</string>
     <string name="start">Начало</string>
@@ -150,6 +151,7 @@
     <string name="most_productive_day">Самый продуктивный день</string>
     <string name="best_time">Лучшее время</string>
     <string name="focus_score">Оценка фокуса</string>
+    <string name="cannot_create_event_in_future">Нельзя создать событие в будущем</string>
     <string name="todays_tasks">📝 Задачи на сегодня</string>
     <string name="no_tasks_for_today">Нет задач на сегодня! Наслаждайтесь свободным временем!</string>
     <string name="tasks_stats">📊 Статистика задач</string>
@@ -241,6 +243,7 @@
     <string name="notification_permission_message">Уведомления необходимы для напоминаний о задачах и отслеживания ваших целей. Пожалуйста, включите уведомления в настройках, чтобы получить максимальную пользу от приложения.</string>
 
     <!-- New turbo mode completion strings -->
+    <string name="end_time">Время окончания</string>
     <string name="congratulations">Поздравляем! 🎉</string>
     <string name="task_completed">Вы выполнили задачу \"%1$s\"</string>
     <string name="completed_in_time">за %1$s</string>
@@ -249,4 +252,9 @@
     <!-- New strings for adding photo and deadline -->
     <string name="add_photo">Добавьте фото</string>
     <string name="add_deadline">Добавьте крайний срок</string>
+    <string name="deadline">Крайний срок</string>
+    <string name="error_date_before_1970">Дата не может быть раньше 1970 года</string>
+    <string name="no_goal">Нет цели</string>
+    <string name="stop_tracker_first">Чтоб отредактировать это событие, сначала остановите трекер</string>
+    <string name="start_time">Время начала</string>
 </resources>

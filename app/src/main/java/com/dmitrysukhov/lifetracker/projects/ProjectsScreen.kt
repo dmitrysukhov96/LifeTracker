@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -84,7 +83,7 @@ fun ProjectsScreen(
                 val deadlineText = project.deadlineMillis?.let {
                     val date = Date(it)
                     SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(date)
-                } ?: stringResource(R.string.no_deadline)
+                } ?: ""
                 val tasks = todoViewModel.todoList.collectAsStateWithLifecycle(emptyList()).value
                 val projectTasks = tasks.filter { it.projectId == project.projectId }
                 val completedTasks = projectTasks.count { it.isDone }
@@ -149,14 +148,16 @@ fun ProjectItem(
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 8.dp)
         )
-        Text(
-            text = deadline,
-            style = SimpleText,
-            color = Color.White.copy(alpha = 0.8f),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 20.dp, bottom = 8.dp)
-        )
+        if (deadline.isNotEmpty()) {
+            Text(
+                text = deadline,
+                style = SimpleText,
+                color = Color.White.copy(alpha = 0.8f),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 20.dp, bottom = 8.dp)
+            )
+        }
     }
 }
 

@@ -5,7 +5,7 @@
     <string name="description">Description</string>
     <string name="description_colon">Description:</string>
     <string name="tasks_colon">Tasks:</string>
-    <string name="goal_colon">Goal:</string>
+    <string name="goal_colon">Project Goal:</string>
     <string name="new_task">New Task</string>
     <string name="save_task_toast">Task saved</string>
     <string name="update_task_toast">Task updated</string>
@@ -211,7 +211,7 @@
     <!-- Date formatting strings -->
     <string name="yesterday_at">Yesterday at %s</string>
     <string name="tomorrow_at">Tomorrow at %s</string>
-    <string name="cannot_create_event_in_future">Нельзя создать событие в будущем</string>
+    <string name="cannot_create_event_in_future">You cannot create event in future</string>
 
     <!-- New dashboard strings -->
     <string name="todays_tasks">📝 Today\'s Tasks</string>
@@ -250,4 +250,7 @@
     <string name="continue_text">Continue</string>
     <string name="add_photo">Add photo</string>
     <string name="add_deadline">Add deadline</string>
+    <string name="deadline">Deadline</string>
+    <string name="error_date_before_1970">Deadline cannot be before 1970</string>
+    <string name="no_goal">No goal</string>
 </resources>

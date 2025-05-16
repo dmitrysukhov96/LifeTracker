@@ -78,6 +78,7 @@ fun TrackerScreen(
     navController: NavHostController, projectsViewModel: ProjectsViewModel
 ) {
     var showTaskDialog by remember { mutableStateOf(false) }
+    var showNewEventDialog by remember { mutableStateOf(false) }
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
     var isTrackerStart by remember { mutableStateOf(false) }
     val title = stringResource(R.string.tracker)
@@ -110,6 +111,19 @@ fun TrackerScreen(
         }
     }
     LaunchedEffect(refreshTrigger, selectedDate) { trackerViewModel.refreshEvents() }
+    if (showNewEventDialog) NewEventDialog(
+        projects = projects,
+        onDismiss = { showNewEventDialog = false },
+        onSave = { event ->
+            if (lastEvent?.endTime == null) {
+                trackerViewModel.stopEvent()
+            }
+            trackerViewModel.insertEvent(event)
+            showNewEventDialog = false
+        }, selectedProjectId = selectedProjectId,
+        onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
+        setProjectId = { selectedProjectId = it }
+    )
     Column(
         Modifier
             .fillMaxSize()
@@ -119,13 +133,13 @@ fun TrackerScreen(
             lastEvent = lastEvent, projects = projects, onCircleButtonClick = {
                 if (lastEvent == null || lastEvent.endTime != null) {
                     selectedEvent = null
-                    isTrackerStart = true
-                    showTaskDialog = true
+                    showNewEventDialog = true
                 } else trackerViewModel.stopEvent()
             }, onActionClick = {
-                selectedEvent = null
-                isTrackerStart = true
-                showTaskDialog = true
+                if (lastEvent == null || lastEvent.endTime != null) {
+                    selectedEvent = null
+                    showNewEventDialog = true
+                } else showNewEventDialog = true
             }
         )
         Spacer(Modifier.height(16.dp))
@@ -151,7 +165,9 @@ fun TrackerScreen(
     }
     if (showTaskDialog) {
         if (isTrackerStart) {
-            NewEventDialog(
+            AddEditEventDialog(
+                event = null,
+                onDelete = {},
                 projects = projects,
                 onDismiss = {
                     showTaskDialog = false

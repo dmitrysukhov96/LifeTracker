@@ -150,9 +150,12 @@ class MainActivity : LocaleBaseActivity() {
 
     companion object {
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 100
+        private const val EXACT_ALARM_PERMISSION_REQUEST_CODE = 101
     }
 
     private var showPermissionDialog by mutableStateOf(false)
+    private var showAlarmPermissionDialog by mutableStateOf(false)
+    private lateinit var todoViewModel: TodoViewModel
 
     override fun attachBaseContext(newBase: Context) {
         val sharedPref = newBase.getSharedPreferences("user_prefs", MODE_PRIVATE)
@@ -183,6 +186,9 @@ class MainActivity : LocaleBaseActivity() {
                     )
                 )
             }
+            
+            todoViewModel = hiltViewModel()
+            
             LaunchedEffect(Unit) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     when {
@@ -202,6 +208,12 @@ class MainActivity : LocaleBaseActivity() {
                                 NOTIFICATION_PERMISSION_REQUEST_CODE
                             )
                         }
+                    }
+                }
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (!todoViewModel.checkAlarmPermission()) {
+                        showAlarmPermissionDialog = true
                     }
                 }
             }
@@ -246,7 +258,48 @@ class MainActivity : LocaleBaseActivity() {
                     }
                 }
             )
-
+            
+            if (showAlarmPermissionDialog) AlertDialog(
+                containerColor = BgColor,
+                onDismissRequest = { showAlarmPermissionDialog = false },
+                title = {
+                    Text(
+                        "Разрешение для напоминаний",
+                        style = H1, color = InverseColor
+                    )
+                },
+                text = {
+                    Text(
+                        "Для корректной работы напоминаний в нужное время, необходимо разрешение на точные будильники. Пожалуйста, разрешите это в настройках.",
+                        style = SimpleText, color = InverseColor
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val intent = todoViewModel.getAlarmPermissionSettingsIntent()
+                            if (intent != null) {
+                                startActivityForResult(intent, EXACT_ALARM_PERMISSION_REQUEST_CODE)
+                            }
+                            showAlarmPermissionDialog = false
+                        }
+                    ) {
+                        Text(
+                            stringResource(R.string.settings),
+                            style = SimpleText, color = PineColor
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showAlarmPermissionDialog = false }) {
+                        Text(
+                            stringResource(R.string.cancel), 
+                            style = SimpleText,
+                            color = PineColor
+                        )
+                    }
+                }
+            )
 
             LaunchedEffect(topBarState.color) {
                 systemUiController.setNavigationBarColor(
@@ -313,7 +366,6 @@ class MainActivity : LocaleBaseActivity() {
                         screen = ABOUT_DEVELOPER_SCREEN
                     )
                 )
-                val todoViewModel: TodoViewModel = hiltViewModel()
                 val trackerViewModel: TrackerViewModel = hiltViewModel()
                 val projectViewModel: ProjectsViewModel = hiltViewModel()
                 val habitViewModel: HabitsViewModel = hiltViewModel()
@@ -480,7 +532,6 @@ class MainActivity : LocaleBaseActivity() {
                                         .fillMaxSize()
                                         .background(topBarState.color)
                                 ) {
-                                    //custom top bar
                                     topBarState.imagePath?.let { imagePath ->
                                         Image(
                                             painter = rememberAsyncImagePainter(
@@ -598,7 +649,8 @@ class MainActivity : LocaleBaseActivity() {
                                         }
                                         composable(VIEW_PROJECT_SCREEN) {
                                             ViewProjectScreen(
-                                                setTopBarState, projectViewModel, navController
+                                                setTopBarState, projectViewModel, navController,
+                                                todoViewModel
                                             )
                                         }
                                         composable(TRACKER_SCREEN) {
@@ -667,6 +719,18 @@ class MainActivity : LocaleBaseActivity() {
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 showPermissionDialog = true
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        
+        if (requestCode == EXACT_ALARM_PERMISSION_REQUEST_CODE) {
+            if (todoViewModel.checkAlarmPermission()) {
+                todoViewModel.onPermissionGranted()
+            } else {
+                showAlarmPermissionDialog = true
             }
         }
     }

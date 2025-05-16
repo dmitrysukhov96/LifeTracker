@@ -6,7 +6,7 @@
     <string name="description_colon">Опис:</string>
     <string name="tasks_colon">Задачі:</string>
     <string name="add_task">Додати задачу</string>
-    <string name="goal_colon">Мета:</string>
+    <string name="goal_colon">Мета проекту:</string>
     <string name="new_task">Нова задача</string>
     <string name="save_task_toast">Задача збережена</string>
     <string name="update_task_toast">Задача оновлена</string>
@@ -20,6 +20,7 @@
     <string name="shopping">Покупки</string>
     <string name="new_event">Нова подія</string>
     <string name="edit_event">Редагувати подію</string>
+    <string name="add_event">Додати подію</string>
     <string name="task_name">Назва завдання</string>
     <string name="select_project">Вибрати проект</string>
     <string name="start">Початок</string>
@@ -148,6 +149,7 @@
     <string name="most_productive_day">Найпродуктивніший день</string>
     <string name="best_time">Найкращий час</string>
     <string name="focus_score">Оцінка фокусу</string>
+    <string name="cannot_create_event_in_future">Не можна створити подію в майбутньому</string>
     <string name="todays_tasks">📝 Завдання на сьогодні</string>
     <string name="no_tasks_for_today">Немає завдань на сьогодні! Насолоджуйтесь вільним часом!</string>
     <string name="tasks_stats">📊 Статистика завдань</string>
@@ -223,6 +225,7 @@
     <string name="max_streak">Максимально поспіль: %1$d (%2$s – %3$s)</string>
     <string name="minimum">Мінімум: %1$s (%2$s)</string>
     <string name="maximum">Максимум: %1$s (%2$s)</string>
+    <string name="task_reminders">Нагадування про задачі</string>
     <string name="task_reminders_desc">Сповіщення для запланованих завдань</string>
 
     <!-- Notification permission strings -->
@@ -232,6 +235,7 @@
     <string name="cancel">Скасувати</string>
 
     <!-- Date formatting strings -->
+    <string name="end_time">Час закінчення</string>
     <string name="congratulations">Вітаємо! 🎉</string>
     <string name="task_completed">Ви виконали завдання \"%1$s\"</string>
     <string name="completed_in_time">за %1$s</string>
@@ -240,4 +244,11 @@
     <!-- New strings from the code block -->
     <string name="add_photo">Додайте фото</string>
     <string name="add_deadline">Додайте крайній термін</string>
+    <string name="deadline">Крайній термін</string>
+    <string name="error_date_before_1970">Дата не може бути раніше 1970 року</string>
+    <string name="no_goal">Немає мети</string>
+    <string name="yesterday_at">Вчора в %s</string>
+    <string name="tomorrow_at">Завтра в %s</string>
+    <string name="stop_tracker_first">Щоб редагувати цю подію, спочатку зупиніть трекер</string>
+    <string name="start_time">Час початку</string>
 </resources>

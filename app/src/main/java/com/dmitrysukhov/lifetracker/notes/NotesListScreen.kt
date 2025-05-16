@@ -81,7 +81,6 @@ fun NotesListScreen(
         if (notes.isEmpty()) {
             EmptyPlaceholder(R.string.no_notes_yet, R.string.tap_plus_to_create_note)
         } else {
-            // Notes list
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(24.dp),
@@ -128,7 +127,6 @@ fun NoteItem(note: Note, onNoteClick: () -> Unit, project: Project? = null) {
             )
         }
 
-        // Project tag if exists
         project?.let {
             Spacer(modifier = Modifier.height(4.dp))
             Row(

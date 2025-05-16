@@ -167,7 +167,7 @@ fun NewTaskScreen(
         Spacer(Modifier.height(4.dp))
         HorizontalDivider(color = PineColor.copy(0.5f), thickness = 0.5.dp)
         BasicTextField(
-            value = description, onValueChange = { if (it.length <= 1000) description = it },
+            value = description, onValueChange = { if (it.length <= 300) description = it },
             textStyle = SimpleText.copy(color = InverseColor), cursorBrush = SolidColor(PineColor),
             maxLines = 5, decorationBox = { innerTextField ->
                 Box(modifier = Modifier.fillMaxWidth()) {

@@ -90,7 +90,6 @@ fun TodoListScreen(
     val lastEvent by trackerViewModel.lastEvent.collectAsStateWithLifecycle()
     var refreshTrigger by remember { mutableIntStateOf(0) }
 
-    // Refresh timer every second
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000)
@@ -98,7 +97,6 @@ fun TodoListScreen(
         }
     }
 
-    // Get localized category names
     val completedCategory = stringResource(R.string.completed_tasks)
     val noDateCategory = stringResource(R.string.no_date)
     val earlierCategory = stringResource(R.string.earlier)
@@ -107,14 +105,12 @@ fun TodoListScreen(
     val tomorrowCategory = stringResource(R.string.tomorrow)
     val laterCategory = stringResource(R.string.later)
 
-    // Track active task based on event name
     val activeTask = remember(todoList, lastEvent) {
         if (lastEvent != null && lastEvent?.endTime == null) {
             todoList.find { it.text == lastEvent?.name && it.estimatedDurationMs != null && it.estimatedDurationMs > 0 }
         } else null
     }
 
-    // Categorize items first
     val categorizedTasks = remember(
         todoList, completedCategory, noDateCategory,
         earlierCategory, yesterdayCategory, todayCategory, tomorrowCategory, laterCategory

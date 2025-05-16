@@ -1,8 +1,6 @@
 package com.dmitrysukhov.lifetracker.todo
 
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitrysukhov.lifetracker.Event
@@ -11,7 +9,6 @@ import com.dmitrysukhov.lifetracker.TodoItem
 import com.dmitrysukhov.lifetracker.projects.ProjectDao
 import com.dmitrysukhov.lifetracker.tracker.EventRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,8 +21,7 @@ import javax.inject.Inject
 class TodoViewModel @Inject constructor(
     private val todoDao: TodoDao,
     private val eventRepository: EventRepository,
-    private val notificationManager: TodoNotificationManager,
-    @ApplicationContext private val context: Context
+    private val notificationManager: TodoNotificationManager
 ) : ViewModel() {
     var selectedTask: TodoItem? = null
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
@@ -37,6 +33,8 @@ class TodoViewModel @Inject constructor(
     private val _currentlyTrackedTask = MutableStateFlow<TodoItem?>(null)
 
     private val _lastEvent = MutableStateFlow<Event?>(null)
+    
+    private val _needsPermission = MutableStateFlow(false)
 
     @Inject
     lateinit var projectsDao: ProjectDao
@@ -51,6 +49,8 @@ class TodoViewModel @Inject constructor(
                 _lastEvent.value = event
             }
         }
+        
+        checkAlarmPermission()
     }
 
     private fun loadProjects() {
@@ -150,9 +150,12 @@ class TodoViewModel @Inject constructor(
             val id = todoDao.insertTask(newTask)
             loadTasks()
             
-            deadline?.let {
-                scheduleNotification(id, text, it)
-                startNotificationService()
+            if (deadline != null && deadline > System.currentTimeMillis()) {
+                if (checkAlarmPermission()) {
+                    scheduleNotification(id, text, deadline)
+                } else {
+                    _needsPermission.value = true
+                }
             }
         }
     }
@@ -166,12 +169,14 @@ class TodoViewModel @Inject constructor(
                 _currentlyTrackedTask.value = item
             }
             
-            item.dateTime?.let {
-                cancelNotification(item.id)
-                scheduleNotification(item.id, item.text, it)
-                startNotificationService()
-            } ?: run {
-                cancelNotification(item.id)
+            cancelNotification(item.id)
+            
+            if (item.dateTime != null && item.dateTime > System.currentTimeMillis()) {
+                if (checkAlarmPermission()) {
+                    scheduleNotification(item.id, item.text, item.dateTime)
+                } else {
+                    _needsPermission.value = true
+                }
             }
         }
     }
@@ -211,16 +216,31 @@ class TodoViewModel @Inject constructor(
         viewModelScope.launch {
             todoDao.updateTask(updatedTask)
             loadTasks()
-            println("Updated task ${updatedTask.id} with explicit duration: ${updatedTask.estimatedDurationMs}ms")
         }
     }
-
-    private fun startNotificationService() {
-        val serviceIntent = Intent(context, TodoNotificationService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
+    
+    fun checkAlarmPermission(): Boolean {
+        val hasPermission = notificationManager.hasExactAlarmPermission()
+        _needsPermission.value = !hasPermission
+        return hasPermission
+    }
+    
+    fun getAlarmPermissionSettingsIntent(): Intent? {
+        return notificationManager.getAlarmPermissionSettingsIntent()
+    }
+    
+    fun onPermissionGranted() {
+        _needsPermission.value = false
+        
+        viewModelScope.launch {
+            val tasks = todoDao.getTasksWithDeadlines()
+            val currentTime = System.currentTimeMillis()
+            
+            tasks.forEach { task ->
+                if (task.dateTime != null && task.dateTime > currentTime) {
+                    scheduleNotification(task.id, task.text, task.dateTime)
+                }
+            }
         }
     }
 }
