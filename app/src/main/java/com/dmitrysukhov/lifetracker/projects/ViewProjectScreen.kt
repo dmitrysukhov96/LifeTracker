@@ -59,7 +59,7 @@ fun ViewProjectScreen(
     setTopBarState(
         TopBarState(
             title = project?.title ?: "", color = projectColor, screen = VIEW_PROJECT_SCREEN,
-            imagePath = if (project?.imagePath.isNullOrEmpty()) null else project.imagePath,
+            imagePath = if (project?.imagePath.isNullOrEmpty()) null else project?.imagePath,
             topBarActions = {
                 IconButton(onClick = {
                     // Keep the selected project and navigate to edit screen
@@ -78,20 +78,14 @@ fun ViewProjectScreen(
             .padding(horizontal = 24.dp),
     ) {
         Spacer(modifier = Modifier.height(20.dp))
-        
-        // Only show description if it's not empty
         if (!project?.description.isNullOrEmpty()) {
             Text(stringResource(R.string.description_colon), style = BoldText, color = projectColor)
-            Text(
-                project.description,
-                style = SimpleText,
-                color = InverseColor
-            )
+            Text(project?.description ?: "", style = SimpleText, color = InverseColor)
             Spacer(modifier = Modifier.height(16.dp))
         }
         if (!project?.goal.isNullOrEmpty()) {
             Text(stringResource(R.string.goal_colon), style = BoldText, color = projectColor)
-            Text(project.goal, style = SimpleText, color = InverseColor)
+            Text(project?.goal ?: "", style = SimpleText, color = InverseColor)
             Spacer(modifier = Modifier.height(16.dp))
         }
         if (project?.deadlineMillis != null) {
@@ -142,7 +136,9 @@ fun ViewProjectScreen(
         if (projectTasks.isEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

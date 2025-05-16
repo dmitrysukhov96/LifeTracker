@@ -92,6 +92,18 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
         val locale = when (languageCode) {
             "ru" -> Locale("ru")
             "uk" -> Locale("uk")
+            "de" -> Locale("de")
+            "fr" -> Locale("fr")
+            "es" -> Locale("es")
+            "it" -> Locale("it")
+            "bg" -> Locale("bg")
+            "ja" -> Locale("ja")
+            "ko" -> Locale("ko")
+            "lt" -> Locale("lt")
+            "sr" -> Locale("sr")
+            "zh" -> Locale("zh")
+            "he" -> Locale("he", "IL")
+            "iw" -> Locale("he", "IL")
             else -> Locale("en")
         }
         Locale.setDefault(locale)
@@ -212,7 +224,7 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
         HorizontalDivider()
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Language / Язык / Мова",
+            text = stringResource(R.string.language),
             color = InverseColor,
             style = SimpleText,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -238,6 +250,17 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
                         "en" -> "English"
                         "ru" -> "Русский"
                         "uk" -> "Українська"
+                        "de" -> "Deutsch"
+                        "fr" -> "Français"
+                        "es" -> "Español"
+                        "it" -> "Italiano"
+                        "bg" -> "Български"
+                        "ja" -> "日本語"
+                        "ko" -> "한국어"
+                        "lt" -> "Lietuvių"
+                        "sr" -> "Српски"
+                        "zh" -> "中文"
+                        "he", "iw" -> "עברית"
                         else -> "English"
                     },
                     fontFamily = Montserrat,
@@ -336,6 +359,270 @@ fun SettingsScreen(setTopBarState: (TopBarState) -> Unit) {
 
                             // Apply language immediately
                             applyLanguage("uk")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Deutsch",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "de") {
+                            selectedLanguage = "de"
+                            sharedPref.edit {
+                                putString("language", "de")
+                            }
+                            languageExpanded = false
+                            applyLanguage("de")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Français",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "fr") {
+                            selectedLanguage = "fr"
+                            sharedPref.edit {
+                                putString("language", "fr")
+                            }
+                            languageExpanded = false
+                            applyLanguage("fr")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Español",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "es") {
+                            selectedLanguage = "es"
+                            sharedPref.edit {
+                                putString("language", "es")
+                            }
+                            languageExpanded = false
+                            applyLanguage("es")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Italiano",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "it") {
+                            selectedLanguage = "it"
+                            sharedPref.edit {
+                                putString("language", "it")
+                            }
+                            languageExpanded = false
+                            applyLanguage("it")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Български",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "bg") {
+                            selectedLanguage = "bg"
+                            sharedPref.edit {
+                                putString("language", "bg")
+                            }
+                            languageExpanded = false
+                            applyLanguage("bg")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "日本語",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "ja") {
+                            selectedLanguage = "ja"
+                            sharedPref.edit {
+                                putString("language", "ja")
+                            }
+                            languageExpanded = false
+                            applyLanguage("ja")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "한국어",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "ko") {
+                            selectedLanguage = "ko"
+                            sharedPref.edit {
+                                putString("language", "ko")
+                            }
+                            languageExpanded = false
+                            applyLanguage("ko")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Lietuvių",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "lt") {
+                            selectedLanguage = "lt"
+                            sharedPref.edit {
+                                putString("language", "lt")
+                            }
+                            languageExpanded = false
+                            applyLanguage("lt")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "Српски",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "sr") {
+                            selectedLanguage = "sr"
+                            sharedPref.edit {
+                                putString("language", "sr")
+                            }
+                            languageExpanded = false
+                            applyLanguage("sr")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "中文",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "zh") {
+                            selectedLanguage = "zh"
+                            sharedPref.edit {
+                                putString("language", "zh")
+                            }
+                            languageExpanded = false
+                            applyLanguage("zh")
+                        } else {
+                            languageExpanded = false
+                        }
+                    }
+                )
+                
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "עברית",
+                            fontFamily = Montserrat,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = InverseColor
+                        )
+                    },
+                    onClick = {
+                        if (selectedLanguage != "he") {
+                            selectedLanguage = "he"
+                            sharedPref.edit {
+                                putString("language", "he")
+                            }
+                            languageExpanded = false
+                            applyLanguage("he")
                         } else {
                             languageExpanded = false
                         }

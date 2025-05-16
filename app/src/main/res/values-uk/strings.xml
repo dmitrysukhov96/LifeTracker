@@ -17,7 +17,6 @@
     <string name="repeat">Повторення</string>
     <string name="time_for_task">Час на завдання</string>
     <string name="category">Категорія</string>
-    <string name="shopping">Покупки</string>
     <string name="new_event">Нова подія</string>
     <string name="edit_event">Редагувати подію</string>
     <string name="add_event">Додати подію</string>
@@ -127,7 +126,6 @@
     <string name="complete">Завершити</string>
     <string name="task_completed_in">Ви виконали %1$s за %2$s!</string>
     <string name="what_next">Що робимо далі?</string>
-    <string name="go">GO!</string>
     <string name="task_added">Завдання додано</string>
     <string name="focus_session">Фокус-сесія</string>
 
@@ -251,4 +249,5 @@
     <string name="tomorrow_at">Завтра в %s</string>
     <string name="stop_tracker_first">Щоб редагувати цю подію, спочатку зупиніть трекер</string>
     <string name="start_time">Час початку</string>
+    <string name="language">Мова</string>
 </resources>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LifeTracker</string>
+    <string name="main_screen">메인 화면</string>
+    <string name="description">설명</string>
+    <string name="description_colon">설명:</string>
+    <string name="tasks_colon">작업:</string>
+    <string name="goal_colon">프로젝트 목표:</string>
+    <string name="new_task">새 작업</string>
+    <string name="save_task_toast">작업이 저장되었습니다</string>
+    <string name="update_task_toast">작업이 업데이트되었습니다</string>
+    <string name="task_deleted">작업이 삭제되었습니다</string>
+    <string name="title_hint">제목</string>
+    <string name="description_hint">설명</string>
+    <string name="reminders">알림</string>
+    <string name="repeat">반복</string>
+    <string name="time_for_task">작업 시간</string>
+    <string name="category">카테고리</string>
+    <string name="new_event">새 이벤트</string>
+    <string name="edit_event">이벤트 편집</string>
+    <string name="add_event">이벤트 추가</string>
+    <string name="task_name">작업 이름</string>
+    <string name="select_project">프로젝트 선택</string>
+    <string name="start">시작</string>
+    <string name="end">종료</string>
+    <string name="date">날짜</string>
+    <string name="time">시간</string>
+    <string name="cancel">취소</string>
+    <string name="save">저장</string>
+    <string name="delete">삭제</string>
+    <string name="enter_value">값 입력</string>
+    <string name="add_task">작업 추가</string>
+    <string name="error_end_time_before_start">종료 시간은 시작 시간보다 빠를 수 없습니다</string>
+    <string name="error_invalid_date_format">잘못된 날짜 형식</string>
+    <string name="error_invalid_date_value">잘못된 날짜 값</string>
+    <string name="error_parsing_date">날짜 분석 오류</string>
+    
+    <!-- New strings -->
+    <string name="tracker">트래커</string>
+    <string name="habits">습관</string>
+    <string name="new_habit">새 습관</string>
+    <string name="edit_habit">습관 편집</string>
+    <string name="projects">프로젝트</string>
+    <string name="new_project">새 프로젝트</string>
+    <string name="edit_project">프로젝트 편집</string>
+    <string name="project_title">프로젝트 제목</string>
+    <string name="project_description">프로젝트 설명</string>
+    <string name="select_color">색상 선택</string>
+    <string name="no_deadline">기한 없음</string>
+    <string name="tasks_completed">%1$d/%2$d 완료됨</string>
+    <string name="no_task">작업 없음</string>
+    <string name="no_name">이름 없음</string>
+    <string name="no_project">프로젝트 없음</string>
+    <string name="add_project">프로젝트 추가</string>
+    <string name="previous_day">이전 날</string>
+    <string name="next_day">다음 날</string>
+    <string name="start_new_task">새 작업 시작</string>
+    <string name="edit">편집</string>
+    <string name="ok">확인</string>
+    <string name="view_project">프로젝트 보기</string>
+    <string name="turbo_screen">터보 화면</string>
+    <string name="todo_list">할 일 목록</string>
+    <string name="tomorrow">내일</string>
+    <string name="today">오늘</string>
+    <string name="monday">월</string>
+    <string name="tuesday">화</string>
+    <string name="wednesday">수</string>
+    <string name="thursday">목</string>
+    <string name="friday">금</string>
+    <string name="saturday">토</string>
+    <string name="sunday">일</string>
+    <string name="delete_project">프로젝트 삭제</string>
+    <string name="delete_project_confirmation">이 프로젝트를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+    <string name="no_tasks">작업 없음</string>
+    <string name="add_task_hint">작업을 추가하려면 +를 누르세요</string>
+    <string name="app_title">LifeTracker</string>
+    <string name="menu">메뉴</string>
+    <string name="back">뒤로</string>
+    <string name="no_projects">프로젝트 없음</string>
+    <string name="create_project_hint">프로젝트를 만들려면 +를 누르세요</string>
+    <string name="tasks_completed_format">%1$d/%2$d 완료됨</string>
+    <string name="import_tasks">작업 가져오기</string>
+    <string name="import_tasks_hint">각 작업을 새 줄에 입력하세요</string>
+    <string name="imp">가져오기</string>
+    <string name="enter_task_hint">작업 입력…</string>
+    <string name="dialog_ask_name">이름이 무엇인가요?</string>
+    <string name="dialog_dont_ask_again">다시 묻지 않기</string>
+    <string name="habit_type">유형</string>
+    <string name="checkbox">체크박스</string>
+    <string name="number">숫자</string>
+    <string name="number_greater">클수록 좋음</string>
+    <string name="number_less">작을수록 좋음</string>
+    <string name="week">주</string>
+    <string name="month">월</string>
+    <string name="year">년</string>
+    <string name="no_habits">습관 없음</string>
+    <string name="create_habit_hint">습관을 만들려면 +를 누르세요</string>
+    <string name="select_tasks_for_today">오늘 할 작업을 선택하세요</string>
+    <string name="daily_planner">일일 플래너</string>
+    <string name="dashboard">대시보드</string>
+    <string name="username">사용자 이름:</string>
+    <string name="good_morning">☀️ 좋은 아침입니다</string>
+    <string name="good_afternoon">🌤️ 좋은 오후입니다</string>
+    <string name="good_evening">🌆 좋은 저녁입니다</string>
+    <string name="good_night">🌙 좋은 밤입니다</string>
+    <string name="settings">설정</string>
+    <string name="select_image">이미지 선택</string>
+    <string name="selected_image">선택된 이미지</string>
+    <string name="change_image">이미지 변경</string>
+    <string name="delete_image">이미지 삭제</string>
+    
+    <!-- Theme settings -->
+    <string name="theme">테마</string>
+    <string name="theme_system">시스템 기본값</string>
+    <string name="theme_light">라이트</string>
+    <string name="theme_dark">다크</string>
+    <string name="theme_restart_hint">앱을 다음에 시작할 때 테마 설정이 적용됩니다.</string>
+    
+    <!-- Focus Mode strings -->
+    <string name="focus_session">집중 세션</string>
+    
+    <!-- Turbo Mode strings -->
+    <string name="turbo_mode">터보 모드</string>
+    <string name="select_task">작업 선택</string>
+    <string name="timer_settings">타이머 설정</string>
+    <string name="stopwatch">스톱워치</string>
+    <string name="countdown">카운트다운</string>
+    <string name="hours">시간</string>
+    <string name="minutes">분</string>
+    <string name="pause">일시 정지</string>
+    <string name="resume">계속</string>
+    <string name="stop">중지</string>
+    <string name="complete">완료</string>
+    <string name="task_completed_in">%1$s을(를) %2$s에 완료했습니다!</string>
+    <string name="what_next">다음은 무엇인가요?</string>
+    <string name="task_added">작업이 추가되었습니다</string>
+
+    <!-- Dashboard strings -->
+    <string name="todays_overview">오늘의 개요</string>
+    <string name="tasks_completed_row">완료된 작업</string>
+    <string name="habits_tracked">추적된 습관</string>
+    <string name="focus_sessions">집중 세션</string>
+    <string name="focus_time">집중 시간</string>
+    <string name="weekly_progress">주간 진행 상황</string>
+    <string name="tasks">작업</string>
+    <string name="focus">집중</string>
+    <string name="top_habits">상위 습관</string>
+    <string name="project_status">프로젝트 상태</string>
+    <string name="website_redesign">웹사이트 리디자인</string>
+    <string name="mobile_app">모바일 앱</string>
+    <string name="marketing">마케팅</string>
+    <string name="productivity_insights">생산성 인사이트</string>
+    <string name="most_productive_day">가장 생산적인 요일</string>
+    <string name="best_time">최적의 시간</string>
+    <string name="focus_score">집중 점수</string>
+    <string name="about_developer">개발자 소개</string>
+    <string name="dev_description">👋 안녕하세요, 저는 Dima입니다. Android 개발자이자 LifeTracker 앱의 창작자입니다.</string>
+    <string name="contact_email">coffeecodedevs@gmail.com</string>
+    <string name="contact_social">\@coffeecodedevs</string>
+    <string name="buy_me_coffee">커피 한 잔 사주기</string>
+    <string name="dev_ideas">💡 기능 아이디어, 질문 또는 문제가 있으신가요? 언제든지 연락해 주세요!</string>
+    <string name="dev_end">✨ 부담 없이 물어보세요 — 여러분의 제안을 정말 소중히 여깁니다!</string>
+    
+    <!-- Notes strings -->
+    <string name="notes">메모</string>
+    <string name="note">메모</string>
+    <string name="new_note">새 메모</string>
+    <string name="edit_note">메모 편집</string>
+    <string name="note_title">제목</string>
+    <string name="note_content">내용</string>
+    <string name="enter_note_title">메모 제목 입력</string>
+    <string name="enter_note_content">메모 내용을 여기에 입력하세요</string>
+    <string name="save_note">메모 저장</string>
+    <string name="delete_note">메모 삭제</string>
+    <string name="note_not_found">메모를 찾을 수 없습니다</string>
+    <string name="add_note">메모 추가</string>
+    <string name="no_notes_yet">아직 메모가 없습니다</string>
+    <string name="tap_plus_to_create_note">새 메모를 만들려면 +를 탭하세요</string>
+
+    <!-- TodoListScreen strings -->
+    <string name="completed_tasks">완료됨</string>
+    <string name="no_date">날짜 없음</string>
+    <string name="earlier">이전</string>
+    <string name="yesterday">어제</string>
+    <string name="later">나중에</string>
+
+    <!-- Reminders strings -->
+    <string name="add_reminder">알림 추가</string>
+    <string name="add_repeat">반복 추가</string>
+    <string name="add_time_to_task">작업에 시간 추가</string>
+
+    <!-- Placeholders -->
+    <string name="date_time_placeholder">날짜/시간</string>
+    <string name="project_placeholder">프로젝트</string>
+
+    <!-- Task reminders -->
+    <string name="task_reminder">작업 알림</string>
+    <string name="reminder_channel_name">작업 알림</string>
+    <string name="reminder_channel_description">예정된 작업에 대한 알림</string>
+    <string name="notification_enabled">알림 활성화됨</string>
+    <string name="notification_disabled">알림 비활성화됨</string>
+    <string name="task_reminders">작업 알림</string>
+    <string name="task_reminders_desc">예정된 작업에 대한 알림</string>
+    
+    <!-- Notification permission strings -->
+    <string name="notification_permission_title">알림 필요</string>
+    <string name="notification_permission_message">알림은 작업 리마인더와 목표 추적에 필수적입니다. 앱을 최대한 활용하려면 설정에서 알림을 활성화하세요.</string>
+    
+    <!-- Date formatting strings -->
+    <string name="yesterday_at">어제 %s</string>
+    <string name="tomorrow_at">내일 %s</string>
+    <string name="cannot_create_event_in_future">미래에 이벤트를 만들 수 없습니다</string>
+
+    <!-- New dashboard strings -->
+    <string name="todays_tasks">📝 오늘의 작업</string>
+    <string name="no_tasks_for_today">오늘의 작업이 없습니다! 자유 시간을 즐기세요!</string>
+    <string name="tasks_stats">📊 작업 통계</string>
+    <string name="tasks_completed_of_total">%1$d/%2$d 완료됨</string>
+    <string name="this_month">이번 달</string>
+    <string name="this_week">이번 주</string>
+    <string name="this_day">오늘</string>
+    <string name="record_tasks">기록: %1$d 작업 - %2$s</string>
+    <string name="projects_section">📁 프로젝트</string>
+    <string name="habits_metrics">💪 습관 및 측정 항목</string>
+    <string name="no_habits_yet">아직 습관이 없습니다!</string>
+    <string name="tracker_stats">⏱️ 트래커 통계</string>
+    <string name="all_time">전체 시간</string>
+    <string name="day">일</string>
+    <string name="all_tracked_time">총 추적 시간</string>
+    <string name="church">교회</string>
+    <string name="personal">개인</string>
+    <string name="work">직장</string>
+    <string name="without_project">프로젝트 없음</string>
+    <string name="turbo_mode_sessions">🚀 터보 모드 세션</string>
+    <string name="sessions_count">%1$d 세션</string>
+    <string name="overall_time">총 %1$d분. 잘 했어요!</string>
+    <string name="no_data">데이터 없음</string>
+    <string name="days_in_a_row">%1$d일 연속 (%2$s – %3$s)</string>
+    <string name="max_streak">최대 연속: %1$d (%2$s – %3$s)</string>
+    <string name="minimum">최소: %1$s (%2$s)</string>
+    <string name="maximum">최대: %1$s (%2$s)</string>
+    <string name="stop_tracker_first">이 이벤트를 편집하려면 먼저 트래커를 중지하세요</string>
+    <string name="start_time">시작 시간</string>
+    <string name="end_time">종료 시간</string>
+    <string name="congratulations">축하합니다! 🎉</string>
+    <string name="task_completed">작업 \"%1$s\"을(를) 완료했습니다</string>
+    <string name="completed_in_time">%1$s에</string>
+    <string name="continue_text">계속</string>
+    <string name="add_photo">사진 추가</string>
+    <string name="add_deadline">기한 추가</string>
+    <string name="deadline">기한</string>
+    <string name="error_date_before_1970">기한은 1970년 이전으로 설정할 수 없습니다</string>
+    <string name="no_goal">목표 없음</string>
+    <string name="language">언어</string>
+</resources>

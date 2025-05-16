@@ -16,7 +16,6 @@
     <string name="repeat">Repeat</string>
     <string name="time_for_task">Time for task</string>
     <string name="category">Category</string>
-    <string name="shopping">Shopping</string>
     <string name="new_event">New Event</string>
     <string name="edit_event">Edit Event</string>
     <string name="add_event">Add Event</string>
@@ -134,7 +133,7 @@
     <string name="complete">Complete</string>
     <string name="task_completed_in">You completed %1$s in %2$s!</string>
     <string name="what_next">What\'s next?</string>
-    <string name="go">GO!</string>
+    <string name="go" translatable="false">GO!</string>
     <string name="task_added">Task added</string>
 
     <!-- Dashboard strings -->
@@ -253,4 +252,5 @@
     <string name="deadline">Deadline</string>
     <string name="error_date_before_1970">Deadline cannot be before 1970</string>
     <string name="no_goal">No goal</string>
+    <string name="language">Language</string>
 </resources>

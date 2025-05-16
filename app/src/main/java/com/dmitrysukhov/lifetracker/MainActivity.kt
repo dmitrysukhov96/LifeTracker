@@ -158,15 +158,8 @@ class MainActivity : LocaleBaseActivity() {
     private lateinit var todoViewModel: TodoViewModel
 
     override fun attachBaseContext(newBase: Context) {
-        val sharedPref = newBase.getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val languageCode = sharedPref.getString("language", null)
-
-        if (languageCode != null) {
-            val context = LocaleHelper.applyLanguage(newBase, languageCode)
-            super.attachBaseContext(context)
-        } else {
-            super.attachBaseContext(newBase)
-        }
+        val languageCode = LocaleHelper.getLanguageFromPreferences(newBase)
+        super.attachBaseContext(LocaleHelper.applyLanguage(newBase, languageCode))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -707,9 +700,8 @@ class MainActivity : LocaleBaseActivity() {
     }
 
     private fun applyLanguageSettings() {
-        val sharedPref = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val languageCode = sharedPref.getString("language", null)
-        if (languageCode != null) LocaleHelper.applyLanguage(this, languageCode)
+        val languageCode = LocaleHelper.getLanguageFromPreferences(this)
+        LocaleHelper.applyLanguage(this, languageCode)
     }
 
     override fun onRequestPermissionsResult(

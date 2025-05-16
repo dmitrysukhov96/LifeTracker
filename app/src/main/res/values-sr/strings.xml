@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LifeTracker</string>
+    <string name="main_screen">Главни екран</string>
+    <string name="description">Опис</string>
+    <string name="description_colon">Опис:</string>
+    <string name="tasks_colon">Задаци:</string>
+    <string name="goal_colon">Циљ пројекта:</string>
+    <string name="new_task">Нови задатак</string>
+    <string name="save_task_toast">Задатак сачуван</string>
+    <string name="update_task_toast">Задатак ажуриран</string>
+    <string name="task_deleted">Задатак обрисан</string>
+    <string name="title_hint">Наслов</string>
+    <string name="description_hint">Опис</string>
+    <string name="reminders">Подсетници</string>
+    <string name="repeat">Понавање</string>
+    <string name="time_for_task">Време за задатак</string>
+    <string name="category">Категорија</string>
+    <string name="new_event">Нови догађај</string>
+    <string name="edit_event">Уреди догађај</string>
+    <string name="add_event">Додај догађај</string>
+    <string name="task_name">Назив задатка</string>
+    <string name="select_project">Изабери пројекат</string>
+    <string name="start">Почетак</string>
+    <string name="end">Крај</string>
+    <string name="date">Датум</string>
+    <string name="time">Време</string>
+    <string name="cancel">Откажи</string>
+    <string name="save">Сачувај</string>
+    <string name="delete">Обриши</string>
+    <string name="enter_value">Унесите вредност</string>
+    <string name="add_task">Додај задатак</string>
+    <string name="error_end_time_before_start">Време завршетка не може бити пре времена почетка</string>
+    <string name="error_invalid_date_format">Неважећи формат датума</string>
+    <string name="error_invalid_date_value">Неважећа вредност датума</string>
+    <string name="error_parsing_date">Грешка у анализирању датума</string>
+    
+    <!-- New strings -->
+    <string name="tracker">Праћење</string>
+    <string name="habits">Навике</string>
+    <string name="new_habit">Нова навика</string>
+    <string name="edit_habit">Уреди навику</string>
+    <string name="projects">Пројекти</string>
+    <string name="new_project">Нови пројекат</string>
+    <string name="edit_project">Уреди пројекат</string>
+    <string name="project_title">Наслов пројекта</string>
+    <string name="project_description">Опис пројекта</string>
+    <string name="select_color">Изабери боју</string>
+    <string name="no_deadline">Без рока</string>
+    <string name="tasks_completed">%1$d/%2$d завршено</string>
+    <string name="no_task">Без задатка</string>
+    <string name="no_name">Без назива</string>
+    <string name="no_project">Без пројекта</string>
+    <string name="add_project">Додај пројекат</string>
+    <string name="previous_day">Претходни дан</string>
+    <string name="next_day">Следећи дан</string>
+    <string name="start_new_task">Започни нови задатак</string>
+    <string name="edit">Уреди</string>
+    <string name="ok">У реду</string>
+    <string name="view_project">Прегледај пројекат</string>
+    <string name="turbo_screen">Турбо екран</string>
+    <string name="todo_list">Листа задатака</string>
+    <string name="tomorrow">Сутра</string>
+    <string name="today">Данас</string>
+    <string name="monday">Пон</string>
+    <string name="tuesday">Уто</string>
+    <string name="wednesday">Сре</string>
+    <string name="thursday">Чет</string>
+    <string name="friday">Пет</string>
+    <string name="saturday">Суб</string>
+    <string name="sunday">Нед</string>
+    <string name="delete_project">Обриши пројекат</string>
+    <string name="delete_project_confirmation">Да ли сте сигурни да желите да обришете овај пројекат? Ова радња се не може поништити.</string>
+    <string name="no_tasks">Нема задатака</string>
+    <string name="add_task_hint">Притисните + да додате задатак</string>
+    <string name="app_title">LifeTracker</string>
+    <string name="menu">Мени</string>
+    <string name="back">Назад</string>
+    <string name="no_projects">Нема пројеката</string>
+    <string name="create_project_hint">Притисните + да креирате пројекат</string>
+    <string name="tasks_completed_format">%1$d/%2$d завршено</string>
+    <string name="import_tasks">Увоз задатака</string>
+    <string name="import_tasks_hint">Унесите сваки задатак у нови ред</string>
+    <string name="imp">Увоз</string>
+    <string name="enter_task_hint">Унесите задатак…</string>
+    <string name="dialog_ask_name">Како се зовете?</string>
+    <string name="dialog_dont_ask_again">Не питај поново</string>
+    <string name="habit_type">Тип</string>
+    <string name="checkbox">Поље за потврду</string>
+    <string name="number">Број</string>
+    <string name="number_greater">Веће = боље</string>
+    <string name="number_less">Мање = боље</string>
+    <string name="week">Недеља</string>
+    <string name="month">Месец</string>
+    <string name="year">Година</string>
+    <string name="no_habits">Нема навика</string>
+    <string name="create_habit_hint">Притисните + да креирате навику</string>
+    <string name="select_tasks_for_today">Изаберите задатке које планирате да обавите данас</string>
+    <string name="daily_planner">Дневни планер</string>
+    <string name="dashboard">Командна табла</string>
+    <string name="username">Корисничко име:</string>
+    <string name="good_morning">☀️ Добро јутро</string>
+    <string name="good_afternoon">🌤️ Добар дан</string>
+    <string name="good_evening">🌆 Добро вече</string>
+    <string name="good_night">🌙 Лаку ноћ</string>
+    <string name="settings">Подешавања</string>
+    <string name="select_image">Изабери слику</string>
+    <string name="selected_image">Изабрана слика</string>
+    <string name="change_image">Промени слику</string>
+    <string name="delete_image">Обриши слику</string>
+    
+    <!-- Theme settings -->
+    <string name="theme">Тема</string>
+    <string name="theme_system">Системска подразумевана</string>
+    <string name="theme_light">Светла</string>
+    <string name="theme_dark">Тамна</string>
+    <string name="theme_restart_hint">Апликација ће користити вашу поставку теме када следећи пут покрене.</string>
+    
+    <!-- Focus Mode strings -->
+    <string name="focus_session">Сесија фокуса</string>
+    
+    <!-- Turbo Mode strings -->
+    <string name="turbo_mode">Турбо режим</string>
+    <string name="select_task">Изабери задатак</string>
+    <string name="timer_settings">Подешавање тајмера</string>
+    <string name="stopwatch">Штоперица</string>
+    <string name="countdown">Одбројавање</string>
+    <string name="hours">Сати</string>
+    <string name="minutes">Минути</string>
+    <string name="pause">Пауза</string>
+    <string name="resume">Настави</string>
+    <string name="stop">Заустави</string>
+    <string name="complete">Заврши</string>
+    <string name="task_completed_in">Завршили сте %1$s за %2$s!</string>
+    <string name="what_next">Шта даље?</string>
+    <string name="go">КРЕНИ!</string>
+    <string name="task_added">Задатак додат</string>
+
+    <!-- Dashboard strings -->
+    <string name="todays_overview">Данашњи преглед</string>
+    <string name="tasks_completed_row">Завршени задаци</string>
+    <string name="habits_tracked">Праћене навике</string>
+    <string name="focus_sessions">Сесије фокуса</string>
+    <string name="focus_time">Време фокуса</string>
+    <string name="weekly_progress">Недељни напредак</string>
+    <string name="tasks">Задаци</string>
+    <string name="focus">Фокус</string>
+    <string name="top_habits">Најбоље навике</string>
+    <string name="project_status">Статус пројекта</string>
+    <string name="website_redesign">Редизајн веб сајта</string>
+    <string name="mobile_app">Мобилна апликација</string>
+    <string name="marketing">Маркетинг</string>
+    <string name="productivity_insights">Увид у продуктивност</string>
+    <string name="most_productive_day">Најпродуктивнији дан</string>
+    <string name="best_time">Најбоље време</string>
+    <string name="focus_score">Оцена фокуса</string>
+    <string name="about_developer">О програмеру</string>
+    <string name="dev_description">👋 Здраво, ја сам Дима, Андроид програмер и креатор LifeTracker апликације.</string>
+    <string name="contact_email">coffeecodedevs@gmail.com</string>
+    <string name="contact_social">\@coffeecodedevs</string>
+    <string name="buy_me_coffee">Частите ме кафом</string>
+    <string name="dev_ideas">💡 Имате идеје за функције, питања или проблеме? Слободно ме контактирајте!</string>
+    <string name="dev_end">✨ Слободно питајте — заиста ценим ваше сугестије!</string>
+    
+    <!-- Notes strings -->
+    <string name="notes">Белешке</string>
+    <string name="note">Белешка</string>
+    <string name="new_note">Нова белешка</string>
+    <string name="edit_note">Уреди белешку</string>
+    <string name="note_title">Наслов</string>
+    <string name="note_content">Садржај</string>
+    <string name="enter_note_title">Унесите наслов за вашу белешку</string>
+    <string name="enter_note_content">Унесите садржај ваше белешке овде</string>
+    <string name="save_note">Сачувај белешку</string>
+    <string name="delete_note">Обриши белешку</string>
+    <string name="note_not_found">Белешка није пронађена</string>
+    <string name="add_note">Додај белешку</string>
+    <string name="no_notes_yet">Још нема белешки</string>
+    <string name="tap_plus_to_create_note">Притисните + да креирате нову белешку</string>
+
+    <!-- TodoListScreen strings -->
+    <string name="completed_tasks">Завршено</string>
+    <string name="no_date">Без датума</string>
+    <string name="earlier">Раније</string>
+    <string name="yesterday">Јуче</string>
+    <string name="later">Касније</string>
+
+    <!-- Reminders strings -->
+    <string name="add_reminder">Додај подсетник</string>
+    <string name="add_repeat">Додај понављање</string>
+    <string name="add_time_to_task">Додај време задатку</string>
+
+    <!-- Placeholders -->
+    <string name="date_time_placeholder">Датум/време</string>
+    <string name="project_placeholder">Пројекат</string>
+
+    <!-- Task reminders -->
+    <string name="task_reminder">Подсетник за задатак</string>
+    <string name="reminder_channel_name">Подсетници за задатке</string>
+    <string name="reminder_channel_description">Обавештења за заказане задатке</string>
+    <string name="notification_enabled">Обавештење укључено</string>
+    <string name="notification_disabled">Обавештење искључено</string>
+    <string name="task_reminders">Подсетници за задатке</string>
+    <string name="task_reminders_desc">Обавештења за заказане задатке</string>
+    
+    <!-- Notification permission strings -->
+    <string name="notification_permission_title">Обавештења су потребна</string>
+    <string name="notification_permission_message">Обавештења су кључна за подсетнике задатака и праћење ваших циљева. Молимо вас да омогућите обавештења у подешавањима како бисте максимално искористили апликацију.</string>
+    
+    <!-- Date formatting strings -->
+    <string name="yesterday_at">Јуче у %s</string>
+    <string name="tomorrow_at">Сутра у %s</string>
+    <string name="cannot_create_event_in_future">Не можете креирати догађај у будућности</string>
+
+    <!-- New dashboard strings -->
+    <string name="todays_tasks">📝 Данашњи задаци</string>
+    <string name="no_tasks_for_today">Нема задатака за данас! Уживајте у слободном времену!</string>
+    <string name="tasks_stats">📊 Статистика задатака</string>
+    <string name="tasks_completed_of_total">%1$d од %2$d завршено</string>
+    <string name="this_month">Овај месец</string>
+    <string name="this_week">Ове недеље</string>
+    <string name="this_day">Данас</string>
+    <string name="record_tasks">Рекорд: %1$d задатака - %2$s</string>
+    <string name="projects_section">📁 Пројекти</string>
+    <string name="habits_metrics">💪 Навике и метрике</string>
+    <string name="no_habits_yet">Још нема навика!</string>
+    <string name="tracker_stats">⏱️ Статистика праћења</string>
+    <string name="all_time">Све време</string>
+    <string name="day">Дан</string>
+    <string name="all_tracked_time">Укупно праћено време</string>
+    <string name="church">Црква</string>
+    <string name="personal">Лично</string>
+    <string name="work">Посао</string>
+    <string name="without_project">Без пројекта</string>
+    <string name="turbo_mode_sessions">🚀 Сесије турбо режима</string>
+    <string name="sessions_count">%1$d сесија</string>
+    <string name="overall_time">%1$d мин укупно. Одличан посао!</string>
+    <string name="no_data">Нема података</string>
+    <string name="days_in_a_row">%1$d дана заредом (%2$s – %3$s)</string>
+    <string name="max_streak">Максимални низ: %1$d (%2$s – %3$s)</string>
+    <string name="minimum">Минимум: %1$s (%2$s)</string>
+    <string name="maximum">Максимум: %1$s (%2$s)</string>
+    <string name="stop_tracker_first">Да бисте уредили овај догађај, прво зауставите праћење</string>
+    <string name="start_time">Време почетка</string>
+    <string name="end_time">Време завршетка</string>
+    <string name="congratulations">Честитамо! 🎉</string>
+    <string name="task_completed">Завршили сте задатак \"%1$s\"</string>
+    <string name="completed_in_time">за %1$s</string>
+    <string name="continue_text">Настави</string>
+    <string name="add_photo">Додај фотографију</string>
+    <string name="add_deadline">Додај рок</string>
+    <string name="deadline">Рок</string>
+    <string name="error_date_before_1970">Рок не може бити пре 1970. године</string>
+    <string name="no_goal">Нема циља</string>
+    <string name="language">Језик</string>
+</resources>

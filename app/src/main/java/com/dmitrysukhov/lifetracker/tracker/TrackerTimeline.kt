@@ -1,6 +1,7 @@
 package com.dmitrysukhov.lifetracker.tracker
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.view.ContextThemeWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,7 +61,13 @@ fun TrackerTimeline(
     val scrollState = rememberScrollState()
     val hourHeight = 80.dp
     val halfHourHeight = 40.dp
-    val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy")
+    
+    // Get the app's selected language from SharedPreferences
+    val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val selectedLanguage = sharedPref.getString("language", "en") ?: "en"
+    val appLocale = Locale(selectedLanguage)
+    
+    val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy").withLocale(appLocale)
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -70,7 +77,8 @@ fun TrackerTimeline(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Previous day", tint = PineColor, modifier = Modifier
+                contentDescription = stringResource(R.string.previous_day), 
+                tint = PineColor, modifier = Modifier
                     .clickable { onDateSelected(selectedDate.minusDays(1)) }
                     .padding(8.dp)
             )
@@ -84,7 +92,8 @@ fun TrackerTimeline(
             )
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Next day", tint = PineColor, modifier = Modifier
+                contentDescription = stringResource(R.string.next_day), 
+                tint = PineColor, modifier = Modifier
                     .clickable { onDateSelected(selectedDate.plusDays(1)) }
                     .padding(8.dp)
             )
@@ -131,7 +140,7 @@ fun TrackerTimeline(
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Text(
-                                    text = String.format(Locale.getDefault(), "%02d:00", hour),
+                                    text = String.format(appLocale, "%02d:00", hour),
                                     color = PineColor, fontSize = 14.sp, fontFamily = Montserrat,
                                     fontWeight = Bold
                                 )
@@ -143,7 +152,7 @@ fun TrackerTimeline(
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 Text(
-                                    text = String.format(Locale.getDefault(), "%02d:30", hour),
+                                    text = String.format(appLocale, "%02d:30", hour),
                                     color = PineColor, fontSize = 14.sp, fontFamily = Montserrat
                                 )
                             }
@@ -224,6 +233,13 @@ fun EventBlock(
     val durationMinutes = duration.standardMinutes
     val isShortEvent = durationMinutes < 30
     val project = projects.find { it.projectId == event.projectId }
+    
+    // Get app's selected language
+    val context = LocalContext.current
+    val sharedPref = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val selectedLanguage = sharedPref.getString("language", "en") ?: "en"
+    val appLocale = Locale(selectedLanguage)
+    
     Box(
         modifier = modifier
             .background(color = color.copy(alpha = 0.7f), shape = RoundedCornerShape(8.dp))
@@ -241,7 +257,7 @@ fun EventBlock(
                     maxLines = 1, lineHeight = 14.sp
                 )
                 Text(
-                    text = formatDuration(durationMinutes), color = Color.White.copy(alpha = 0.7f),
+                    text = formatDuration(durationMinutes, appLocale), color = Color.White.copy(alpha = 0.7f),
                     fontSize = 12.sp, fontFamily = Montserrat, maxLines = 1, lineHeight = 12.sp
                 )
             }
@@ -264,7 +280,7 @@ fun EventBlock(
                     fontFamily = Montserrat,
                 )
                 Text(
-                    text = formatDuration(durationMinutes), color = Color.White.copy(alpha = 0.7f),
+                    text = formatDuration(durationMinutes, appLocale), color = Color.White.copy(alpha = 0.7f),
                     fontSize = 12.sp, fontFamily = Montserrat, maxLines = 1
                 )
             }
@@ -272,9 +288,9 @@ fun EventBlock(
     }
 }
 
-private fun formatDuration(minutes: Long): String {
+private fun formatDuration(minutes: Long, locale: Locale): String {
     val hours = minutes / 60
     val remainingMinutes = minutes % 60
-    return if (hours > 0) String.format(Locale.getDefault(), "%dh %dm", hours, remainingMinutes)
-    else String.format(Locale.getDefault(), "%dm", remainingMinutes)
+    return if (hours > 0) String.format(locale, "%dh %dm", hours, remainingMinutes)
+    else String.format(locale, "%dm", remainingMinutes)
 }

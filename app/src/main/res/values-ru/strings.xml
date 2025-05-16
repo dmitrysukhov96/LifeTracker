@@ -17,7 +17,6 @@
     <string name="repeat">Повтор</string>
     <string name="time_for_task">Время на задачу</string>
     <string name="category">Категория</string>
-    <string name="shopping">Покупки</string>
     <string name="new_event">Новое событие</string>
     <string name="edit_event">Редактировать событие</string>
     <string name="add_event">Добавить событие</string>
@@ -129,7 +128,6 @@
     <string name="complete">Завершить</string>
     <string name="task_completed_in">Вы выполнили %1$s за %2$s!</string>
     <string name="what_next">Что делаем дальше?</string>
-    <string name="go">GO!</string>
     <string name="task_added">Задача добавлена</string>
     <string name="focus_session">Фокус-сессия</string>
 
@@ -257,4 +255,7 @@
     <string name="no_goal">Нет цели</string>
     <string name="stop_tracker_first">Чтоб отредактировать это событие, сначала остановите трекер</string>
     <string name="start_time">Время начала</string>
+
+    <!-- New language string -->
+    <string name="language">Язык</string>
 </resources>
