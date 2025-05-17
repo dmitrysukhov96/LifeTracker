@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">Невалидна стойност на датата</string>
     <string name="error_parsing_date">Грешка при анализиране на датата</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">СЕГА:</string>
+    <string name="widget_no_task">Няма задача</string>
+    <string name="widget_name">Текуща задача</string>
+    <string name="widget_description">Показва вашата текуща активна задача</string>
+    
     <!-- New strings -->
     <string name="tracker">Проследяване</string>
     <string name="habits">Навици</string>

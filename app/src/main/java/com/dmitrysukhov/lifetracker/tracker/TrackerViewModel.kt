@@ -1,11 +1,13 @@
 package com.dmitrysukhov.lifetracker.tracker
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dmitrysukhov.lifetracker.Event
 import com.dmitrysukhov.lifetracker.Project
 import com.dmitrysukhov.lifetracker.dashboard.TimeRange
 import com.dmitrysukhov.lifetracker.projects.ProjectRepository
+import com.dmitrysukhov.lifetracker.widgets.WidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 class TrackerViewModel @Inject constructor(
     private val eventRepository: EventRepository,
-    private val projectRepository: ProjectRepository
-) : ViewModel() {
+    private val projectRepository: ProjectRepository,
+    application: Application
+) : AndroidViewModel(application) {
 
     private val _lastEvent = MutableStateFlow<Event?>(null)
     val lastEvent: StateFlow<Event?> = _lastEvent
@@ -126,6 +129,11 @@ class TrackerViewModel @Inject constructor(
                 eventRepository.updateEvent(updatedEvent)
                 _lastEvent.value = updatedEvent
                 refreshEvents()
+                
+                // Update the widget
+                getApplication<Application>().applicationContext?.let { context ->
+                    WidgetUpdater.updateWidgets(context)
+                }
             }
         }
     }
@@ -134,6 +142,11 @@ class TrackerViewModel @Inject constructor(
         viewModelScope.launch {
             eventRepository.insertEvent(event)
             refreshEvents()
+            
+            // Update the widget
+            getApplication<Application>().applicationContext?.let { context ->
+                WidgetUpdater.updateWidgets(context)
+            }
         }
     }
 
@@ -144,6 +157,11 @@ class TrackerViewModel @Inject constructor(
                 _lastEvent.value = event
             }
             refreshEvents()
+            
+            // Update the widget
+            getApplication<Application>().applicationContext?.let { context ->
+                WidgetUpdater.updateWidgets(context)
+            }
         }
     }
 
@@ -154,6 +172,11 @@ class TrackerViewModel @Inject constructor(
                 _lastEvent.value = null
             }
             refreshEvents()
+            
+            // Update the widget
+            getApplication<Application>().applicationContext?.let { context ->
+                WidgetUpdater.updateWidgets(context)
+            }
         }
     }
 }

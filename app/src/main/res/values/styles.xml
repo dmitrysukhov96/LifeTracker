@@ -3,6 +3,15 @@
         <item name="android:windowBackground">@color/bgColor</item>
     </style>
     
+    <!-- Widget Text Styles -->
+    <style name="WidgetMontserratBold">
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+    
+    <style name="WidgetMontserratMedium">
+        <item name="android:fontFamily">@font/montserrat_medium</item>
+    </style>
+    
     <!-- Custom Date and Time Picker styles -->
     <style name="CustomDatePickerTheme" parent="android:Theme.Material.Dialog">
         <item name="android:colorAccent">@color/pineColor</item>

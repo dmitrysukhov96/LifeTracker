@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">日期值无效</string>
     <string name="error_parsing_date">解析日期时出错</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">现在:</string>
+    <string name="widget_no_task">无任务</string>
+    <string name="widget_name">当前任务</string>
+    <string name="widget_description">显示您当前正在进行的任务</string>
+    
     <!-- New strings -->
     <string name="tracker">跟踪器</string>
     <string name="habits">习惯</string>

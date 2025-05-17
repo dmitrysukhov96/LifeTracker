@@ -50,35 +50,33 @@ fun NoteDetailScreen(
     val context = LocalContext.current
     val selectedNote by viewModel.selectedNote.collectAsState()
     val projects by viewModel.projects.collectAsState()
-    
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = context.getString(R.string.note), color = PineColor,
-                screen = NOTE_DETAIL_SCREEN, topBarActions = {
-                    IconButton(onClick = { navController.navigate(NEW_NOTE_SCREEN) }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(R.string.save_note),
-                            tint = WhitePine
-                        )
-                    }
-                    IconButton(onClick = {
-                        selectedNote?.let {
-                            viewModel.deleteNote(it)
-                            navController.navigateUp()
-                        }
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.delete),
-                            contentDescription = stringResource(R.string.delete_note),
-                            tint = WhitePine
-                        )
-                    }
+
+    setTopBarState(
+        TopBarState(
+            title = context.getString(R.string.note), color = PineColor,
+            screen = NOTE_DETAIL_SCREEN, topBarActions = {
+                IconButton(onClick = { navController.navigate(NEW_NOTE_SCREEN) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.save_note),
+                        tint = WhitePine
+                    )
                 }
-            )
+                IconButton(onClick = {
+                    selectedNote?.let {
+                        viewModel.deleteNote(it)
+                        navController.navigateUp()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = stringResource(R.string.delete_note),
+                        tint = WhitePine
+                    )
+                }
+            }
         )
-    }
+    )
     selectedNote?.let { note ->
         Box(
             modifier = Modifier

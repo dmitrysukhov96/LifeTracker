@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">ערך תאריך לא תקין</string>
     <string name="error_parsing_date">שגיאה בניתוח התאריך</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">עכשיו:</string>
+    <string name="widget_no_task">אין משימה</string>
+    <string name="widget_name">משימה נוכחית</string>
+    <string name="widget_description">מציג את המשימה הפעילה הנוכחית שלך</string>
+    
     <!-- New strings -->
     <string name="tracker">מעקב</string>
     <string name="habits">הרגלים</string>

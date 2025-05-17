@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/lifetracker_monochrome"
+            android:contentDescription="LifeTracker icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LifeTracker"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="8dp"
+            style="@style/WidgetMontserratBold" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_now_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_now"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:paddingBottom="1dp"
+        android:clickable="true"
+        android:focusable="true"
+        style="@style/WidgetMontserratMedium" />
+
+    <LinearLayout
+        android:id="@+id/widget_task_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/widget_task_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_task"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:ellipsize="end"
+            android:maxLines="2"
+            style="@style/WidgetMontserratBold" />
+
+        <TextView
+            android:id="@+id/widget_project_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="14sp"
+            android:textColor="#CCCCCC"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone"
+            style="@style/WidgetMontserratMedium" />
+    </LinearLayout>
+</LinearLayout> 

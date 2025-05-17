@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">Valeur de date invalide</string>
     <string name="error_parsing_date">Erreur lors de l\'analyse de la date</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">MAINTENANT:</string>
+    <string name="widget_no_task">Pas de tâche</string>
+    <string name="widget_name">Tâche actuelle</string>
+    <string name="widget_description">Affiche votre tâche active actuelle</string>
+    
     <!-- New strings -->
     <string name="tracker">Suivi</string>
     <string name="habits">Habitudes</string>

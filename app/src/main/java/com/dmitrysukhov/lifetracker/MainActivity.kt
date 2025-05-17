@@ -658,7 +658,9 @@ class MainActivity : LocaleBaseActivity() {
                                             )
                                         }
                                         composable(NEW_HABIT_SCREEN) {
-                                            NewHabitScreen(setTopBarState, habitViewModel)
+                                            NewHabitScreen(
+                                                setTopBarState, navController, habitViewModel
+                                            )
                                         }
                                         composable(PROJECTS_SCREEN) {
                                             ProjectsScreen(

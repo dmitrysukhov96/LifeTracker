@@ -99,12 +99,13 @@ fun TurboScreen(
     var completedEvent by remember { mutableStateOf<Event?>(null) }
     var selectedProjectId by remember { mutableStateOf<Long?>(null) }
     var cameFromSetup by remember { mutableStateOf(false) }
-    
-    LaunchedEffect(Unit) {
-        setTopBarState(TopBarState(title = context.getString(R.string.turbo_mode),
-            screen = TURBO_SCREEN, color = PineColor))
-    }
-    
+    setTopBarState(
+        TopBarState(
+            title = context.getString(R.string.turbo_mode),
+            screen = TURBO_SCREEN, color = PineColor
+        )
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -129,24 +130,25 @@ fun TurboScreen(
                     selectedMode = selectedMode,
                     durationMinutes = durationMinutes,
                     cameFromSetup = cameFromSetup,
-                    onStop = { 
+                    onStop = {
                         val currentTime = System.currentTimeMillis()
                         val eventDuration = currentTime - (lastEvent?.startTime ?: currentTime)
                         viewModel.stopEvent()
                         completedEvent = lastEvent
                         showCompletionScreen = true
-                        
+
                         // Update statistics
-                        val prefs = context.getSharedPreferences("turbo_stats", Context.MODE_PRIVATE)
+                        val prefs =
+                            context.getSharedPreferences("turbo_stats", Context.MODE_PRIVATE)
                         val sessions = prefs.getInt("focus_sessions", 0)
                         val totalTime = prefs.getLong("total_focus_time", 0)
-                        
+
                         prefs.edit().apply {
                             putInt("focus_sessions", sessions + 1)
                             putLong("total_focus_time", totalTime + eventDuration)
                             apply()
                         }
-                        
+
                         // Update task's estimated time if exists
                         selectedTask?.let { task ->
                             task.estimatedDurationMs?.let { estimatedTime ->
@@ -174,11 +176,12 @@ fun TurboScreen(
                     onTaskSelect = { selectedTask = it },
                     onModeSelect = { selectedMode = it },
                     onDurationChange = { durationMinutes = it },
-                    onStart = { 
+                    onStart = {
                         cameFromSetup = true
                         viewModel.insertEvent(
                             Event(
-                                name = selectedTask?.text ?: context.getString(R.string.focus_session),
+                                name = selectedTask?.text
+                                    ?: context.getString(R.string.focus_session),
                                 projectId = selectedTask?.projectId,
                                 startTime = System.currentTimeMillis(),
                                 endTime = null
@@ -207,7 +210,7 @@ fun TurboScreen(
                     showTaskDialog = false
                 },
                 selectedProjectId = selectedProjectId,
-                onNavigateToNewProject = { 
+                onNavigateToNewProject = {
                     navController.navigate(NEW_PROJECT_SCREEN)
                 },
                 setProjectId = { projectId ->
@@ -228,7 +231,7 @@ fun TurboSetupScreen(
     var showDropdown by remember { mutableStateOf(false) }
     var hours by remember { mutableStateOf((durationMinutes / 60).toString()) }
     var minutes by remember { mutableStateOf((durationMinutes % 60).toString()) }
-    
+
     LaunchedEffect(durationMinutes) {
         hours = (durationMinutes / 60).toString()
         minutes = (durationMinutes % 60).toString()
@@ -248,7 +251,7 @@ fun TurboSetupScreen(
             color = Color.White,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        
+
         Box(modifier = Modifier.fillMaxWidth()) {
             Card(
                 modifier = Modifier
@@ -308,12 +311,14 @@ fun TurboSetupScreen(
                     DropdownMenuItem(
                         text = { Text(event.name ?: "", style = H2.copy(color = InverseColor)) },
                         onClick = {
-                            onTaskSelect(TodoItem(
-                                text = event.name ?: "",
-                                projectId = event.projectId,
-                                dateTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1),
-                                isDone = false
-                            ))
+                            onTaskSelect(
+                                TodoItem(
+                                    text = event.name ?: "",
+                                    projectId = event.projectId,
+                                    dateTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1),
+                                    isDone = false
+                                )
+                            )
                             showDropdown = false
                         }
                     )
@@ -391,7 +396,8 @@ fun TurboSetupScreen(
                     onValueChange = { newValue ->
                         if (newValue.isEmpty() || (newValue.all { it.isDigit() } && newValue.toIntOrNull() ?: 0 <= 23)) {
                             hours = newValue
-                            val totalMinutes = (hours.toIntOrNull() ?: 0) * 60 + (minutes.toIntOrNull() ?: 0)
+                            val totalMinutes =
+                                (hours.toIntOrNull() ?: 0) * 60 + (minutes.toIntOrNull() ?: 0)
                             onDurationChange(totalMinutes)
                         }
                     },
@@ -422,7 +428,8 @@ fun TurboSetupScreen(
                     onValueChange = { newValue ->
                         if (newValue.isEmpty() || (newValue.all { it.isDigit() } && newValue.toIntOrNull() ?: 0 <= 59)) {
                             minutes = newValue
-                            val totalMinutes = (hours.toIntOrNull() ?: 0) * 60 + (minutes.toIntOrNull() ?: 0)
+                            val totalMinutes =
+                                (hours.toIntOrNull() ?: 0) * 60 + (minutes.toIntOrNull() ?: 0)
                             onDurationChange(totalMinutes)
                         }
                     },
@@ -445,8 +452,8 @@ fun TurboSetupScreen(
         Spacer(modifier = Modifier.height(32.dp))
         TurboButton(
             onClick = onStart,
-            enabled = (selectedTask != null || additionalEvent != null) && 
-                     (selectedMode == TimerMode.STOPWATCH || durationMinutes > 0)
+            enabled = (selectedTask != null || additionalEvent != null) &&
+                    (selectedMode == TimerMode.STOPWATCH || durationMinutes > 0)
         )
         Spacer(modifier = Modifier.weight(1f))
     }
@@ -463,10 +470,10 @@ fun TurboActiveScreen(
     var timeElapsed by remember { mutableLongStateOf(0L) }
     var timeRemaining by remember { mutableLongStateOf(durationMinutes * 60L) }
     var isWarning by remember { mutableStateOf(false) }
-    
+
     // Use stopwatch mode if we didn't come from setup screen (i.e. there was an active event)
     val effectiveMode = if (!cameFromSetup) TimerMode.STOPWATCH else selectedMode
-    
+
     LaunchedEffect(event) {
         while (true) {
             if (event?.endTime == null) {
@@ -474,7 +481,7 @@ fun TurboActiveScreen(
                 if (effectiveMode == TimerMode.COUNTDOWN) {
                     timeRemaining = maxOf(0, durationMinutes * 60L - timeElapsed)
                     isWarning = timeRemaining <= 10
-                    
+
                     if (timeRemaining == 0L) {
                         onStop()
                         break
@@ -484,22 +491,22 @@ fun TurboActiveScreen(
             delay(1000)
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp), 
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = event?.name ?: stringResource(R.string.focus_session),
-            style = H1, 
-            color = Color.White, 
+            style = H1,
+            color = Color.White,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 32.dp)
         )
-        
+
         Box(
             modifier = Modifier
                 .padding(vertical = 32.dp)
@@ -522,11 +529,11 @@ fun TurboActiveScreen(
                 )
             )
         }
-        
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 64.dp), 
+                .padding(bottom = 64.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(onClick = onStop, modifier = Modifier.width(120.dp)) {
@@ -544,7 +551,7 @@ fun TurboCompletionScreen(
     val duration = event?.let { (it.endTime ?: 0) - it.startTime } ?: 0
     val minutes = duration / (1000 * 60)
     val seconds = (duration / 1000) % 60
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -558,21 +565,22 @@ fun TurboCompletionScreen(
             color = Color.White,
             textAlign = TextAlign.Center
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Text(
             text = stringResource(R.string.task_completed, event?.name ?: ""),
             style = H2,
             color = Color.White,
             textAlign = TextAlign.Center
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         if (duration > 0) {
             Text(
-                text = stringResource(R.string.completed_in_time, 
+                text = stringResource(
+                    R.string.completed_in_time,
                     if (minutes > 0) {
                         if (seconds > 0) {
                             "$minutes ${if (minutes == 1L) "minute" else "minutes"} $seconds seconds"
@@ -588,9 +596,9 @@ fun TurboCompletionScreen(
                 textAlign = TextAlign.Center
             )
         }
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
+
         Button(
             onClick = onContinue,
             modifier = Modifier.width(200.dp)
@@ -626,11 +634,11 @@ fun TurboButton(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.go), 
-            fontSize = 18.sp, 
+            text = stringResource(R.string.go),
+            fontSize = 18.sp,
             fontStyle = FontStyle.Italic,
-            color = Color.White, 
-            fontFamily = Montserrat, 
+            color = Color.White,
+            fontFamily = Montserrat,
             fontWeight = FontWeight.ExtraBold
         )
     }

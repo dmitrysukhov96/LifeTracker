@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">Invalid date value</string>
     <string name="error_parsing_date">Error parsing date</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">NOW:</string>
+    <string name="widget_no_task">No task</string>
+    <string name="widget_name">Current Task</string>
+    <string name="widget_description">Shows your current active task</string>
+    
     <!-- New strings -->
     <string name="tracker">Tracker</string>
     <string name="habits">Habits</string>

@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">Valore data non valido</string>
     <string name="error_parsing_date">Errore nell\'analisi della data</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">ADESSO:</string>
+    <string name="widget_no_task">Nessuna attività</string>
+    <string name="widget_name">Attività corrente</string>
+    <string name="widget_description">Mostra la tua attività attiva corrente</string>
+    
     <!-- New strings -->
     <string name="tracker">Tracker</string>
     <string name="habits">Abitudini</string>

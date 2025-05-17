@@ -258,4 +258,10 @@
 
     <!-- New language string -->
     <string name="language">Язык</string>
+
+    <!-- Widget strings -->
+    <string name="widget_now">СЕЙЧАС:</string>
+    <string name="widget_no_task">Без задачи</string>
+    <string name="widget_name">Текущая задача</string>
+    <string name="widget_description">Показывает вашу текущую активную задачу</string>
 </resources>

@@ -85,44 +85,42 @@ fun NewNoteScreen(
             projectsViewModel.clearLastCreatedProjectId()
         }
     }
-    LaunchedEffect(Unit) {
-        setTopBarState(
-            TopBarState(
-                title = context.getString(R.string.new_note), color = PineColor,
-                screen = NEW_NOTE_SCREEN, topBarActions = {
-                    IconButton(
-                        onClick = {
-                            if (title.isNotBlank()) {
-                                if (isEditing) {
-                                    viewModel.updateNote(
-                                        selectedNote.value?.copy(
+    setTopBarState(
+        TopBarState(
+            title = context.getString(R.string.new_note), color = PineColor,
+            screen = NEW_NOTE_SCREEN, topBarActions = {
+                IconButton(
+                    onClick = {
+                        if (title.isNotBlank()) {
+                            if (isEditing) {
+                                viewModel.updateNote(
+                                    selectedNote.value?.copy(
+                                        title = title,
+                                        content = content,
+                                        projectId = selectedProjectId
+                                    )
+                                        ?: Note(
                                             title = title,
                                             content = content,
                                             projectId = selectedProjectId
                                         )
-                                            ?: Note(
-                                                title = title,
-                                                content = content,
-                                                projectId = selectedProjectId
-                                            )
-                                    )
-                                } else {
-                                    viewModel.createNote(title, content, selectedProjectId)
-                                }
-                                navController.popBackStack()
+                                )
+                            } else {
+                                viewModel.createNote(title, content, selectedProjectId)
                             }
-                        }, enabled = title.isNotBlank()
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.tick),
-                            contentDescription = stringResource(R.string.save_note),
-                            tint = WhitePine
-                        )
-                    }
+                            navController.popBackStack()
+                        }
+                    }, enabled = title.isNotBlank()
+                ) {
+                    Icon(
+                        painterResource(R.drawable.tick),
+                        contentDescription = stringResource(R.string.save_note),
+                        tint = WhitePine
+                    )
                 }
-            )
+            }
         )
-    }
+    )
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">Ungültiger Datumswert</string>
     <string name="error_parsing_date">Fehler beim Parsen des Datums</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">JETZT:</string>
+    <string name="widget_no_task">Keine Aufgabe</string>
+    <string name="widget_name">Aktuelle Aufgabe</string>
+    <string name="widget_description">Zeigt Ihre aktuelle aktive Aufgabe</string>
+    
     <!-- New strings -->
     <string name="tracker">Tracker</string>
     <string name="habits">Gewohnheiten</string>

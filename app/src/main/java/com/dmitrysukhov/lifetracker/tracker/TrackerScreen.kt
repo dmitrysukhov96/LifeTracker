@@ -85,7 +85,7 @@ fun TrackerScreen(
     setTopBarState(TopBarState(title, screen = TRACKER_SCREEN) {
         IconButton(onClick = {
             selectedEvent = null
-            isTrackerStart = true
+            isTrackerStart = false
             showTaskDialog = true
         }) { Icon(painterResource(R.drawable.plus), null, tint = Color.White) }
     })
@@ -111,19 +111,25 @@ fun TrackerScreen(
         }
     }
     LaunchedEffect(refreshTrigger, selectedDate) { trackerViewModel.refreshEvents() }
-    if (showNewEventDialog) NewEventDialog(
-        projects = projects,
-        onDismiss = { showNewEventDialog = false },
-        onSave = { event ->
-            if (lastEvent?.endTime == null) {
-                trackerViewModel.stopEvent()
-            }
-            trackerViewModel.insertEvent(event)
-            showNewEventDialog = false
-        }, selectedProjectId = selectedProjectId,
-        onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
-        setProjectId = { selectedProjectId = it }
-    )
+    
+    // Small dialog - for starting a new event from the time tracker
+    if (showNewEventDialog) {
+        NewEventDialog(
+            projects = projects,
+            onDismiss = { showNewEventDialog = false },
+            onSave = { event ->
+                if (lastEvent?.endTime == null) {
+                    trackerViewModel.stopEvent()
+                }
+                trackerViewModel.insertEvent(event)
+                showNewEventDialog = false
+            }, 
+            selectedProjectId = selectedProjectId,
+            onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
+            setProjectId = { selectedProjectId = it }
+        )
+    }
+    
     Column(
         Modifier
             .fillMaxSize()
@@ -163,51 +169,34 @@ fun TrackerScreen(
                 .padding(horizontal = 16.dp)
         )
     }
+    
+    // Big dialog - for adding new event from plus button or editing existing event
     if (showTaskDialog) {
-        if (isTrackerStart) {
-            AddEditEventDialog(
-                event = null,
-                onDelete = {},
-                projects = projects,
-                onDismiss = {
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                onSave = { event ->
-                    trackerViewModel.stopEvent()
+        AddEditEventDialog(
+            event = selectedEvent,
+            projects = projects,
+            onDismiss = {
+                showTaskDialog = false
+                selectedEvent = null
+            },
+            onSave = { event ->
+                if (selectedEvent == null) {
                     trackerViewModel.insertEvent(event)
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                selectedProjectId = selectedProjectId,
-                onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
-                setProjectId = { selectedProjectId = it }
-            )
-        } else {
-            AddEditEventDialog(
-                event = selectedEvent, projects = projects, onDismiss = {
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                onSave = { event ->
-                    if (selectedEvent == null) {
-                        trackerViewModel.insertEvent(event)
-                    } else {
-                        trackerViewModel.updateEvent(event)
-                    }
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                onDelete = { event ->
-                    trackerViewModel.deleteEvent(event.eventId)
-                    showTaskDialog = false
-                    selectedEvent = null
-                },
-                selectedProjectId = selectedProjectId,
-                onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
-                setProjectId = { selectedProjectId = it }
-            )
-        }
+                } else {
+                    trackerViewModel.updateEvent(event)
+                }
+                showTaskDialog = false
+                selectedEvent = null
+            },
+            onDelete = { event ->
+                trackerViewModel.deleteEvent(event.eventId)
+                showTaskDialog = false
+                selectedEvent = null
+            },
+            selectedProjectId = selectedProjectId,
+            onNavigateToNewProject = { navController.navigate(NEW_PROJECT_SCREEN) },
+            setProjectId = { selectedProjectId = it }
+        )
     }
 }
 
@@ -277,6 +266,8 @@ fun NewEventDialog(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     ),
+                    maxLines = 1,
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
@@ -500,6 +491,21 @@ fun AddEditEventDialog(
         }
     }
 
+    fun validateTimeFormat(time: String): Boolean {
+        return time.matches(Regex("\\d{1,2}:\\d{1,2}"))
+    }
+    
+    fun formatTimeIfNeeded(time: String): String {
+        if (time.contains(":")) return time
+        
+        val digits = time.filter { it.isDigit() }
+        if (digits.isEmpty()) return ""
+        if (digits.length <= 2) return digits
+        
+        // Format as HH:mm
+        return "${digits.take(2)}:${digits.drop(2).take(2)}"
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
@@ -549,6 +555,8 @@ fun AddEditEventDialog(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     ),
+                    maxLines = 1,
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
@@ -748,6 +756,8 @@ fun AddEditEventDialog(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         ),
+                        maxLines = 1,
+                        singleLine = true,
                         modifier = Modifier.width(120.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
@@ -757,7 +767,11 @@ fun AddEditEventDialog(
                             focusedBorderColor = PineColor,
                             unfocusedBorderColor = InverseColor.copy(0.5f)
                         ),
-                        onValueChange = { startTime = it },
+                        onValueChange = { input -> 
+                            // Allow only digits and colon
+                            val filtered = input.filter { it.isDigit() || it == ':' }
+                            startTime = filtered
+                        },
                         label = {
                             Text(
                                 stringResource(R.string.time),
@@ -771,7 +785,10 @@ fun AddEditEventDialog(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        maxLines = 1,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                        placeholder = { Text("HH:mm") }
                     )
                 }
 
@@ -808,6 +825,8 @@ fun AddEditEventDialog(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         ),
+                        maxLines = 1,
+                        singleLine = true,
                         modifier = Modifier.width(120.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
@@ -817,7 +836,11 @@ fun AddEditEventDialog(
                             focusedBorderColor = PineColor,
                             unfocusedBorderColor = InverseColor.copy(0.5f)
                         ),
-                        onValueChange = { endTime = it },
+                        onValueChange = { input ->
+                            // Allow only digits and colon
+                            val filtered = input.filter { it.isDigit() || it == ':' }
+                            endTime = filtered
+                        },
                         label = {
                             Text(
                                 stringResource(R.string.time),
@@ -831,7 +854,10 @@ fun AddEditEventDialog(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        maxLines = 1,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                        placeholder = { Text("HH:mm") }
                     )
                 }
 
@@ -848,12 +874,26 @@ fun AddEditEventDialog(
                     Button(
                         onClick = {
                             try {
+                                val formattedStartTime = formatTimeIfNeeded(startTime)
+                                val formattedEndTime = formatTimeIfNeeded(endTime)
+                                
                                 val format = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
-                                val startDT = DateTime.parse("$startDate $startTime", format)
-                                val endDT = DateTime.parse("$endDate $endTime", format)
+                                val startDT = try {
+                                    DateTime.parse("$startDate $formattedStartTime", format)
+                                } catch (e: Exception) {
+                                    error = context.getString(R.string.error_parsing_date)
+                                    return@Button
+                                }
+                                
+                                val endDT = try {
+                                    DateTime.parse("$endDate $formattedEndTime", format)
+                                } catch (e: Exception) {
+                                    error = context.getString(R.string.error_parsing_date)
+                                    return@Button
+                                }
+                                
                                 if (isFuture(startDT) || isFuture(endDT)) {
-                                    error =
-                                        context.getString(R.string.cannot_create_event_in_future)
+                                    error = context.getString(R.string.cannot_create_event_in_future)
                                     return@Button
                                 }
                                 if (taskName.isBlank()) return@Button
@@ -870,12 +910,7 @@ fun AddEditEventDialog(
                                 )
                                 onSave(updatedEvent)
                             } catch (e: Exception) {
-                                error = when (e) {
-                                    is IllegalArgumentException ->
-                                        context.getString(R.string.error_invalid_date_format)
-
-                                    else -> context.getString(R.string.error_parsing_date)
-                                }
+                                error = context.getString(R.string.error_parsing_date)
                             }
                         },
                         enabled = taskName.isNotBlank(),

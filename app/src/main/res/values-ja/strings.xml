@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">無効な日付値</string>
     <string name="error_parsing_date">日付の解析エラー</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">現在:</string>
+    <string name="widget_no_task">タスクなし</string>
+    <string name="widget_name">現在のタスク</string>
+    <string name="widget_description">現在のアクティブなタスクを表示</string>
+    
     <!-- New strings -->
     <string name="tracker">トラッカー</string>
     <string name="habits">習慣</string>

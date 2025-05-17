@@ -33,6 +33,13 @@
     <string name="error_invalid_date_format">Невірний формат дати/часу</string>
     <string name="error_invalid_date_value">Невірне значення дати</string>
     <string name="error_parsing_date">Помилка при розборі дати/часу</string>
+    
+    <!-- Widget strings -->
+    <string name="widget_now">ЗАРАЗ:</string>
+    <string name="widget_no_task">Без завдання</string>
+    <string name="widget_name">Поточне завдання</string>
+    <string name="widget_description">Показує ваше поточне активне завдання</string>
+    
     <string name="tracker">Трекер</string>
     <string name="habits">Звички</string>
     <string name="edit_habit">Ред. звичку</string>

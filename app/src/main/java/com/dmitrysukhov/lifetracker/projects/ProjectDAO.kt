@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.Flow
 interface ProjectDao {
     @Query("SELECT * FROM projects")
     fun getAllProjects(): Flow<List<Project>>
+    
+    @Query("SELECT * FROM projects")
+    suspend fun getAllProjectsList(): List<Project>
 
     @Insert
     suspend fun insert(project: Project): Long

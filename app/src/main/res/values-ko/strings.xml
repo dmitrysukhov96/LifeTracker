@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">잘못된 날짜 값</string>
     <string name="error_parsing_date">날짜 분석 오류</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">지금:</string>
+    <string name="widget_no_task">작업 없음</string>
+    <string name="widget_name">현재 작업</string>
+    <string name="widget_description">현재 활성화된 작업을 표시합니다</string>
+    
     <!-- New strings -->
     <string name="tracker">트래커</string>
     <string name="habits">습관</string>

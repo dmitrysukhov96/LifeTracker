@@ -35,6 +35,12 @@
     <string name="error_invalid_date_value">Neteisinga datos reikšmė</string>
     <string name="error_parsing_date">Klaida apdorojant datą</string>
     
+    <!-- Widget strings -->
+    <string name="widget_now">DABAR:</string>
+    <string name="widget_no_task">Nėra užduoties</string>
+    <string name="widget_name">Dabartinė užduotis</string>
+    <string name="widget_description">Rodo jūsų dabartinę aktyvią užduotį</string>
+    
     <!-- New strings -->
     <string name="tracker">Sekiklis</string>
     <string name="habits">Įpročiai</string>
