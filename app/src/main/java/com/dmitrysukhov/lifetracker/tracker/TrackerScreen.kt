@@ -161,6 +161,7 @@ fun TrackerScreen(
                     return@TrackerTimeline
                 }
                 selectedEvent = event
+                selectedProjectId = if (event.projectId == 0L) null else event.projectId
                 isTrackerStart = false
                 showTaskDialog = true
             }, modifier = Modifier
@@ -476,8 +477,8 @@ fun AddEditEventDialog(
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val now = DateTime.now()
-    val startDateTime = event?.let { DateTime(it.startTime) } ?: now
-    val endDateTime = event?.endTime?.let { DateTime(it) } ?: now.plusHours(1)
+    val startDateTime = event?.let { DateTime(it.startTime) } ?: now.minusMinutes(30)
+    val endDateTime = event?.endTime?.let { DateTime(it) } ?: now
     var startDate by remember { mutableStateOf(startDateTime.toString("dd.MM.yyyy")) }
     var startTime by remember { mutableStateOf(startDateTime.toString("HH:mm")) }
     var endDate by remember { mutableStateOf(endDateTime.toString("dd.MM.yyyy")) }
@@ -489,10 +490,6 @@ fun AddEditEventDialog(
             Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
             error = null
         }
-    }
-
-    fun validateTimeFormat(time: String): Boolean {
-        return time.matches(Regex("\\d{1,2}:\\d{1,2}"))
     }
     
     fun formatTimeIfNeeded(time: String): String {
@@ -880,14 +877,14 @@ fun AddEditEventDialog(
                                 val format = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm")
                                 val startDT = try {
                                     DateTime.parse("$startDate $formattedStartTime", format)
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     error = context.getString(R.string.error_parsing_date)
                                     return@Button
                                 }
                                 
                                 val endDT = try {
                                     DateTime.parse("$endDate $formattedEndTime", format)
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     error = context.getString(R.string.error_parsing_date)
                                     return@Button
                                 }
@@ -909,7 +906,7 @@ fun AddEditEventDialog(
                                     endTime = endDT.millis
                                 )
                                 onSave(updatedEvent)
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 error = context.getString(R.string.error_parsing_date)
                             }
                         },

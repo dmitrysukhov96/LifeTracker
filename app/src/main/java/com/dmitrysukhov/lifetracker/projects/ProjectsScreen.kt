@@ -122,17 +122,16 @@ fun ProjectItem(
             .background(gradient)
     ) {
         if (!imagePath.isNullOrEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-            )
-
             Image(
                 painter = rememberAsyncImagePainter(File(context.filesDir, imagePath)),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
             )
         }
 

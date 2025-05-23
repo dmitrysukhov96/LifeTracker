@@ -408,12 +408,10 @@ fun NewProjectScreen(
                     .size(16.dp), tint = selectedColor
             )
         }
-        Row(modifier = Modifier.padding(start = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (deadline.isNotEmpty()) Row(modifier = Modifier.padding(start = 24.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = if (deadline.isEmpty())
-                    stringResource(R.string.deadline)
-                else deadline,
-                style = H2,
+                text = if (deadline.isEmpty()) stringResource(R.string.deadline)
+                else deadline, style = H2,
                 color = if (deadline.isEmpty()) selectedColor.copy(0.5f) else InverseColor
             )
 
@@ -433,6 +431,7 @@ fun NewProjectScreen(
             }
 
         }
+        Spacer(Modifier.height(8.dp))
         HorizontalDivider(thickness = 0.5.dp, color = selectedColor.copy(0.5f))
     }
     if (showDeleteConfirmation) {

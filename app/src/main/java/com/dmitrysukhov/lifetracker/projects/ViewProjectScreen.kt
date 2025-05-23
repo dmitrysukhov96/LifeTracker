@@ -40,7 +40,6 @@ import com.dmitrysukhov.lifetracker.todo.TodoViewModel
 import com.dmitrysukhov.lifetracker.utils.BoldText
 import com.dmitrysukhov.lifetracker.utils.H2
 import com.dmitrysukhov.lifetracker.utils.InverseColor
-import com.dmitrysukhov.lifetracker.utils.PineColor
 import com.dmitrysukhov.lifetracker.utils.SimpleText
 import com.dmitrysukhov.lifetracker.utils.Small
 import com.dmitrysukhov.lifetracker.utils.TopBarState
@@ -144,7 +143,7 @@ fun ViewProjectScreen(
             ) {
                 Text(
                     text = stringResource(R.string.no_tasks), style = H2,
-                    color = PineColor, modifier = Modifier.padding(bottom = 8.dp)
+                    color = projectColor, modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Text(
                     text = stringResource(R.string.add_task_hint), style = Small,
